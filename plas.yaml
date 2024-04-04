@@ -1,0 +1,17 @@
+name: plas
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.10
+  - blast
+  - htslib
+  - gfapy
+  - pandas
+  - numpy
+  - altair
+  - biopython
+  - scipy
+  - seaborn
+  - vl-convert-python

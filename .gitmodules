@@ -1,0 +1,3 @@
+[submodule "pangenome"]
+	path = pangenome
+	url = git@github.com:nf-core/pangenome.git

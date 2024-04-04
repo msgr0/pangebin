@@ -1,3 +1,6 @@
 [submodule "pangenome"]
 	path = pangenome
 	url = git@github.com:nf-core/pangenome.git
+[submodule "gplas2"]
+	path = gplas2
+	url = https://gitlab.com/illoxian/gplas2.git

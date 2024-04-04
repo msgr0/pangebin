@@ -4,3 +4,6 @@
 [submodule "gplas2"]
 	path = gplas2
 	url = https://gitlab.com/illoxian/gplas2.git
+[submodule "PlasEval"]
+	path = PlasEval
+	url = https://github.com/acme92/PlasEval.git

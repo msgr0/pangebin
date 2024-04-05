@@ -38,5 +38,19 @@ process fastas_preprocess {
 
 
 workflow FASTA_PREPROCESS {
+    take:
+    id,
+    A,
+    B, 
+
+    main:
+    preprocessed = fasta_preprocess(id, A, B)
+    fasta_A = preprocessed[1]
+    fasta_B = preprocessed[2]
+    fasta_pangenome = preprocessed[4]
+    fasta_pangenome_gz = preprocessed[3]
+
+    emit:
+    fasta_pangenome
 
 }

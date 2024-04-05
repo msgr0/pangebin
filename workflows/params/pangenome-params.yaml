@@ -1,0 +1,9 @@
+{
+  "max_memory" = "32GB"
+  "wfmash_segment_length" = "200"
+  "seqwish_min_match_length" = "1000"
+  "smoothxg_poa_params" = "asm5"
+  "wfmash_chunks" = 1
+  "wfmash_map_pct_id" = 95
+  "max_cpus" = 16
+}

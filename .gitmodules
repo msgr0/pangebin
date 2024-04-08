@@ -7,3 +7,6 @@
 [submodule "PlasEval"]
 	path = PlasEval
 	url = https://github.com/acme92/PlasEval.git
+[submodule "PlasBin-flow-pangenome"]
+	path = PlasBin-flow-pangenome
+	url = git@github.com:msgr0/PlasBin-flow-pangenome.git

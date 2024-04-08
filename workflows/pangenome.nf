@@ -1,6 +1,6 @@
-include { NFCORE_PANGENOME } from "$projectDir/pangenome"
+// include { NFCORE_PANGENOME } from "$projectDir/pangenome"
 paramfile = "$projectDir/workflows/params/pangenome-params.yaml"
-profile = docker
+profile = 'docker'
 
 process make_pangenome {
     maxForks 2
@@ -74,25 +74,3 @@ workflow PANGENOME {
 
 
 
-
-process make_pangenome {
-    maxForks 1
-
-    input:
-    tuple val(id), path(fasta_AB_gz)
-
-    output:
-    tuple val(id), path(pangenome)
-
-    script:
-
-
-    pangenome = "${id}.pangenome.gfa"
-    haplos = 2
-    paramfile = "${src_dir}/param-pangenome.yaml"
-    """
-    nextflow run nf-core/pangenome -r 1.1.1 -profile conda --input ${fasta_AB_gz} --n_haplotypes ${haplos} --outdir ${id}-nfcore -params-file ${paramfile}
-    mv ${id}-nfcore/FINAL_GFA/${fasta_AB_gz}.gfaffix.unchop.Ygs.view.gfa ${id}.pangenome.gfa
-    """
-    
-}

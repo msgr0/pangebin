@@ -23,10 +23,9 @@ include { FASTA_PREPROCESS      } from "./workflows/fasta_preprocess"
 include { BLAST                 } from "./workflows/blast"
 include { PANGENOME             } from "./workflows/pangenome"
 include { PLASBIN as PFLOW_PAN  } from "./workflows/plasbinflow.nf"
-include { PLASBIN as PFLOW_A    } from "./workflows/plasbinflow.nf"
-include { PLASBIN as PFLOW_B    } from "./workflows/plasbinflow.nf"
+include { PLASBIN as PFLOW_ASM    } from "./workflows/plasbinflow.nf"
 include { GPLAS as GPLAS_PAN    } from "./workflows/gplas.nf"
-include { GPLAS as GPLAS_A      } from "./workflows/gplas.nf"
+include { GPLAS as GPLAS_ASM      } from "./workflows/gplas.nf"
 include { PLOTS                 } from "./workflows/plots.nf"
 
 
@@ -35,7 +34,8 @@ workflow PANGEBIN {
     input
 
     main:
-    FASTA_PREPROCESS(m)
+
+    FASTA_PREPROCESS(input)
     PANGENOME(
         FASTA_PREPROCESS.out.id
         FASTA_PREPROCESS.out.fasta_A
@@ -43,18 +43,68 @@ workflow PANGEBIN {
     )
 
     PFLOW_PAN(PANGENOME.out.augmented)
-    GPLAS_PAN(PANGENOME.out.augmented)
-    GPLAS_A(input.gfa_A_gz)
-    PFLOW_A(input.gfa_A_gz)
-    PFLOW_B(input.gfa_B_gz)
 
-    PLOT(PFLOW_PAN.out.results, GPLAS_PAN.out.results)
+    RESULTS(PFLOW_PAN.out)
     
     emit:
-    plot = PLOT.out
-    pflow = PFLOW_PAN.out.bin
-    gplas = GPLAS_PAN.out.bin
+    bins = PFLOW_PAN.out.bins
+    res = RESULTS.out
+
 }
+
+workflow ASSEMBLER_A {
+    take:
+    input
+    
+    main:
+
+    FASTA_PREPROCESS(input)
+    PFLOW_ASM(FASTA_PREPROCESS.out.gfa_A_gz)
+
+    RESULTS(PFLOW_ASM.out)
+
+    emit:
+    RESULTS.out
+
+}
+
+workflow ASSEMBLER_B {
+    take:
+    input
+    
+    main:
+
+    FASTA_PREPROCESS(input)
+    PFLOW_ASM(FASTA_PREPROCESS.out.gfa_B_gz)
+
+    RESULTS(PFLOW_ASM.out)
+
+    emit:
+    RESULTS.out
+
+}
+
+workflow GPLAS {
+
+    take:
+    input
+    
+    main:
+    FASTA_PREPROCESS(input)
+    PANGENOME(
+        FASTA_PREPROCESS.out.id
+        FASTA_PREPROCESS.out.fasta_A
+        FASTA_PREPROCESS.out.fasta_B
+    )
+
+
+    GPLAS_PAN(PANGENOME.out.augmented)
+    GPLAS_ASM(FASTA_PREPROCESS.out.gfa_A_gz)
+}
+
+
+work
+
 
 workflow {
     // GET INPUT FOLDER WITH SAMPLES, assemlby one and two
@@ -68,25 +118,12 @@ workflow {
     
     PANGEBIN(input)
 
-    PANGEBIN.pangebin | view
+    PANGEBIN.out.bins | view
+
+    // ASSEMBLER_A(input)
+
+    // ASSEMBLER_B(input)
+
+    // GPLAS(input)
 
 }
-
-
-
-
-
-// workflow {
-//     // sample_ids = Channel.of(test_sample)
-//     sample_folders = Channel.fromPath("${test_dataset}/*", type: 'dir')
-//     sample_ids = sample_folders.map{it-> it.getName()}
-//     genomic_files = ncbi_retrive(sample_ids)
-
-//     fastas = sample_folders.map{dir ->  [dir.getName(), file("$dir/${ass_A}.gfa.gz"), file("$dir/${ass_B}.gfa.gz")]}
-//     fastas_prep = fastas_preprocess(fastas)
-//     blast_info = blast(fastas_prep.map{it -> [it[0], it[-1]]}.join(genomic_files))
-//     pangenome = make_pangenome(fastas_prep.map{it->[it[0], it[-2]]})
-
-    
-     
-// }

@@ -36,12 +36,12 @@ process fastas_preprocess {
     """
 }
 
-
 workflow FASTA_PREPROCESS {
+
     take:
-    id,
-    A,
-    B, 
+    id
+    A
+    B 
 
     main:
     preprocessed = fasta_preprocess(id, A, B)

@@ -1,57 +1,122 @@
 
-putils_executable="${projectDir}/src/plasbin-flow/bin/plasbin_utils.py"
-pflow_executable="${baseDir}/src/plasbin-flow/bin/plasbin_flow.py"
-database="${baseDir}/src/plasbin-flow/database/plas_db.gfa"
+putils_executable="${projectDir}/PlasBin-flow-pangenome/code/plasbin_utils.py"
+pflow_executable="${projectDir}/PlasBin-flow-pangenome/code/plasbin_flow.py"
+database="${projectDir}/PlasBin-flow-pangenome/database/plas_db.gfa"
+
+include { COMPRESS } from "${projectDir}/workflows/utils"
 
 
-process compress {
-
-}
-
-
-process make_input {
+process MAKE_INPUT {
 
     input:
-    tuple val(id), path(pangenome)
+    tuple val(meta), path(graph)
 
     output:
-    tuple val(id), path(pangenome), path(input_csv)
+    tuple val(meta), path(graph), path(input_csv)
     
     script:
-    input_csv = "${id}-input.csv"
+    input_csv = "${meta.id}-input.csv"
     """
+    #!/bin/bash
     echo "sample,gfa" > "${input_csv}"
-    echo "${id},${pangenome}" >> "${input_csv}"
+    echo "${meta.id},${graph}" >> "${input_csv}"
     """
 
 }
 
-process gc_probs {
+process GC_PROBS {
     input:
-    tuple val(id), path(pangenome), path(input_csv)
+    tuple val(meta), path(graph), path(input_csv)
 
     output:
-    tuple val(id), path(pangenome), path(input_csv), path(gc_content)
+    tuple val(meta), path(graph), path(input_csv), path(gc_content)
 
     script:
-    gc_content = "${id}.gc.tsv"
+    gc_content = "${meta.id}.gc.tsv"
     """
     #!/bin/bash
     python ${putils_executable} gc_probabilities --input_file ${input_csv} --out_dir . --tmp_dir ./tmp
     """
 
+}
+
+process GENES2CTG {
+    input:
+    tuple val(meta), path(graph), path(input_csv)
+
+    output:
+    tuple val(meta), path(graph), path(input_csv), path(mapping), path("*.genes_mappings.txt")
+
+    script:
+    mapping = "${meta.id}.mapping.csv"
+    """
+    #!/bin/bash
+    python ${putils_executable} map_genes_to_ctgs --input_file ${input_csv} --out_dir . --tmp_dir ./tmp --db_file ${database} --out_file ${mapping}
+
+    """
 
 }
 
-process map_genes_to_ctgs {
+process GD_SCORE {
+    input:
+    tuple val(meta), path(graph), path(input_csv), path(mapping_csv), path(mapping_txt)
+
+    output:
+    tuple val(meta), path("*.gd.tsv")
+
+    script:
+    """
+    python ${putils_executable} gene_density --input_file ${mapping_csv}  --out_dir . --tmp_dir ./tmp
+    """
+}
+
+process MILP {
+    maxForks 1
+
+    input:
+    tuple val(meta), path(graph), path(input_csv), path(gc_tsv), path(gd_tsv)
+    val asm
+    val seed_len
+    val seed_score
+    val min_pls_len
+    output:
+    tuple val(meta), path(bins), optional: true
+
+    script:
+    bins = "${meta.id}.${asm}.bins.tsv"
+    if (asm == "pangenome_no_penalty") {
+        asm = "pangenome"
+    }
+    if (asm != "pangenome") {
+        penalty = "--nopenalty"
+    } else {
+        penalty = ""
+    }
+
+    """
+    python ${pflow_executable} ${penalty} -ag ${graph} -gc ${gc_tsv} -out_dir . -out_file ${bins} -alpha4 1 -score ${gd_tsv} -assembler ${asm} -seed_len ${seed_len}  -seed_score ${seed_score} -min_pls_len ${min_pls_len}
+    """
 
 }
 
-process gene_density {
+workflow PLASBIN {
+
+    take:
+    graph
+    asm
+    seed_len
+    seed_score
+    min_pls_len
+
+    main:
+    input_csv = graph | COMPRESS | MAKE_INPUT
+    gc_csv = input_csv | GC_PROBS
+    mapping_csv = input_csv | GENES2CTG
+    gd_csv = mapping_csv | GD_SCORE
+    model_results = MILP(gc_csv.join(gd_csv), asm, seed_len, seed_score, min_pls_len)
+
+
+    emit:
+    bins = model_results
 
 }
-
-process model {
-
-}
-

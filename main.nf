@@ -19,91 +19,69 @@ if (params.input == null & params.dataset == null) {
 }
 
 
-include { FASTA_PREPROCESS      } from "./workflows/fasta_preprocess"
+include { PREPROCESS            } from "./workflows/preprocess"
 include { BLAST                 } from "./workflows/blast"
 include { PANGENOME             } from "./workflows/pangenome"
-include { PLASBIN as PFLOW_PAN  } from "./workflows/plasbinflow.nf"
-include { PLASBIN as PFLOW_ASM    } from "./workflows/plasbinflow.nf"
+include { PLASBIN               } from "./workflows/plasbinflow.nf"
+include { PLASEVAL              } from "./workflows/plaseval.nf"
+// include { PLASBIN as PFLOW_PAN    } from "./workflows/plasbinflow.nf"
+// include { PLASBIN as PFLOW_ASM    } from "./workflows/plasbinflow.nf"
 include { GPLAS as GPLAS_PAN    } from "./workflows/gplas.nf"
 include { GPLAS as GPLAS_ASM      } from "./workflows/gplas.nf"
-include { PLOTS                 } from "./workflows/plots.nf"
+// include { PLOTS                 } from "./workflows/plots.nf"
 
 
 workflow PANGEBIN {
     take:
-    input
+    pangenome
+    fasta
 
     main:
+    PLASBIN(pangenome, "pangenome", 1000, 0.5, 1500)
+    PLASEVAL(PLASBIN.out.bins, pangenome, fasta, "pangenome")
 
-    FASTA_PREPROCESS(input)
-    PANGENOME(
-        FASTA_PREPROCESS.out.id
-        FASTA_PREPROCESS.out.fasta_A
-        FASTA_PREPROCESS.out.fasta_B
-    )
-
-    PFLOW_PAN(PANGENOME.out.augmented)
-
-    RESULTS(PFLOW_PAN.out)
-    
     emit:
-    bins = PFLOW_PAN.out.bins
-    res = RESULTS.out
+    res = PLASBIN.out.bins
+    eval_0 = PLASEVAL.out.mode0
+    eval_1 = PLASEVAL.out.mode1
+
 
 }
 
 workflow ASSEMBLER_A {
     take:
-    input
-    
+    pangenome
+    asm
+    fasta
+
     main:
-
-    FASTA_PREPROCESS(input)
-    PFLOW_ASM(FASTA_PREPROCESS.out.gfa_A_gz)
-
-    RESULTS(PFLOW_ASM.out)
+    PLASBIN(asm, "unicycler", 2000, 0.7, 1500)
+    PLASEVAL(PLASBIN.out.bins, pangenome, fasta, "unicycler")
 
     emit:
-    RESULTS.out
+    res = PLASBIN.out.bins
+    eval_0 = PLASEVAL.out.mode0
 
 }
 
 workflow ASSEMBLER_B {
     take:
-    input
-    
+    pangenome
+    asm
+    fasta
+
     main:
-
-    FASTA_PREPROCESS(input)
-    PFLOW_ASM(FASTA_PREPROCESS.out.gfa_B_gz)
-
-    RESULTS(PFLOW_ASM.out)
+    PLASBIN(asm, "skesa", 2000, 0.7, 1500)
+    PLASEVAL(PLASBIN.out.bins, pangenome, fasta, "skesa")
 
     emit:
-    RESULTS.out
+    res = PLASBIN.out.bins
+    eval_0 = PLASEVAL.out.mode0
+
 
 }
 
-workflow GPLAS {
 
-    take:
-    input
-    
-    main:
-    FASTA_PREPROCESS(input)
-    PANGENOME(
-        FASTA_PREPROCESS.out.id
-        FASTA_PREPROCESS.out.fasta_A
-        FASTA_PREPROCESS.out.fasta_B
-    )
-
-
-    GPLAS_PAN(PANGENOME.out.augmented)
-    GPLAS_ASM(FASTA_PREPROCESS.out.gfa_A_gz)
-}
-
-
-work
 
 
 workflow {
@@ -114,16 +92,54 @@ workflow {
         samples = Channel.fromPath("$params.input", type: 'dir')
     }
 
-    input = samples.map{dir -> [dir.getName(), file("$dir/${ass_A_gfa_gz}"), file("$dir/${ass_B_gfa_gz}")]}
+    input_ch = samples.map{dir -> tuple([id: dir.getName()], file("$dir/${ass_A_gfa_gz}"), file("$dir/${ass_B_gfa_gz}"))}
+
+    input_ch | view
+
+    PREPROCESS(input_ch)
+    PANGENOME(
+        PREPROCESS.out.assemblies,
+        PREPROCESS.out.pangenome
+    )
     
-    PANGEBIN(input)
+    // PANGEBIN(
+    //     PANGENOME.out.augmented,
+    //     PREPROCESS.out.pangenome.map{meta, fasta_AB, fasta_AB_gz -> tuple(meta, fasta_AB)}
+    // )
+    
+    // ASSEMBLER_A(
+    //     PANGENOME.out.augmented,
+    //     PREPROCESS.out.assemblies.map{it, A, B -> tuple(it, A)},
+    //     PREPROCESS.out.fastas.map{it, A, B -> tuple(it, A)}
+    // )
 
-    PANGEBIN.out.bins | view
+    // ASSEMBLER_B(
+    //     PANGENOME.out.augmented,
+    //     PREPROCESS.out.assemblies.map{it, A, B -> tuple(it, B)},
+    //     PREPROCESS.out.fastas.map{it, A, B -> tuple(it, B)}
+    // )
+    
+    // PANGEBIN.out.res.map{meta, bins -> bins} | view
+    // PANGEBIN.out.eval_0 | view
+    // PANGEBIN.out.eval_1 | view
 
-    // ASSEMBLER_A(input)
+    // ASSEMBLER_A.out.res.map{meta, bins -> bins} | view
+    // ASSEMBLER_A.out.eval_0 | view
 
-    // ASSEMBLER_B(input)
+    // ASSEMBLER_B.out.res.map{meta, bins -> bins} | view
+    // ASSEMBLER_B.out.eval_0 | view
 
-    // GPLAS(input)
+
+    GPLAS_PAN(
+        PANGENOME.out.augmented
+    )
+
+    GPLAS_ASM(
+        PREPROCESS.out.assemblies.map{it, A, B -> tuple(it, A)}
+    )
+
+    GPLAS_PAN.out.bins | view
+    GPLAS_ASM.out.bins | view
+
 
 }

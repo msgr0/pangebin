@@ -1,0 +1,106 @@
+May-15 13:20:11.324 [main] DEBUG nextflow.cli.Launcher - $> nextflow run . --input /data/gen-data/small-test -profile conda --output output
+May-15 13:20:11.514 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.10.1
+May-15 13:20:11.549 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/sgro/.nextflow/plugins; core-plugins: nf-amazon@2.1.4,nf-azure@1.3.3,nf-cloudcache@0.3.0,nf-codecommit@0.1.5,nf-console@1.0.6,nf-ga4gh@1.1.0,nf-google@1.8.3,nf-tower@1.6.3,nf-wave@1.0.1
+May-15 13:20:11.564 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+May-15 13:20:11.565 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+May-15 13:20:11.571 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+May-15 13:20:11.588 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+May-15 13:20:12.589 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /data/pangebin/nextflow.config
+May-15 13:20:12.591 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /data/pangebin/nextflow.config
+May-15 13:20:12.610 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `conda`
+May-15 13:20:12.749 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [test, mamba, conda, gt, tower, test_set]
+May-15 13:20:12.801 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 by global default
+May-15 13:20:12.830 [main] INFO  nextflow.cli.CmdRun - Launching `./main.nf` [golden_pauling] DSL2 - revision: d4b74c2e8e
+May-15 13:20:12.831 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+May-15 13:20:12.831 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+May-15 13:20:12.847 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/sgro/.nextflow/secrets/store.json
+May-15 13:20:12.854 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@791c12e3] - activable => nextflow.secret.LocalSecretsProvider@791c12e3
+May-15 13:20:12.928 [main] DEBUG nextflow.Session - Session UUID: f6af7293-2693-4b1b-b19a-9807907afa74
+May-15 13:20:12.928 [main] DEBUG nextflow.Session - Run name: golden_pauling
+May-15 13:20:12.929 [main] DEBUG nextflow.Session - Executor pool size: 32
+May-15 13:20:12.939 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+May-15 13:20:12.976 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 23.10.1 build 5891
+  Created: 12-01-2024 22:01 UTC (23:01 CEST)
+  System: Linux 5.15.0-89-generic
+  Runtime: Groovy 3.0.19 on OpenJDK 64-Bit Server VM 21-internal-adhoc.conda.src
+  Encoding: UTF-8 (UTF-8)
+  Process: 719906@pangebin [10.180.7.171]
+  CPUs: 32 - Mem: 125.5 GB (82.6 GB) - Swap: 8 GB (837.8 MB) - Virtual threads ON
+May-15 13:20:13.011 [main] DEBUG nextflow.Session - Work-dir: /data/pangebin/work [zfs]
+May-15 13:20:13.079 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+May-15 13:20:13.096 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+May-15 13:20:13.149 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+May-15 13:20:13.161 [main] DEBUG nextflow.util.CustomPoolFactory - Creating virtual thread pool
+May-15 13:20:13.256 [main] DEBUG nextflow.Session - Session start
+May-15 13:20:13.811 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+May-15 13:20:14.688 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 13:20:14.688 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 13:20:14.696 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+May-15 13:20:14.704 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=32; memory=125.5 GB; capacity=32; pollInterval=100ms; dumpInterval=5m
+May-15 13:20:14.707 [main] DEBUG n.processor.TaskPollingMonitor - >>> barrier register (monitor: local)
+May-15 13:20:14.789 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 13:20:14.790 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 13:20:14.795 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 13:20:14.796 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 13:20:14.808 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 13:20:14.808 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 13:20:14.815 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 13:20:14.815 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 13:20:14.820 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 13:20:14.820 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 13:20:14.824 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 13:20:14.825 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 13:20:14.829 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 13:20:14.829 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 13:20:14.834 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 13:20:14.834 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 13:20:14.842 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 13:20:14.843 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 13:20:14.852 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+  Script_3e616f8898221b4d: /data/pangebin/./workflows/preprocess.nf
+  Script_c13bc17486819d64: /data/pangebin/main.nf
+  Script_3c706f0086e179ca: /data/pangebin/./workflows/plasbinflow.nf
+  Script_1aa8378c5ac044dd: /data/pangebin/workflows/other/gfautils.nf
+  Script_10231ffcb8edc553: /data/pangebin/./workflows/pangenome.nf
+May-15 13:20:14.855 [main] DEBUG nextflow.Session - Session aborted -- Cause: No such property: bins for class: nextflow.script.WorkflowDef
+Possible solutions: body
+May-15 13:20:14.878 [main] DEBUG nextflow.Session - The following nodes are still active:
+  [operator] map
+  [operator] view
+  [operator] view
+  [operator] join
+  [operator] view
+  [operator] join
+
+May-15 13:20:14.890 [Task monitor] DEBUG n.processor.TaskPollingMonitor - <<< barrier arrives (monitor: local) - terminating tasks monitor poll loop
+May-15 13:20:14.891 [main] ERROR nextflow.cli.Launcher - @unknown
+groovy.lang.MissingPropertyException: No such property: bins for class: nextflow.script.WorkflowDef
+Possible solutions: body
+	at org.codehaus.groovy.runtime.ScriptBytecodeAdapter.unwrap(ScriptBytecodeAdapter.java:65)
+	at org.codehaus.groovy.runtime.callsite.GetEffectivePogoPropertySite.getProperty(GetEffectivePogoPropertySite.java:87)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callGetProperty(AbstractCallSite.java:329)
+	at Script_c13bc17486819d64$_runScript_closure3$_closure9.doCall(Script_c13bc17486819d64:138)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:274)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1030)
+	at groovy.lang.Closure.call(Closure.java:427)
+	at groovy.lang.Closure.call(Closure.java:406)
+	at nextflow.script.WorkflowDef.run0(WorkflowDef.groovy:204)
+	at nextflow.script.WorkflowDef.run(WorkflowDef.groovy:188)
+	at nextflow.script.BindableDef.invoke_a(BindableDef.groovy:51)
+	at nextflow.script.IterableDef$invoke_a.call(Unknown Source)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCall(CallSiteArray.java:47)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:125)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:139)
+	at nextflow.script.BaseScript.run0(BaseScript.groovy:183)
+	at nextflow.script.BaseScript.run(BaseScript.groovy:192)
+	at nextflow.script.ScriptParser.runScript(ScriptParser.groovy:236)
+	at nextflow.script.ScriptRunner.run(ScriptRunner.groovy:242)
+	at nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:137)
+	at nextflow.cli.CmdRun.run(CmdRun.groovy:372)
+	at nextflow.cli.Launcher.run(Launcher.groovy:500)
+	at nextflow.cli.Launcher.main(Launcher.groovy:672)

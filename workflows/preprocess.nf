@@ -6,6 +6,7 @@ src_dir = "$projectDir/bin"
 
 
 process FASTA {
+    conda 'bioconda::htslib gfapy'
     input:
     tuple val(meta), path(A), path(B)
 

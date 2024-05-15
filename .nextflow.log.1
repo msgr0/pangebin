@@ -1,0 +1,312 @@
+May-15 14:19:42.318 [main] DEBUG nextflow.cli.Launcher - $> nextflow run . --db /data/gen-data/genomes/plasgraph2-datasets/eskapee-test/ -profile conda --out output -resume
+May-15 14:19:42.501 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.10.1
+May-15 14:19:42.530 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/sgro/.nextflow/plugins; core-plugins: nf-amazon@2.1.4,nf-azure@1.3.3,nf-cloudcache@0.3.0,nf-codecommit@0.1.5,nf-console@1.0.6,nf-ga4gh@1.1.0,nf-google@1.8.3,nf-tower@1.6.3,nf-wave@1.0.1
+May-15 14:19:42.551 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+May-15 14:19:42.552 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+May-15 14:19:42.558 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+May-15 14:19:42.577 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+May-15 14:19:43.689 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /data/pangebin/nextflow.config
+May-15 14:19:43.691 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /data/pangebin/nextflow.config
+May-15 14:19:43.710 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `conda`
+May-15 14:19:43.893 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [test, mamba, conda, gt, tower, test_set]
+May-15 14:19:43.946 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 by global default
+May-15 14:19:43.969 [main] INFO  nextflow.cli.CmdRun - Launching `./main.nf` [zen_stone] DSL2 - revision: 0204e632f5
+May-15 14:19:43.970 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+May-15 14:19:43.970 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+May-15 14:19:43.983 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/sgro/.nextflow/secrets/store.json
+May-15 14:19:43.990 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@67cefd84] - activable => nextflow.secret.LocalSecretsProvider@67cefd84
+May-15 14:19:44.062 [main] DEBUG nextflow.Session - Session UUID: eede5ad0-8464-4e19-94e4-84629447ba2b
+May-15 14:19:44.062 [main] DEBUG nextflow.Session - Run name: zen_stone
+May-15 14:19:44.063 [main] DEBUG nextflow.Session - Executor pool size: 32
+May-15 14:19:44.073 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+May-15 14:19:44.109 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 23.10.1 build 5891
+  Created: 12-01-2024 22:01 UTC (23:01 CEST)
+  System: Linux 5.15.0-89-generic
+  Runtime: Groovy 3.0.19 on OpenJDK 64-Bit Server VM 21-internal-adhoc.conda.src
+  Encoding: UTF-8 (UTF-8)
+  Process: 2008439@pangebin [10.180.7.171]
+  CPUs: 32 - Mem: 125.5 GB (86.6 GB) - Swap: 8 GB (837.8 MB) - Virtual threads ON
+May-15 14:19:44.170 [main] DEBUG nextflow.Session - Work-dir: /data/pangebin/work [zfs]
+May-15 14:19:44.202 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+May-15 14:19:44.218 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+May-15 14:19:44.266 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+May-15 14:19:44.277 [main] DEBUG nextflow.util.CustomPoolFactory - Creating virtual thread pool
+May-15 14:19:44.421 [main] DEBUG nextflow.Session - Session start
+May-15 14:19:45.007 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+May-15 14:19:45.830 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:19:45.831 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:19:45.838 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+May-15 14:19:45.846 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=32; memory=125.5 GB; capacity=32; pollInterval=100ms; dumpInterval=5m
+May-15 14:19:45.849 [main] DEBUG n.processor.TaskPollingMonitor - >>> barrier register (monitor: local)
+May-15 14:19:45.948 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:19:45.949 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:19:45.955 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:19:45.956 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:19:45.964 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:19:45.964 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:19:45.971 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:19:45.971 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:19:45.975 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:19:45.975 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:19:45.979 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:19:45.980 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:19:45.984 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:19:45.985 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:19:45.989 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:19:45.989 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:19:45.998 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:19:45.998 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:19:46.009 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:19:46.010 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:19:46.013 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: PANGENOME:ENHANCE, PREPROCESS:FASTA, MILP, PANGEBIN:PLASBIN:GD_SCORE, MAKE, COMPRESS, PANGEBIN:PLASBIN:COMPRESS, PANGEBIN:PLASBIN:MILP, MAKE_INPUT, GENES2CTG, PANGEBIN:PLASBIN:GC_PROBS, FASTA, GFA_TO_FASTA, PANGENOME:MAKE, GC_PROBS, UNPACK_GZ, PACK_GZ, PANGENOME:CLEAN, PUBLISH, PANGEBIN:PLASBIN:GENES2CTG, PROCESS_INPUT_GFA_GPLAS, PANGEBIN:PLASBIN:MAKE_INPUT, ENHANCE, PROCESS_INPUT_GFA, GD_SCORE, CLEAN
+May-15 14:19:46.014 [main] DEBUG nextflow.Session - Igniting dataflow network (13)
+May-15 14:19:46.020 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PREPROCESS:FASTA
+May-15 14:19:46.021 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGENOME:MAKE
+May-15 14:19:46.023 [PathVisitor-2] DEBUG nextflow.file.PathVisitor - files for syntax: glob; folder: /data/gen-data/genomes/plasgraph2-datasets/eskapee-test/; pattern: robertson-benchmark_*-*-s.gfa.gz; options: [type:file]
+May-15 14:19:46.023 [PathVisitor-1] DEBUG nextflow.file.PathVisitor - files for syntax: glob; folder: /data/gen-data/genomes/plasgraph2-datasets/eskapee-test/; pattern: robertson-benchmark_*-*-u.gfa.gz; options: [type:file]
+May-15 14:19:46.026 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGENOME:CLEAN
+May-15 14:19:46.026 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGENOME:ENHANCE
+May-15 14:19:46.027 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGEBIN:PLASBIN:COMPRESS
+May-15 14:19:46.027 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGEBIN:PLASBIN:MAKE_INPUT
+May-15 14:19:46.028 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGEBIN:PLASBIN:GC_PROBS
+May-15 14:19:46.029 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGEBIN:PLASBIN:GENES2CTG
+May-15 14:19:46.029 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGEBIN:PLASBIN:GD_SCORE
+May-15 14:19:46.029 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGEBIN:PLASBIN:MILP
+May-15 14:19:46.033 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PUBLISH
+May-15 14:19:46.034 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+  Script_3e616f8898221b4d: /data/pangebin/./workflows/preprocess.nf
+  Script_35bd64a3d2c0aff3: /data/pangebin/./workflows/pangenome.nf
+  Script_fa9edab7ecb7d71f: /data/pangebin/main.nf
+  Script_3c706f0086e179ca: /data/pangebin/./workflows/plasbinflow.nf
+  Script_1aa8378c5ac044dd: /data/pangebin/workflows/other/gfautils.nf
+May-15 14:19:46.035 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
+May-15 14:19:46.035 [main] DEBUG nextflow.Session - Session await
+May-15 14:19:46.358 [Actor Thread 110] DEBUG nextflow.conda.CondaCache - conda found local env for environment=bioconda::htslib gfapy; path=/opt/mambaforge/envs/env-a6cdd5590f00b1bcdba1a56b75a0fb54
+May-15 14:19:46.578 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.581 [Task submitter] INFO  nextflow.Session - [d6/4c0ead] Submitted process > PREPROCESS:FASTA (3)
+May-15 14:19:46.603 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.604 [Task submitter] INFO  nextflow.Session - [2a/fe7407] Submitted process > PREPROCESS:FASTA (9)
+May-15 14:19:46.614 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.615 [Task submitter] INFO  nextflow.Session - [d5/79f56c] Submitted process > PREPROCESS:FASTA (13)
+May-15 14:19:46.625 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.626 [Task submitter] INFO  nextflow.Session - [d7/fecdf9] Submitted process > PREPROCESS:FASTA (30)
+May-15 14:19:46.632 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.632 [Task submitter] INFO  nextflow.Session - [3f/9cdbbb] Submitted process > PREPROCESS:FASTA (34)
+May-15 14:19:46.643 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.645 [Task submitter] INFO  nextflow.Session - [d4/248382] Submitted process > PREPROCESS:FASTA (18)
+May-15 14:19:46.662 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.663 [Task submitter] INFO  nextflow.Session - [6d/76b2d0] Submitted process > PREPROCESS:FASTA (29)
+May-15 14:19:46.675 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.676 [Task submitter] INFO  nextflow.Session - [d5/dc96b7] Submitted process > PREPROCESS:FASTA (17)
+May-15 14:19:46.688 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.688 [Task submitter] INFO  nextflow.Session - [40/e30c88] Submitted process > PREPROCESS:FASTA (11)
+May-15 14:19:46.707 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.707 [Task submitter] INFO  nextflow.Session - [81/41d32b] Submitted process > PREPROCESS:FASTA (32)
+May-15 14:19:46.716 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.717 [Task submitter] INFO  nextflow.Session - [5d/674bde] Submitted process > PREPROCESS:FASTA (4)
+May-15 14:19:46.733 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.733 [Task submitter] INFO  nextflow.Session - [57/ae67f8] Submitted process > PREPROCESS:FASTA (21)
+May-15 14:19:46.738 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.739 [Task submitter] INFO  nextflow.Session - [1d/dc9084] Submitted process > PREPROCESS:FASTA (10)
+May-15 14:19:46.747 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.747 [Task submitter] INFO  nextflow.Session - [19/8700fa] Submitted process > PREPROCESS:FASTA (1)
+May-15 14:19:46.758 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.758 [Task submitter] INFO  nextflow.Session - [ff/5267ae] Submitted process > PREPROCESS:FASTA (22)
+May-15 14:19:46.765 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.766 [Task submitter] INFO  nextflow.Session - [32/34e44f] Submitted process > PREPROCESS:FASTA (14)
+May-15 14:19:46.772 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.773 [Task submitter] INFO  nextflow.Session - [18/73b989] Submitted process > PREPROCESS:FASTA (24)
+May-15 14:19:46.781 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.783 [Task submitter] INFO  nextflow.Session - [8b/0df0bc] Submitted process > PREPROCESS:FASTA (2)
+May-15 14:19:46.796 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.797 [Task submitter] INFO  nextflow.Session - [ef/71b33a] Submitted process > PREPROCESS:FASTA (28)
+May-15 14:19:46.820 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.820 [Task submitter] INFO  nextflow.Session - [d5/889d04] Submitted process > PREPROCESS:FASTA (26)
+May-15 14:19:46.829 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.831 [Task submitter] INFO  nextflow.Session - [b0/5e45b4] Submitted process > PREPROCESS:FASTA (5)
+May-15 14:19:46.842 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.842 [Task submitter] INFO  nextflow.Session - [36/fe6611] Submitted process > PREPROCESS:FASTA (8)
+May-15 14:19:46.855 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.856 [Task submitter] INFO  nextflow.Session - [23/8e4bc7] Submitted process > PREPROCESS:FASTA (19)
+May-15 14:19:46.862 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.862 [Task submitter] INFO  nextflow.Session - [c7/b695a5] Submitted process > PREPROCESS:FASTA (27)
+May-15 14:19:46.868 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.869 [Task submitter] INFO  nextflow.Session - [fe/f67962] Submitted process > PREPROCESS:FASTA (7)
+May-15 14:19:46.900 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.906 [Task submitter] INFO  nextflow.Session - [e1/eb1b34] Submitted process > PREPROCESS:FASTA (16)
+May-15 14:19:46.930 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.931 [Task submitter] INFO  nextflow.Session - [b6/fe34ee] Submitted process > PREPROCESS:FASTA (15)
+May-15 14:19:46.942 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.943 [Task submitter] INFO  nextflow.Session - [0e/87b96e] Submitted process > PREPROCESS:FASTA (6)
+May-15 14:19:46.952 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.953 [Task submitter] INFO  nextflow.Session - [c4/9c9a2c] Submitted process > PREPROCESS:FASTA (25)
+May-15 14:19:46.961 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.962 [Task submitter] INFO  nextflow.Session - [9c/d37695] Submitted process > PREPROCESS:FASTA (49)
+May-15 14:19:46.975 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.976 [Task submitter] INFO  nextflow.Session - [8b/d030be] Submitted process > PREPROCESS:FASTA (23)
+May-15 14:19:46.986 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:46.987 [Task submitter] INFO  nextflow.Session - [82/eb4bca] Submitted process > PREPROCESS:FASTA (12)
+May-15 14:19:51.809 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 19; name: PREPROCESS:FASTA (19); status: COMPLETED; exit: 0; error: -; workDir: /data/pangebin/work/23/8e4bc767b5e804a52c9357c94e30a2]
+May-15 14:19:51.815 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+May-15 14:19:51.815 [Task submitter] INFO  nextflow.Session - [02/653a4c] Submitted process > PREPROCESS:FASTA (31)
+May-15 14:19:51.837 [Task monitor] DEBUG nextflow.processor.TaskProcessor - Process `PREPROCESS:FASTA (19)` is unable to find [UnixPath]: `/data/pangebin/work/23/8e4bc767b5e804a52c9357c94e30a2/saur-SAMN03255479.skesa.ren.gfa` (pattern: `saur-SAMN03255479.skesa.ren.gfa`)
+May-15 14:19:51.852 [Task monitor] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
+  task: name=PREPROCESS:FASTA (19); work-dir=/data/pangebin/work/23/8e4bc767b5e804a52c9357c94e30a2
+  error [nextflow.exception.MissingFileException]: Missing output file(s) `saur-SAMN03255479.skesa.ren.gfa` expected by process `PREPROCESS:FASTA (19)`
+May-15 14:19:52.007 [Task monitor] ERROR nextflow.processor.TaskProcessor - Error executing process > 'PREPROCESS:FASTA (19)'
+
+Caused by:
+  Missing output file(s) `saur-SAMN03255479.skesa.ren.gfa` expected by process `PREPROCESS:FASTA (19)`
+
+Command executed:
+
+  #!/bin/bash
+  bgzip -d -c robertson-benchmark_saur-SAMN03255479-u.gfa.gz > saur-SAMN03255479.short.gfa
+  bgzip -d -c robertson-benchmark_saur-SAMN03255479-s.gfa.gz > saur-SAMN03255479.skesa.gfa
+  
+  python /data/pangebin/bin/rename_gfa.py --input saur-SAMN03255479.short.gfa --output saur-SAMN03255479.short.ren.gfa --type uni
+  python /data/pangebin/bin/rename_gfa.py --input saur-SAMN03255479.skesa.gfa --output saur-SAMN03255479.skesa.ren.gfa --type ske
+  
+  awk '/^S/{print ">"$2; print ""$3}' saur-SAMN03255479.short.ren.gfa > saur-SAMN03255479.short.fa
+  awk '/^S/{print ">"$2; print ""$3}' saur-SAMN03255479.skesa.ren.gfa > saur-SAMN03255479.skesa.fa
+  
+  cat saur-SAMN03255479.short.fa saur-SAMN03255479.skesa.fa > saur-SAMN03255479.fasta
+  
+  bgzip -c saur-SAMN03255479.fasta > saur-SAMN03255479.fasta.gz
+
+Command exit status:
+  0
+
+Command output:
+  (empty)
+
+Command error:
+  Traceback (most recent call last):
+    File "/opt/mambaforge/envs/env-a6cdd5590f00b1bcdba1a56b75a0fb54/lib/python3.12/site-packages/gfapy/field/integer.py", line 6, in decode
+      return int(string)
+             ^^^^^^^^^^^
+  ValueError: invalid literal for int() with base 10: '1.04153e+06'
+  
+  During handling of the above exception, another exception occurred:
+  
+  Traceback (most recent call last):
+    File "/opt/mambaforge/envs/env-a6cdd5590f00b1bcdba1a56b75a0fb54/lib/python3.12/site-packages/gfapy/field/parser.py", line 63, in _parse_gfa_field
+      return mod.unsafe_decode(string)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/opt/mambaforge/envs/env-a6cdd5590f00b1bcdba1a56b75a0fb54/lib/python3.12/site-packages/gfapy/field/integer.py", line 8, in decode
+      raise gfapy.FormatError("the string does not represent a valid integer")
+  gfapy.error.FormatError: the string does not represent a valid integer
+  
+  The above exception was the direct cause of the following exception:
+  
+  Traceback (most recent call last):
+    File "/data/pangebin/bin/rename_gfa.py", line 46, in <module>
+      main()
+    File "/data/pangebin/bin/rename_gfa.py", line 13, in main
+      graph = gp.Gfa.from_file(args.input, vlevel=0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/opt/mambaforge/envs/env-a6cdd5590f00b1bcdba1a56b75a0fb54/lib/python3.12/site-packages/gfapy/gfa.py", line 235, in from_file
+      gfa.read_file(filename)
+    File "/opt/mambaforge/envs/env-a6cdd5590f00b1bcdba1a56b75a0fb54/lib/python3.12/site-packages/gfapy/gfa.py", line 209, in read_file
+      self.add_line(line.rstrip('\r\n'))
+    File "/opt/mambaforge/envs/env-a6cdd5590f00b1bcdba1a56b75a0fb54/lib/python3.12/site-packages/gfapy/lines/creators.py", line 25, in add_line
+      self.__add_line_GFA1(gfa_line)
+    File "/opt/mambaforge/envs/env-a6cdd5590f00b1bcdba1a56b75a0fb54/lib/python3.12/site-packages/gfapy/lines/creators.py", line 132, in __add_line_GFA1
+      gfa_line = gfapy.Line(gfa_line, vlevel=self._vlevel,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/opt/mambaforge/envs/env-a6cdd5590f00b1bcdba1a56b75a0fb54/lib/python3.12/site-packages/gfapy/line/common/construction.py", line 80, in __init__
+      self._initialize_tags(data)
+    File "/opt/mambaforge/envs/env-a6cdd5590f00b1bcdba1a56b75a0fb54/lib/python3.12/site-packages/gfapy/line/common/construction.py", line 165, in _initialize_tags
+      self._initialize_tag(*(gfapy.Field._parse_gfa_tag(strings[i])),
+    File "/opt/mambaforge/envs/env-a6cdd5590f00b1bcdba1a56b75a0fb54/lib/python3.12/site-packages/gfapy/line/common/construction.py", line 181, in _initialize_tag
+      self._init_field_value(n, t, s, errmsginfo = errmsginfo)
+    File "/opt/mambaforge/envs/env-a6cdd5590f00b1bcdba1a56b75a0fb54/lib/python3.12/site-packages/gfapy/line/common/construction.py", line 142, in _init_field_value
+      s = gfapy.Field._parse_gfa_field(s, t, safe = (self.vlevel >= 1),
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/opt/mambaforge/envs/env-a6cdd5590f00b1bcdba1a56b75a0fb54/lib/python3.12/site-packages/gfapy/field/parser.py", line 78, in _parse_gfa_field
+      raise err.__class__(
+  gfapy.error.FormatError: Field: KC
+  Datatype: i
+  Content: 1.04153e+06
+  the string does not represent a valid integer
+  awk: fatal: cannot open file `saur-SAMN03255479.skesa.ren.gfa' for reading: No such file or directory
+
+Work dir:
+  /data/pangebin/work/23/8e4bc767b5e804a52c9357c94e30a2
+
+Tip: when you have fixed the problem you can continue the execution adding the option `-resume` to the run command line
+May-15 14:19:52.037 [Task monitor] DEBUG nextflow.Session - Session aborted -- Cause: Missing output file(s) `saur-SAMN03255479.skesa.ren.gfa` expected by process `PREPROCESS:FASTA (19)`
+May-15 14:19:52.062 [Task monitor] DEBUG nextflow.Session - The following nodes are still active:
+[process] PANGENOME:MAKE
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PANGENOME:CLEAN
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PANGENOME:ENHANCE
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PANGEBIN:PLASBIN:COMPRESS
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PANGEBIN:PLASBIN:MAKE_INPUT
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PANGEBIN:PLASBIN:GC_PROBS
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PANGEBIN:PLASBIN:GENES2CTG
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PANGEBIN:PLASBIN:GD_SCORE
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PANGEBIN:PLASBIN:MILP
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: asm
+  port 2: (value) bound ; channel: seed_len
+  port 3: (value) bound ; channel: seed_score
+  port 4: (value) bound ; channel: min_pls_len
+  port 5: (cntrl) -     ; channel: $
+
+[process] PUBLISH
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+May-15 14:19:52.067 [main] DEBUG nextflow.Session - Session await > all processes finished
+May-15 14:19:52.067 [main] DEBUG nextflow.Session - Session await > all barriers passed
+May-15 14:19:52.080 [main] WARN  n.processor.TaskPollingMonitor - Killing running tasks (32)
+May-15 14:19:52.259 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 25; name: PREPROCESS:FASTA (25); status: COMPLETED; exit: 0; error: -; workDir: /data/pangebin/work/c4/9c9a2c28dac88c93dd35c9c1940249]
+May-15 14:19:52.260 [Task monitor] DEBUG nextflow.processor.TaskProcessor - Process `PREPROCESS:FASTA (25)` is unable to find [UnixPath]: `/data/pangebin/work/c4/9c9a2c28dac88c93dd35c9c1940249/saur-SAMN03255469.skesa.ren.gfa` (pattern: `saur-SAMN03255469.skesa.ren.gfa`)
+May-15 14:19:52.261 [Task monitor] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
+  task: name=PREPROCESS:FASTA (25); work-dir=/data/pangebin/work/c4/9c9a2c28dac88c93dd35c9c1940249
+  error [nextflow.exception.MissingFileException]: Missing output file(s) `saur-SAMN03255469.skesa.ren.gfa` expected by process `PREPROCESS:FASTA (25)`
+May-15 14:19:52.294 [Task monitor] DEBUG n.processor.TaskPollingMonitor - <<< barrier arrives (monitor: local) - terminating tasks monitor poll loop
+May-15 14:19:52.317 [main] DEBUG n.executor.local.LocalTaskHandler - Unable to kill PREPROCESS:FASTA (17) -- command: kill -TERM 2009187; exit: 1 
+ bash: line 1: kill: (2009187) - No such process
+
+May-15 14:19:52.424 [main] DEBUG n.executor.local.LocalTaskHandler - Unable to kill PREPROCESS:FASTA (4) -- command: kill -TERM 2009215; exit: 1 
+ bash: line 1: kill: (2009215) - No such process
+
+May-15 14:19:52.617 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=0; failedCount=2; ignoredCount=0; cachedCount=0; pendingCount=79; submittedCount=1; runningCount=-1; retriesCount=0; abortedCount=31; succeedDuration=0ms; failedDuration=10.2s; cachedDuration=0ms;loadCpus=-1; loadMemory=0; peakRunning=32; peakCpus=32; peakMemory=0; ]
+May-15 14:19:52.631 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+May-15 14:19:52.658 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye

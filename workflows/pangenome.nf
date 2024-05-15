@@ -1,11 +1,14 @@
 // include { NFCORE_PANGENOME } from "$projectDir/pangenome"
 paramfile = "$projectDir/workflows/params/pangenome-params.json"
 release = '1.1.2'
-profile = 'docker'
+profile = 'conda'
 src_dir = "$projectDir/bin"
+
+
 
 process MAKE {
     maxForks 2
+    cache 'lenient'
 
     input:
     tuple val(meta), path(fasta_AB), path(fasta_AB_gz)
@@ -25,6 +28,8 @@ process MAKE {
 
 
 process CLEAN {
+    conda 'gfapy'
+    cache 'lenient'
 
     input:
     tuple val(meta), path(pangenome)
@@ -40,6 +45,8 @@ process CLEAN {
 }
 
 process ENHANCE {
+    cache 'lenient'
+    conda 'gfapy pandas numpy'
     input:
     tuple val(meta), path(clean_pangenome), path(ass_A), path(ass_B)
 
@@ -59,10 +66,20 @@ workflow PANGENOME {
     pangenome
 
     main:
-    cleaned = MAKE(pangenome)
-    | CLEAN
+    pange_out = MAKE(pangenome)
+    // INPUT_CHECK(pangenome_fa)
+
+
+    // PGGB (
+    //     INPUT_CHECK.out.fasta,
+    //     INPUT_CHECK.out.fai,
+    //     INPUT_CHECK.out.gzi
+    // )
+    cleaned = CLEAN(pange_out)
+    cleaned | view
 
     augmented = ENHANCE(cleaned.join(assemblies))
+    augmented | view
     emit:
     augmented
 }

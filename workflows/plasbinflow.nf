@@ -3,7 +3,7 @@ putils_executable="${projectDir}/PlasBin-flow-pangenome/code/plasbin_utils.py"
 pflow_executable="${projectDir}/PlasBin-flow-pangenome/code/plasbin_flow.py"
 database="${projectDir}/PlasBin-flow-pangenome/database/plas_db.gfa"
 
-include { COMPRESS } from "${projectDir}/workflows/utils"
+include { PACK_GZ as COMPRESS } from "${projectDir}/workflows/other/gfautils"
 
 
 process MAKE_INPUT {
@@ -25,6 +25,8 @@ process MAKE_INPUT {
 }
 
 process GC_PROBS {
+    conda 'matplotlib pandas seaborn biopython scipy numpy'
+
     input:
     tuple val(meta), path(graph), path(input_csv)
 
@@ -41,6 +43,8 @@ process GC_PROBS {
 }
 
 process GENES2CTG {
+    conda 'matplotlib pandas seaborn biopython scipy numpy blast'
+
     input:
     tuple val(meta), path(graph), path(input_csv)
 
@@ -58,6 +62,8 @@ process GENES2CTG {
 }
 
 process GD_SCORE {
+    conda 'matplotlib pandas seaborn biopython scipy numpy'
+
     input:
     tuple val(meta), path(graph), path(input_csv), path(mapping_csv), path(mapping_txt)
 
@@ -71,6 +77,8 @@ process GD_SCORE {
 }
 
 process MILP {
+    conda 'matplotlib pandas seaborn biopython scipy numpy gurobi::gurobi pip:networkx'
+
     maxForks 1
 
     input:

@@ -1,0 +1,108 @@
+May-15 14:07:05.137 [main] DEBUG nextflow.cli.Launcher - $> nextflow run . --input /data/gen-data/small-test/ecol-SAMN04014855 -profile conda --out output -resume
+May-15 14:07:05.303 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.10.1
+May-15 14:07:05.330 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/sgro/.nextflow/plugins; core-plugins: nf-amazon@2.1.4,nf-azure@1.3.3,nf-cloudcache@0.3.0,nf-codecommit@0.1.5,nf-console@1.0.6,nf-ga4gh@1.1.0,nf-google@1.8.3,nf-tower@1.6.3,nf-wave@1.0.1
+May-15 14:07:05.343 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+May-15 14:07:05.344 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+May-15 14:07:05.348 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+May-15 14:07:05.415 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+May-15 14:07:06.429 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /data/pangebin/nextflow.config
+May-15 14:07:06.431 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /data/pangebin/nextflow.config
+May-15 14:07:06.449 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `conda`
+May-15 14:07:06.590 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [test, mamba, conda, gt, tower, test_set]
+May-15 14:07:06.636 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 by global default
+May-15 14:07:06.715 [main] INFO  nextflow.cli.CmdRun - Launching `./main.nf` [deadly_avogadro] DSL2 - revision: 5f542a28ba
+May-15 14:07:06.716 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+May-15 14:07:06.717 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+May-15 14:07:06.729 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/sgro/.nextflow/secrets/store.json
+May-15 14:07:06.734 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@67cefd84] - activable => nextflow.secret.LocalSecretsProvider@67cefd84
+May-15 14:07:06.823 [main] DEBUG nextflow.Session - Session UUID: eede5ad0-8464-4e19-94e4-84629447ba2b
+May-15 14:07:06.824 [main] DEBUG nextflow.Session - Run name: deadly_avogadro
+May-15 14:07:06.825 [main] DEBUG nextflow.Session - Executor pool size: 32
+May-15 14:07:06.834 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+May-15 14:07:06.883 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 23.10.1 build 5891
+  Created: 12-01-2024 22:01 UTC (23:01 CEST)
+  System: Linux 5.15.0-89-generic
+  Runtime: Groovy 3.0.19 on OpenJDK 64-Bit Server VM 21-internal-adhoc.conda.src
+  Encoding: UTF-8 (UTF-8)
+  Process: 1941177@pangebin [10.180.7.171]
+  CPUs: 32 - Mem: 125.5 GB (82.8 GB) - Swap: 8 GB (837.8 MB) - Virtual threads ON
+May-15 14:07:06.970 [main] DEBUG nextflow.Session - Work-dir: /data/pangebin/work [zfs]
+May-15 14:07:06.995 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+May-15 14:07:07.011 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+May-15 14:07:07.060 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+May-15 14:07:07.071 [main] DEBUG nextflow.util.CustomPoolFactory - Creating virtual thread pool
+May-15 14:07:07.256 [main] DEBUG nextflow.Session - Session start
+May-15 14:07:07.817 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+May-15 14:07:08.623 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:07:08.624 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:07:08.630 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+May-15 14:07:08.638 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=32; memory=125.5 GB; capacity=32; pollInterval=100ms; dumpInterval=5m
+May-15 14:07:08.641 [main] DEBUG n.processor.TaskPollingMonitor - >>> barrier register (monitor: local)
+May-15 14:07:08.723 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:07:08.723 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:07:08.729 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:07:08.729 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:07:08.742 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:07:08.742 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:07:08.750 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:07:08.751 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:07:08.755 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:07:08.755 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:07:08.760 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:07:08.760 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:07:08.764 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:07:08.765 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:07:08.769 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:07:08.770 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:07:08.778 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:07:08.778 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:07:08.789 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+May-15 14:07:08.789 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+May-15 14:07:08.792 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: PANGENOME:ENHANCE, PREPROCESS:FASTA, MILP, PANGEBIN:PLASBIN:GD_SCORE, MAKE, COMPRESS, PANGEBIN:PLASBIN:COMPRESS, PANGEBIN:PLASBIN:MILP, MAKE_INPUT, GENES2CTG, PANGEBIN:PLASBIN:GC_PROBS, FASTA, GFA_TO_FASTA, PANGENOME:MAKE, GC_PROBS, UNPACK_GZ, PACK_GZ, PANGENOME:CLEAN, PUBLISH, PANGEBIN:PLASBIN:GENES2CTG, PROCESS_INPUT_GFA_GPLAS, PANGEBIN:PLASBIN:MAKE_INPUT, ENHANCE, PROCESS_INPUT_GFA, GD_SCORE, CLEAN
+May-15 14:07:08.793 [main] DEBUG nextflow.Session - Igniting dataflow network (12)
+May-15 14:07:08.800 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PREPROCESS:FASTA
+May-15 14:07:08.801 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGENOME:MAKE
+May-15 14:07:08.801 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGENOME:CLEAN
+May-15 14:07:08.802 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGENOME:ENHANCE
+May-15 14:07:08.802 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGEBIN:PLASBIN:COMPRESS
+May-15 14:07:08.803 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGEBIN:PLASBIN:MAKE_INPUT
+May-15 14:07:08.803 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGEBIN:PLASBIN:GC_PROBS
+May-15 14:07:08.804 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGEBIN:PLASBIN:GENES2CTG
+May-15 14:07:08.805 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGEBIN:PLASBIN:GD_SCORE
+May-15 14:07:08.805 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PANGEBIN:PLASBIN:MILP
+May-15 14:07:08.806 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PUBLISH
+May-15 14:07:08.806 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+  Script_3e616f8898221b4d: /data/pangebin/./workflows/preprocess.nf
+  Script_aaca972feeacfc4f: /data/pangebin/main.nf
+  Script_35bd64a3d2c0aff3: /data/pangebin/./workflows/pangenome.nf
+  Script_3c706f0086e179ca: /data/pangebin/./workflows/plasbinflow.nf
+  Script_1aa8378c5ac044dd: /data/pangebin/workflows/other/gfautils.nf
+May-15 14:07:08.807 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
+May-15 14:07:08.807 [main] DEBUG nextflow.Session - Session await
+May-15 14:07:08.931 [Actor Thread 26] DEBUG nextflow.conda.CondaCache - conda found local env for environment=bioconda::htslib gfapy; path=/opt/mambaforge/envs/env-a6cdd5590f00b1bcdba1a56b75a0fb54
+May-15 14:07:09.090 [Actor Thread 24] INFO  nextflow.processor.TaskProcessor - [a4/82f255] Cached process > PREPROCESS:FASTA (1)
+May-15 14:07:09.132 [Actor Thread 32] INFO  nextflow.processor.TaskProcessor - [31/d20b9e] Cached process > PANGENOME:MAKE (1)
+May-15 14:07:09.141 [Actor Thread 40] DEBUG nextflow.conda.CondaCache - conda found local env for environment=gfapy; path=/opt/mambaforge/envs/env-5f3681c12d99474c5608bb310266e104
+May-15 14:07:09.148 [Actor Thread 38] INFO  nextflow.processor.TaskProcessor - [ee/baec55] Cached process > PANGENOME:CLEAN (1)
+May-15 14:07:09.156 [Actor Thread 52] DEBUG nextflow.conda.CondaCache - conda found local env for environment=gfapy pandas numpy; path=/opt/mambaforge/envs/env-a49684c70d54e6519106ccab09ba055c
+May-15 14:07:09.161 [Actor Thread 48] INFO  nextflow.processor.TaskProcessor - [f0/18e511] Cached process > PANGENOME:ENHANCE (1)
+May-15 14:07:09.170 [Actor Thread 62] DEBUG nextflow.conda.CondaCache - conda found local env for environment=bioconda::htslib; path=/opt/mambaforge/envs/env-508899e1f2892ac4c3a5c95cca5255a8
+May-15 14:07:09.175 [Actor Thread 58] INFO  nextflow.processor.TaskProcessor - [1b/e2179c] Cached process > PANGEBIN:PLASBIN:COMPRESS (1)
+May-15 14:07:09.188 [Actor Thread 67] INFO  nextflow.processor.TaskProcessor - [ca/62508c] Cached process > PANGEBIN:PLASBIN:MAKE_INPUT (1)
+May-15 14:07:09.202 [Actor Thread 77] DEBUG nextflow.conda.CondaCache - conda found local env for environment=matplotlib pandas seaborn biopython scipy numpy blast; path=/opt/mambaforge/envs/env-1072cc8797700933ab8a4dbabe221445
+May-15 14:07:09.214 [Actor Thread 80] DEBUG nextflow.conda.CondaCache - conda found local env for environment=matplotlib pandas seaborn biopython scipy numpy; path=/opt/mambaforge/envs/env-70d7985dce23182fd04b9ebe60c30172
+May-15 14:07:09.220 [Actor Thread 78] INFO  nextflow.processor.TaskProcessor - [39/eee2bd] Cached process > PANGEBIN:PLASBIN:GC_PROBS (1)
+May-15 14:07:09.229 [Actor Thread 75] INFO  nextflow.processor.TaskProcessor - [d5/2093c6] Cached process > PANGEBIN:PLASBIN:GENES2CTG (1)
+May-15 14:07:09.245 [Actor Thread 89] INFO  nextflow.processor.TaskProcessor - [44/ce3e04] Cached process > PANGEBIN:PLASBIN:GD_SCORE (1)
+May-15 14:07:09.255 [Actor Thread 97] DEBUG nextflow.conda.CondaCache - conda found local env for environment=matplotlib pandas seaborn biopython scipy numpy gurobi::gurobi pip:networkx; path=/opt/mambaforge/envs/env-f8cbe1ab4753439f8bc541854e6735c9
+May-15 14:07:09.262 [Actor Thread 96] INFO  nextflow.processor.TaskProcessor - [cd/d53273] Cached process > PANGEBIN:PLASBIN:MILP (1)
+May-15 14:07:09.274 [Actor Thread 102] INFO  nextflow.processor.TaskProcessor - [67/c39c5c] Cached process > PUBLISH (1)
+May-15 14:07:09.295 [main] DEBUG nextflow.Session - Session await > all processes finished
+May-15 14:07:09.359 [Task monitor] DEBUG n.processor.TaskPollingMonitor - <<< barrier arrives (monitor: local) - terminating tasks monitor poll loop
+May-15 14:07:09.360 [main] DEBUG nextflow.Session - Session await > all barriers passed
+May-15 14:07:09.364 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'PublishDir' shutdown completed (hard=false)
+May-15 14:07:09.370 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=0; failedCount=0; ignoredCount=0; cachedCount=11; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=0ms; failedDuration=0ms; cachedDuration=19m 5s;loadCpus=0; loadMemory=0; peakRunning=0; peakCpus=0; peakMemory=0; ]
+May-15 14:07:09.522 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+May-15 14:07:09.545 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'FileTransfer' shutdown completed (hard=false)
+May-15 14:07:09.546 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye

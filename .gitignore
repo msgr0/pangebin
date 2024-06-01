@@ -1,4 +1,5 @@
-nextflow
-.nextflow
 work
-.nextflow.log
+*nextflow*
+data
+output
+test_data

@@ -120,8 +120,8 @@ workflow {
     //     samples = Channel.fromPath("$params.input", type: 'dir')
     // }
 
-    samples_u = Channel.fromPath("$params.db/robertson-benchmark_*-*-u.gfa.gz", type: 'file')
-    samples_s = Channel.fromPath("$params.db/robertson-benchmark_*-*-s.gfa.gz",
+    samples_u = Channel.fromPath("$params.db/short.gfa.gz", type: 'file')
+    samples_s = Channel.fromPath("$params.db/skesa.gfa.gz",
     type: 'file')
 
     

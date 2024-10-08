@@ -10,7 +10,13 @@ Software required for running the pipeline
 - nextflow (can be installed via conda -c bioconda)
 
 ## Input
-The input graphs should be named `short.gfa.gz` for unicycler graphs and `skesa.gfa.gz` for skesa graphs. Both should be placed into a folder named after the `sample_id`. 
+
+--The input graphs should be named `short.gfa.gz` for unicycler graphs and `skesa.gfa.gz` for skesa graphs. Both should be placed into a folder named after the `sample_id`.--
+
+The input is composed by:
+ - unicycler and skesa graphs in .gfa or .gfagz format
+ - pangenome graph built with nf-core Pangenome (PGGB).
+
 
 ## Running the pipeline
 `nextflow run main.nf -profile mamba --db folder_sample_id --out output`

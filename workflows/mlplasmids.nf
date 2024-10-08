@@ -1,5 +1,8 @@
 #!/usr/bin/env nextflow
 
+include { MLPLASMIDS } from "./mlplasmids"
+
+
 def convert_species(spec) {
   switch(spec) {
     case 'efea':
@@ -21,30 +24,22 @@ def convert_species(spec) {
 }
 
 process MLPLASMIDS {
-    // errorStrategy 'ignore'
-
+    cache 'lenient'
 
     input:
-    tuple val(meta), path(mixed), path(uni), path(ske)
+    tuple val(meta), path(gfa), path(fasta)
 
     output:
-    tuple val(meta), path(mixedpred), emit: mixed
-    tuple val(meta), path(unipred), emit: uni
-    tuple val(meta), path(skepred), emit: ske
-
+    tuple val(meta), path(pred_pbf), emit: pbf
     
     script:
-    mixedpred = "${meta.id}.mlplasmid.mix.pred"
-    unipred = "${meta.id}.mlplasmid.uni.pred"
-    skepred = "${meta.id}.mlplasmid.ske.pred"
-
     mlplas_threshold = '0.5'
     species = convert_species("${meta.species}")
+    pred = fasta.baseName + "mlplas.tab"
     """
     #!/bin/bash
-
-      Rscript $projectDir/bin/run_mlplasmids.R ${mixed} ${mixedpred} ${mlplas_threshold} '${species}' TRUE
-      Rscript $projectDir/bin/run_mlplasmids.R ${uni} ${unipred} ${mlplas_threshold} '${species}' TRUE
-      Rscript $projectDir/bin/run_mlplasmids.R ${ske} ${skepred} ${mlplas_threshold} '${species}' TRUE
+    Rscript $projectDir/bin/run_mlplasmids.R ${fasta} ${pred} ${mlplas_threshold} '${species}' TRUE
+    python $projectDir/bin/mlpl.asm.py --pred ${pred} --graph ${gfa}  --output ${pred_gplas}
+    python $projectDir/bin/mlpl.asm.py --pred ${pred} --graph ${gfa}  --pbf ${pred_pbf}
     """
 }

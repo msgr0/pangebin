@@ -6,8 +6,10 @@ built from Skesa and Unicycler, builds the augmented pangenome that could be the
 
 ## Requirements
 Software required for running the pipeline
-- conda/mamba
-- nextflow (can be installed via conda -c bioconda)
+- nextflow
+- htslib
+- R/Rscript
+
 
 ## Input
 

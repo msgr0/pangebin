@@ -1,3 +1,5 @@
-// input: the output of "preprocess" + the output of "plasbin-flow pangenome"
-// output: BINNING evaluation of the results, LABELING evaluation of the results.
+// input:   output of "preprocess.nf" + output of "plasbin-flow pangenome" (bins)
+// output:  BINNING evaluation of pbf-pangenome results,
+//          LABELING evaluation of pbf-pangenome results.
+
 // plotting via jupyter notebook

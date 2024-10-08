@@ -15,12 +15,6 @@ seed_len = 1000
 seed_score = 0.5
 min_pls_len = 1000
 
-binfolder = "~/bin"
-
-putils = "$projectDir/PlasBin-flow-pangenome/code/plasbin_utils.py"
-pflow = "$projectDir/PlasBin-flow-pangenome/code/plasbin_flow.py"
-pdatabase = "$projectDir/Plasbin-flow-pangenome/database/genes.fasta"
-
 process EXTRACT_GFA {
     cache 'lenient'
 

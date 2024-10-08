@@ -34,3 +34,4 @@ process EVAL {
     python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${meta.id} --output ${output} --description '${description}'
     """
 }
+

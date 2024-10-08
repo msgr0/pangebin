@@ -1,6 +1,5 @@
 #!/usr/bin/env nextflow
 
-include { MLPLASMIDS } from "./mlplasmids"
 
 
 def convert_species(spec) {

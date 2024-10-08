@@ -6,4 +6,6 @@
 #SBATCH --mem=64G
 
 
+module 
+
 bash ./pipe.sh ~/scratch/pangebin/test_data/ecol-SAMN04014855

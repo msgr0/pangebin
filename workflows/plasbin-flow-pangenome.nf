@@ -9,13 +9,6 @@ pflow = "$projectDir/PlasBin-flow-pangenome/code/plasbin_flow.py"
 pdatabase = "$projectDir/Plasbin-flow-pangenome/database/genes.fasta"
 
 
-#SBATCH --time=08:00:00
-#SBATCH --account=def-chauvec
-#SBATCH --cpus-per-task=32
-#SBATCH --mail-user=mattia.sgro@unimib.it
-#SBATCH --mail-type=ALL
-#SBATCH --mem=64G
-
 echo 'Starting GPLAS PANGENOME pipeline'
 module load nextflow/23.10.0
 module load apptainer

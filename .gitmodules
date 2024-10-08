@@ -1,18 +1,11 @@
 [submodule "pangenome"]
 	path = pangenome
 	url = git@github.com:nf-core/pangenome.git
-[submodule "gplas2"]
-	path = gplas2
-	url = https://gitlab.com/illoxian/gplas2.git
+
 [submodule "PlasEval"]
 	path = PlasEval
-	url = https://github.com/acme92/PlasEval.git
+	url = https://github.com/acme92/PlasEval
+
 [submodule "PlasBin-flow-pangenome"]
 	path = PlasBin-flow-pangenome
 	url = git@github.com:msgr0/PlasBin-flow-pangenome.git
-[submodule "plasmidEC"]
-	path = plasmidEC
-	url = https://gitlab.com/mmb-umcu/plasmidEC.git
-[submodule "gplas"]
-	path = gplas
-	url = https://gitlab.com/sirarredondo/gplas.git

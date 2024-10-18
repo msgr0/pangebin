@@ -4,12 +4,13 @@
 //          - pan-assembly graph
 
 include { PUBLISH } from "./utils"
+projectDir = "~/pangebin"
 
 params.thr = 0
 
 nfcore_profile = "apptainer"
 paramfile = "$projectDir/pangenome-params.json"
-release = '1.1.2'
+release = "dev"
 
 seed_len = 1000
 seed_score = 0.5
@@ -84,7 +85,7 @@ process MIX_FASTA {
     tuple val(meta), path(fasta)
 
     script:
-    fasta = "${meta.species}.${meta.id}.mix.fa"
+    fasta = "${meta.species}.${meta.id}.${meta.thr}.fa"
     """
     cat ${fasta_a} ${fasta_b} > ${fasta}
     """
@@ -92,9 +93,10 @@ process MIX_FASTA {
 
 process MAKE_PANGENOME {
     cache 'lenient'
+    errorStrategy 'ignore'
 
     maxForks 4
-    time '45m'
+    time '60m'
 
     input:
     tuple val(meta), path(fasta)
@@ -104,7 +106,7 @@ process MAKE_PANGENOME {
 
     script:
     haplos = 2
-    pangenome = "${meta.species}.${meta.id}.pan.gfa"
+    pangenome = fasta.baseName + ".pan.gfa"
 
     """
     bgzip ${fasta}
@@ -125,8 +127,8 @@ process MAKE_PANASSEMBLY {
     // tuple val(meta), path(panassemblycut), emit: panassembly
 
     script:
-    panassembly = "${meta.species}.${meta.id}.pasm.gfa"
-    pangenomecl = "${meta.species}.${meta.id}.pan.cl.gfa"
+    panassembly = pangenome.baseName + "asm.gfa"
+    pangenomecl = pangenome.baseName + "cl.gfa"
     """
     python $projectDir/bin/gfa_cleaner.py --input ${pangenome} --output ${pangenomecl}
     python $projectDir/bin/pangenome_enancher.py --input ${pangenomecl} --output ${panassembly} --assembly ${uni} ${ske}
@@ -136,7 +138,7 @@ process MAKE_PANASSEMBLY {
 
 workflow PREPROCESS {
     take:
-    gfagz
+    gfagz // a pair of gfagz
 
     main:
     extract_ch = EXTRACT_GFA(gfagz)
@@ -158,7 +160,7 @@ workflow PREPROCESS {
         meta, files -> meta = [id: meta.id, species: meta.species, thr:meta.thr]; [meta, files]
     }
 
-    mixed_fasta = skesa_fasta.combine(skesa_fasta, by: 0) | MIX_FASTA
+    mixed_fasta = skesa_fasta.combine(unicycler_fasta, by: 0) | MIX_FASTA
 
     pangenome_gfa = mixed_fasta | MAKE_PANGENOME
 
@@ -186,8 +188,9 @@ workflow {
     unicycler_ch = input_ch | map { meta, files -> meta += [asm: "uni"]; uni = files.findAll { it.toString().contains("-u.gfa.gz")}; [meta, uni[0]]}
     skesa_ch = input_ch | map { meta, files -> meta += [asm: "ske"]; ske = files.findAll { it.toString().contains("-s.gfa.gz")}; [meta, ske[0]]}
 
+    // skesa_ch | view
     PREPROCESS(unicycler_ch.mix(skesa_ch))
-    
     PUBLISH(PREPROCESS.out.all)
+    // pangenome.mix(PREPROCESS.out.panassembly).mix(PREPROCESS.out.pan_fasta))
 
 }

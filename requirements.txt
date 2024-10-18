@@ -1,1 +1,2 @@
 - htslib
+- pip install -e git+https://github.com/msgr0/gfapy.git#egg=gfapy

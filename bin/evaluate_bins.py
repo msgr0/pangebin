@@ -19,7 +19,7 @@ import argparse as ap
 
 import pandas as pd
 
-import altair as alt
+# import altair as alt
 
 # import gfapy as gp
 import os

@@ -41,8 +41,6 @@ def main(args):
         counter = 0
         for key in ctgs_chr:
             counter += 1
-            if counter == 1:
-                counter = ""
             f.write(">chromosome" + str(counter) + "\n")
             f.write(str(ctgs_chr[key]) + "\n")
         counter = 0

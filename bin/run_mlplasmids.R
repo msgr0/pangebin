@@ -10,8 +10,12 @@ if(!"devtools" %in% rownames(installed.packages())) {
 
 if(!"Biostrings" %in% rownames(installed.packages())) {
     print("Installing Biostrings...")
-    source("https://bioconductor.org/biocLite.R")
-    biocLite("Biostrings")
+    if (!requireNamespace("BiocManager", quietly = TRUE))
+	install.packages("BiocManager")
+	BiocManager::install(version = "3.14")
+	BiocManager::install("biocLite")
+	BiocManager::install()
+	BiocManager::install("Biostrings")   
 }
 if(!"mlplasmids" %in% rownames(installed.packages())) {
   print("Installing mlplasmids; please be patient, as this involves downloading a large dataset...")

@@ -84,23 +84,24 @@ process EVAL {
     python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${meta.id} --output ${output} --description '${description}'
     """
 }
+
 process MOD_BINS {
     cache false
 
     input:
-    tuple val(meta), path(pred)
+    tuple val(meta), path(pred), path(graph)
+    val(flag)
+    val(name)
 
     output:
     tuple val(meta), path(pred_mod)
 
     script:
-    pred_mod = pred.baseName + ".mod.tsv"
+    pred_mod = pred.baseName + ".${name}.tsv"
 
     """
-    python $projectDir/bin/extend_bins.py --pred ${pred} --out ${pred_mod}
+    python $projectDir/bin/extend_bins.py --pred ${pred} --out ${pred_mod} ${flag} ${graph}
     """
-
-
 
 }
 
@@ -175,27 +176,6 @@ process BLAST {
 }
 
 
-// workflow EVALUATE {
-//     take:
-//     input
-
-//     main:
-
-    
-
-//     NCBI(meta_ch)
-
-//     BLAST(panassembly_gfa, mixed_fasta, unicycler_fasta, skesa_fasta, NCBI.out.ref)
-
-
-//     EVAL(input)
-//     inpath = Channel.fromPath('${params.input}', type: 'dir')
-
-//     emit:
-//     stats = EVAL.out.stats
-
-// }
-
 
 workflow {
 
@@ -242,49 +222,70 @@ workflow {
 
     BLAST(panassembly_gfa.join(fasta_p_ch).join(fasta_u_ch).join(fasta_s_ch).join(NCBI.out.ref))
 
+    // PUBLISH(BLAST.out.unigt.mix(BLAST.out.skegt))
+
     pan_uni = BLAST.out.unigt
     pan_ske = BLAST.out.skegt
-    
 
-    asm_res = Channel.fromFilePairs("${params.asm}/*-{s,u}*.pred.tab", type: 'file', checkIfExists: true)
-    asm_res | view
+    // pan_uni = Channel.fromPath("${params.gt}/*.uni.gt.tsv", type: 'file', checkIfExists: true)
+    // pan_ske = Channel.fromPath("${params.gt}/*.ske.gt.tsv", type: 'file', checkIfExists: true)
 
-    ske_res = asm_res.map{meta, pairs ->
-        def fmeta = [:];
-        file = pairs[0].toString().split('/')[-1]
-        fmeta.id = file.split('\\.')[1].split('-')[0];
-        fmeta.species = file.split('\\.')[0];
-        fmeta.thr = file.split('\\.')[2];
-        [fmeta, pairs[0]]
-    }
-    uni_res = asm_res.map{meta, pairs ->
-        def fmeta = [:];
-        file = pairs[0].toString().split('/')[-1]
-        fmeta.id = file.split('\\.')[1].split('-')[0];
-        fmeta.species = file.split('\\.')[0];
-        fmeta.thr = file.split('\\.')[2];
-        [fmeta, pairs[1]]
-    }
-
-	// pbf_res = Channel.fromPath("${params.pbf}/*.pred.tab", type: 'file', checkIfExists: true)
-	// pbf_res = pbf_res.map{file ->
+    // pan_uni = pan_uni.map{ file ->  
     //     def fmeta = [:];
-    //     fmeta.id = file.toString().split('/')[-1].split('\\.')[1];
-    //     fmeta.species = file.toString().split('/')[-1].split('\\.')[0];
-    //     fmeta.thr = file.toString().split('/')[-1].split('\\.')[2];
+    //     fmeta.id = file.toString().split('/')[-1].split('\\.')[0];
     //     [fmeta, file]
     // }
-    // pbf_res = MOD_BINS(pbf_res)
-    // pbf_panu_ch = pbf_res.join(BLAST.out.panunigt.map{id, pan -> [id, pan, "pbf.psm.u"]})
-    // pbf_pans_ch = pbf_res.join(BLAST.out.panskegt.map{id, pan -> [id, pan, "pbf.psm.s"]})
+    // pan_ske = pan_ske.map{ file ->  
+    //     def fmeta = [:];
+    //     fmeta.id = file.toString().split('/')[-1].split('\\.')[0];
+    //     [fmeta, file]
+    // }
 
-    pbf_ske_ch = ske_res.join(BLAST.out.skegt.map{id, ske -> [id, ske, "pbf.ske"]})
-    pbf_uni_ch = uni_res.join(BLAST.out.unigt.map{id, ske -> [id, ske, "pbf.uni"]})
+    // asm_res = Channel.fromFilePairs("${params.asm}/*-{s,u}*.pred.tab", type: 'file', checkIfExists: true)
 
-    evaluate_ch = (pbf_ske_ch).mix(pbf_uni_ch)
+    // ske_res = asm_res.map{meta, pairs ->
+    //     def fmeta = [:];
+    //     file = pairs[0].toString().split('/')[-1]
+    //     fmeta.id = file.split('\\.')[1].split('-')[0];
+    //     fmeta.species = file.split('\\.')[0];
+    //     fmeta.thr = file.split('\\.')[2];
+    //     [fmeta, pairs[0]]
+    // }
+    // uni_res = asm_res.map{meta, pairs ->
+    //     def fmeta = [:];
+    //     file = pairs[0].toString().split('/')[-1]
+    //     fmeta.id = file.split('\\.')[1].split('-')[0];
+    //     fmeta.species = file.split('\\.')[0];
+    //     fmeta.thr = file.split('\\.')[2];
+    //     [fmeta, pairs[1]]
+    // }
 
-    EVAL(evaluate_ch)
+	pbf_res = Channel.fromPath("${params.pbf}/*.pred.tab", type: 'file', checkIfExists: true)
+	pbf_res = pbf_res.map{file ->
+        def fmeta = [:];
+        fmeta.id = file.toString().split('/')[-1].split('\\.')[1];
+        fmeta.species = file.toString().split('/')[-1].split('\\.')[0];
+        fmeta.thr = file.toString().split('/')[-1].split('\\.')[2];
+        [fmeta, file]
+    }
+    // pbf_res = MOD_BINS(pbf_res, "--naive --n 1", "A")
+    // pbf_res = MOD_BINS(pbf_res, "--naive --n 2", "B")
+    pbf_res = MOD_BINS(pbf_res.join(panassembly_gfa), "--super --graph", "C")
+
+    pbf_panu_ch = pbf_res.join(BLAST.out.panunigt.map{id, pan -> [id, pan, "pbf.psm.u"]})
+    pbf_pans_ch = pbf_res.join(BLAST.out.panskegt.map{id, pan -> [id, pan, "pbf.psm.s"]})
+
+
+    // pbf_ske_ch = ske_res.join(BLAST.out.skegt.map{id, ske -> [id, ske, "pbf.ske"]})
+    // pbf_uni_ch = uni_res.join(BLAST.out.unigt.map{id, ske -> [id, ske, "pbf.uni"]})
+
+    // evaluate_ch = (pbf_ske_ch).mix(pbf_uni_ch)
+    evaluate_ch = (pbf_panu_ch).mix(pbf_pans_ch)
+
+    // EVAL(evaluate_ch)
     PLASEVAL(evaluate_ch)
+    PLASEVAL.out.stats | view
 
-    PUBLISH(EVAL.out.stats.mix(PLASEVAL.out.stats))
+    // PUBLISH(EVAL.out.stats.mix(PLASEVAL.out.stats))
+    PUBLISH(PLASEVAL.out.stats)
 }

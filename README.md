@@ -17,20 +17,20 @@ using it locally (we assume that every requirement is satisfied locally)
 
 **Running the pipeline**
 1. pangenome construction   `--profile step1`\
-     `input`: `u.gfa.gz`, `s.gfa.gz`\
-     `output`: `psm.gfa.gz`\
+     input: `u.gfa.gz`, `s.gfa.gz`\
+     output: `psm.gfa.gz`
      
 2. model + binning          `--profile step2`\
-    `input`:  `psm.gfa.gz`\
-    `output`:  `bins.tsv`\
+    input:  `psm.gfa.gz`\
+    output:  `bins.tsv`
 
 3. evaluation               `--profile step3`\
-     `input`:  `psm.gfa.gz`, `bins.tsv`, ID\
-     `output`:  `eval.labeling.txt`, `eval.binning.txt`\
+     input:  `psm.gfa.gz`, `bins.tsv`, ID\
+     output:  `eval.labeling.txt`, `eval.binning.txt`
      
 - whole pipeline             `--profile all` (or no profile)\
-     `input`:  `u.gfa.gz`, `s.gfa.gz`, ID\
-     `output`:  `pangenome`, `bins`, `eval.labeling.txt`, `eval.binning.txt`\
+     input:  `u.gfa.gz`, `s.gfa.gz`, ID\
+     output:  `pangenome`, `bins`, `eval.labeling.txt`, `eval.binning.txt`\
 
 ## Assembly graphs and Pangenome construction
 

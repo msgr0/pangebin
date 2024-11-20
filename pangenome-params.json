@@ -1,5 +1,5 @@
 {
-  "max_memory": "32.GB",
+  "max_memory": "14.GB",
   "wfmash_segment_length": 200,
   "seqwish_min_match_length": 1000,
   "smoothxg_poa_params": "asm5",

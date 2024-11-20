@@ -11,3 +11,8 @@ nextflow workflows/preprocess.nf --input $1 --output $1/prep
 
 
 
+# nextflow pangebin --preprocess
+# nextflow pangebin --pbf
+# nextflow pangebin --gt
+# nextflow pangebin --eval
+

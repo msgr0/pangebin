@@ -1,38 +1,37 @@
-// input:   - a pair of assembly graphs
-// output:  - cleaned assembly graphs, standardized on Unicycler
-//          (eventually cutted in 0/100)
-//          - pan-assembly graph
-
+#!/usr/bin/env nextflow
+/*
+input:   - a pair of assembly graphs
+output:  - cleaned assembly graphs, standardized on Unicycler
+          (eventually cutted in 0/100)
+          - pan-assembly graph
+*/
 include { PUBLISH } from "./utils"
-projectDir = "~/pangebin"
 
-params.thr = 0
 
-nfcore_profile = "apptainer"
 paramfile = "$projectDir/pangenome-params.json"
-release = "dev"
 
-seed_len = 1000
-seed_score = 0.5
-min_pls_len = 1000
 
 process EXTRACT_GFA {
     cache 'lenient'
 
     input:
     tuple val(meta), path(gfa)
+    
     output:
     tuple val(meta), path(out_gfa)
+
     script:
-    dec_gfa = gfa.baseName
-    out_gfa = gfa.baseName
+    dec_gfa = gfa.getBaseName()
+    out_gfa = gfa.getBaseName()[0..-4] + ".r.gfa"
 
     if (meta.asm == 'ske') {
-        param = '-c' // convert
+        param = '-c'
     }
+
     else {
         param = '' 
     }
+
     """
     bgzip -d ${gfa}
     python $projectDir/bin/rename_gfa.py -i ${dec_gfa} -o ${out_gfa} -p ${meta.asm} ${param}
@@ -49,12 +48,12 @@ process REMOVE_NODES {
     tuple val(meta), path(trimmed), emit: gfa
 
     script:
-    trimmed = gfa.baseName + ".${meta.thr}.gfa"
+    trimmed = gfa.baseName + ".${meta.cutlen}.gfa"
     """
-    if [ ${meta.thr} == 0]; then
+    if [ ${meta.cutlen} == 0]; then
         mv ${gfa} ${trimmed}
     else
-        python $projectDir/bin/remove_nodes.py -v 2 -i ${gfa} -o ${trimmed} -t ${meta.thr}
+        python $projectDir/bin/remove_nodes.py -v 2 -i ${gfa} -o ${trimmed} -t ${meta.cutlen}
     fi
     """
 }
@@ -70,7 +69,8 @@ process EXTRACT_FASTA {
     tuple val (meta), path(fasta), emit: fasta
 
     script:
-    fasta = gfa.baseName + ".fasta"
+    fasta = gfa.getBaseName() + ".fasta"
+
     """
     awk '/^S/{print ">"\$2; print ""\$3}' ${gfa} > ${fasta}    
     """
@@ -88,50 +88,6 @@ process MIX_FASTA {
     fasta = "${meta.species}.${meta.id}.${meta.thr}.fa"
     """
     cat ${fasta_a} ${fasta_b} > ${fasta}
-    """
-}
-
-process MAKE_PANGENOME {
-    cache 'lenient'
-    errorStrategy 'ignore'
-
-    maxForks 4
-    time '60m'
-
-    input:
-    tuple val(meta), path(fasta)
-
-    output:
-    tuple val(meta), path(pangenome), emit: pangenome
-
-    script:
-    haplos = 2
-    pangenome = fasta.baseName + ".pan.gfa"
-
-    """
-    bgzip ${fasta}
-    nextflow run nf-core/pangenome -r '${release}' -profile ${nfcore_profile} --input ${fasta}.gz --n_haplotypes ${haplos} --outdir . -params-file ${paramfile} -w ${task.workDir} 
-    cp ./FINAL_GFA/${fasta}.gz.gfaffix.unchop.Ygs.view.gfa ${pangenome}
-    """
-}
-
-
-process MAKE_PANASSEMBLY {
-    cache 'lenient'
-        
-    input:
-    tuple val(meta), path(pangenome), path(ske), path(uni)
-
-    output:
-    tuple val(meta), path(panassembly), emit: panassembly
-    // tuple val(meta), path(panassemblycut), emit: panassembly
-
-    script:
-    panassembly = pangenome.baseName + "asm.gfa"
-    pangenomecl = pangenome.baseName + "cl.gfa"
-    """
-    python $projectDir/bin/gfa_cleaner.py --input ${pangenome} --output ${pangenomecl}
-    python $projectDir/bin/pangenome_enancher.py --input ${pangenomecl} --output ${panassembly} --assembly ${uni} ${ske}
     """
 }
 

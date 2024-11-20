@@ -1,28 +1,48 @@
-# Pangebin (WIP)
-Pangebin is a nextflow pipeline that permites to run plasmid binning software (Plasbinflow, Gplas for example) on multiple assembly graphs at once, exploiting pangenome graphs capabilities.
+# Pangebin Pipeline (WIP)
 
-Pangebin pipeline takes as input two assembly graphs of a bacterial sample,
-built from Skesa and Unicycler, builds the augmented pangenome that could be then used as infput for PlasBin-Flow or Gplas.
+Pangebin is a collection of methods aimed at performing the task of "plasmid binning" on a bacterial sample,
+exploiting a pangenome construction on a pair of assembly graph, running a modified version of @chauvec 's Plasbin-Flow
+and, lastly, 
 
-## Requirements
-Software required for running the pipeline
+**Requirements**
 - nextflow
-- htslib
-- R/Rscript
+- PBF requirements:
+
+using conda
+using docker/podman, a single docker image prebuilt for this task
+using singularity, a single singularity image prebuilt for this task
+ 
+using it locally (we assume that every requirement is satisfied locally)
 
 
-## Input
+**Running the pipeline**
+1. pangenome construction   `--profile step1`\
+     input: `u.gfa.gz`, `s.gfa.gz`\
+     output: `psm.gfa.gz`
+     
+2. model + binning          `--profile step2`\
+    input:  `psm.gfa.gz`\
+    output:  `bins.tsv`
 
---The input graphs should be named `short.gfa.gz` for unicycler graphs and `skesa.gfa.gz` for skesa graphs. Both should be placed into a folder named after the `sample_id`.--
+3. evaluation               `--profile step3`\
+     input:  `psm.gfa.gz`, `bins.tsv`, ID\
+     output:  `eval.labeling.txt`, `eval.binning.txt`
+     
+- whole pipeline             `--profile all` (or no profile)\
+     input:  `u.gfa.gz`, `s.gfa.gz`, ID\
+     output:  `pangenome`, `bins`, `eval.labeling.txt`, `eval.binning.txt`\
+
+## Assembly graphs and Pangenome construction
 
 The input is composed by:
  - unicycler and skesa graphs in .gfa or .gfagz format
  - pangenome graph built with nf-core Pangenome (PGGB).
 
 
-## Running the pipeline
-`nextflow run main.nf -profile mamba --db folder_sample_id --out output`
-will run the pipeline, placing the output gfa into the `output` folder.
+## Plasbin-Flow + pangenome
+tbd
 
-# still work-in-progress
+## Output Bins
+tbd
+
 

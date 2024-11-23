@@ -66,6 +66,84 @@ process BLAST {
 
 }
 
+
+process LABELING {
+
+    input:
+    tuple val(meta), path(prediction), path(gt), val(tool)
+
+    output:
+    tuple val(meta), path(stats), emit: stats
+    // tuple val(meta), path(plots), emit: plots
+
+    script:
+
+    output = "${meta.id}.${tool}"
+    description = "${meta.id}.${meta.thr} with ${tool}"
+    stats = "${output}.stats.txt"
+
+    """
+    python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${meta.id} --output ${output} --description '${description}'
+    """
+}
+
+process MOD_BINS {
+    cache false
+
+    input:
+    tuple val(meta), path(pred), path(graph)
+    val(flag)
+    val(name)
+
+    output:
+    tuple val(meta), path(pred_mod)
+
+    script:
+    pred_mod = pred.baseName + ".${name}.tsv"
+
+    """
+    python $projectDir/bin/extend_bins.py --pred ${pred} --out ${pred_mod} ${flag} ${graph}
+    """
+
+}
+
+process PLASEVAL {
+    cache false
+
+    input:
+    tuple val(meta), path(prediction), path(gt), val(tool)
+
+    output:
+    tuple val(meta), path(stats), emit: stats
+    // tuple val(meta), path(plots), emit: plots
+
+    script:
+
+    output = "${meta.id}.${tool}"
+    // description = "${meta.id}.${meta.thr} with ${tool}"
+    // plots = "${output}.scores.pdf"
+    stats = "${output}.plaseval.txt"
+
+    // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",3)}1' ${gt} 
+    // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",4)}1' ${gt} 
+    """
+    #!/bin/bash
+    echo 'plasmid\tcontig\tnan\tnan\tcontig_len' | cat - ${gt} > temp && mv temp ${gt}
+    python $projectDir/PlasEval/src/plaseval.py eval --pred ${prediction} --gt ${gt} --out ${stats} 
+    """
+    // python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${meta.id} --output ${output} --description '${description}'
+
+}
+// workflow EVAL {
+//     take:
+//     mode
+//     result_ch
+
+//     main:
+    
+// }
+
+
 workflow DOWNLOAD_GT {
     take:
     meta_ch
@@ -75,23 +153,23 @@ workflow DOWNLOAD_GT {
 
     emit:
     reference = NCBI.out.ref
-
-
-
 }
 
-workflow BUILD_GT {
+workflow GT {
     take:
-
-    input_ch // pangenome, mixed_fasta, assembly_fasta
-    reference // [meta, reference]
+    
+    meta
+    input_ch
 
 
     main:
+
+    NCBI( meta )
     
-    BLAST ( input_ch, reference )
+    BLAST( input_ch, NCBI.out.ref )
+
     emit:
-    pan_mix = BLAST.out.pangt
-    pan_uni = BLAST.out.unigt
-    pan_ske = BLAST.out.skegt
+    all_contigs = BLAST.out.pangt
+    uni_contigs = BLAST.out.unigt
+    ske_contigs = BLAST.out.skegt
 }

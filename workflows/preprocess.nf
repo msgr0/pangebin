@@ -18,23 +18,24 @@ process EXTRACT_GFA {
     tuple val(meta), path(gfa)
     
     output:
-    tuple val(meta), path(out_gfa)
+    tuple val(meta), path(gfa_std)
 
     script:
-    dec_gfa = gfa.getBaseName()
-    out_gfa = gfa.getBaseName()[0..-4] + ".r.gfa"
-
-    if (meta.asm == 'ske') {
+    if (meta.asm == 's') {
         param = '-c'
+        asm = "ske"
     }
-
-    else {
-        param = '' 
+    else if (meta.asm == 'u') {
+        param = ''
+        asm = "uni" 
     }
+    
+    gfa_xtracted = gfa.getBaseName()
+    gfa_std = gfa.getBaseName()[0..-5] + ".r.gfa"
 
     """
     bgzip -d ${gfa}
-    python $projectDir/bin/rename_gfa.py -i ${dec_gfa} -o ${out_gfa} -p ${meta.asm} ${param}
+    python $projectDir/bin/rename_gfa.py -i ${gfa_xtracted} -o ${gfa_std} -p ${asm} ${param}
     """
 }
 
@@ -48,13 +49,14 @@ process REMOVE_NODES {
     tuple val(meta), path(trimmed), emit: gfa
 
     script:
-    trimmed = gfa.baseName + ".${meta.cutlen}.gfa"
+    trimmed = gfa.getBaseName() + ".${meta.thr}.gfa"
+    if (meta.thr == 0 )
     """
-    if [ ${meta.cutlen} == 0]; then
-        mv ${gfa} ${trimmed}
+    mv ${gfa} ${trimmed}
+    """
     else
-        python $projectDir/bin/remove_nodes.py -v 2 -i ${gfa} -o ${trimmed} -t ${meta.cutlen}
-    fi
+    """
+    python $projectDir/bin/remove_nodes.py -v 2 -i ${gfa} -o ${trimmed} -t ${meta.thr}
     """
 }
 
@@ -92,61 +94,92 @@ process MIX_FASTA {
 }
 
 
+process MAKE_PANGENOME {
+    maxForks 4
+    time '60m'
+    cache 'lenient'
+    errorStrategy 'ignore'
+
+    input:
+    tuple val(meta), path(mixed_fasta)
+    
+    output:
+    tuple val(meta), path(pangenome)
+
+    script:
+    pangenome = "${meta.id}.pan.gfa"
+    out_core = "${meta.id}_nfcore"
+    haplos = 2
+    paramfile = "$projectDir/pangenome-params.json"
+    release = '1.1.2'
+    profile = 'docker'
+
+    """
+    bgzip ${mixed_fasta}
+    nextflow run nf-core/pangenome -r ${release} -profile $profile -resume --input ${mixed_fasta}.gz --n_haplotypes ${haplos} --outdir ${out_core} -params-file ${paramfile}
+    cp ${out_core}/FINAL_GFA/${mixed_fasta}.gz.gfaffix.unchop.Ygs.view.gfa ${pangenome}
+    """
+
+}
+
+process MAKE_PANASSEMBLY {
+    cache 'lenient'
+        
+    input:
+    tuple val(meta), path(pangenome), path(ske), path(uni)
+
+    output:
+    tuple val(meta), path(panassembly), emit: panassembly
+    // tuple val(meta), path(panassemblycut), emit: panassembly
+
+    script:
+    panassembly = pangenome.baseName + "asm.gfa"
+    pangenomecl = pangenome.baseName + "cl.gfa"
+    """
+    python $projectDir/bin/gfa_cleaner.py --input ${pangenome} --output ${pangenomecl}
+    python $projectDir/bin/pangenome_enancher.py --input ${pangenomecl} --output ${panassembly} --assembly ${uni} ${ske}
+    """
+}
+
+
 workflow PREPROCESS {
     take:
-    gfagz // a pair of gfagz
+    gfagz
 
     main:
     extract_ch = EXTRACT_GFA(gfagz)
-    extract_ch.map{meta, files -> meta += [thr:params.thr]; [meta, files]} | REMOVE_NODES | EXTRACT_FASTA
+    extract_ch.map{meta, files -> meta += [thr:params.cutlen]; [meta, files]} | REMOVE_NODES | EXTRACT_FASTA
 
-    skesa_gfa = REMOVE_NODES.out.gfa.filter { meta, file -> meta['asm'] == 'ske' }.map{
+    skesa_gfa = REMOVE_NODES.out.gfa.filter { meta, file -> meta['asm'] == 's' }.map{
         meta, files -> meta = [id: meta.id, species: meta.species, thr:meta.thr]; [meta, files]
     }
 
-    unicycler_gfa = REMOVE_NODES.out.gfa.filter { meta, file -> meta['asm'] == 'uni' }.map{
+    unicycler_gfa = REMOVE_NODES.out.gfa.filter { meta, file -> meta['asm'] == 'u' }.map{
         meta, files -> meta = [id: meta.id, species: meta.species, thr:meta.thr]; [meta, files]
     }
 
-    skesa_fasta = EXTRACT_FASTA.out.fasta.filter { meta, file -> meta['asm'] == 'ske' }.map{
+    skesa_fasta = EXTRACT_FASTA.out.fasta.filter { meta, file -> meta['asm'] == 's' }.map{
         meta, files -> meta = [id: meta.id, species: meta.species, thr:meta.thr]; [meta, files]
-    }
+    } | view
 
-    unicycler_fasta = EXTRACT_FASTA.out.fasta.filter { meta, file -> meta['asm'] == 'uni' }.map{
+    unicycler_fasta = EXTRACT_FASTA.out.fasta.filter { meta, file -> meta['asm'] == 'u' }.map{
         meta, files -> meta = [id: meta.id, species: meta.species, thr:meta.thr]; [meta, files]
-    }
+    } | view
 
-    mixed_fasta = skesa_fasta.combine(unicycler_fasta, by: 0) | MIX_FASTA
+    mixed_fasta = skesa_fasta.combine(unicycler_fasta, by: 0) | MIX_FASTA | view
 
     pangenome_gfa = mixed_fasta | MAKE_PANGENOME
 
     panassembly_gfa = MAKE_PANASSEMBLY(pangenome_gfa.join(skesa_gfa).join(unicycler_gfa)) 
 
     emit:
-    pangenome = pangenome_gfa
-    panassembly = panassembly_gfa
-    pan_fasta = mixed_fasta
-    ske_fasta = skesa_fasta
-    uni_fasta = unicycler_fasta
-    ske_gfa = skesa_gfa
-    uni_gfa = unicycler_gfa
-    all = pangenome_gfa.mix(panassembly_gfa).mix(mixed_fasta).mix(skesa_fasta).mix(unicycler_fasta).mix(skesa_gfa).mix(unicycler_gfa)
-}
+    fasta_mix = mixed_fasta
+    fasta_ske = skesa_fasta
+    fasta_uni = unicycler_fasta
 
-workflow {
-    input_ch = Channel.fromFilePairs("${params.input}/*-S*-{s,u}.gfa.gz", type: 'file', checkIfExists: true)
-
-    input_ch = input_ch.map{ meta, filepair -> def fmeta = [:]; fmeta.id = meta[5..-1]; fmeta.species = meta[0..3]
-        [fmeta, filepair]
-    }
-    meta_ch = input_ch.map{meta, files -> meta}
-
-    unicycler_ch = input_ch | map { meta, files -> meta += [asm: "uni"]; uni = files.findAll { it.toString().contains("-u.gfa.gz")}; [meta, uni[0]]}
-    skesa_ch = input_ch | map { meta, files -> meta += [asm: "ske"]; ske = files.findAll { it.toString().contains("-s.gfa.gz")}; [meta, ske[0]]}
-
-    // skesa_ch | view
-    PREPROCESS(unicycler_ch.mix(skesa_ch))
-    PUBLISH(PREPROCESS.out.all)
-    // pangenome.mix(PREPROCESS.out.panassembly).mix(PREPROCESS.out.pan_fasta))
+    gfa_pan = pangenome_gfa
+    gfa_psm = panassembly_gfa
+    gfa_ske = skesa_gfa
+    gfa_uni = unicycler_gfa
 
 }

@@ -33,8 +33,8 @@ plasmidness, extended+super bins
 
 include { PUBLISH } from "./utils"
 
-binfolder = "~/bin"
-projectDir = "~/pangebin"
+// binfolder = "~/bin"
+// projectDir = "~/pangebin"
 
 process NCBI {
     // publishDir "${params.input}/", mode: 'copy'

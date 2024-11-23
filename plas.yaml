@@ -10,8 +10,6 @@ dependencies:
   - gfapy
   - pandas
   - numpy
-  - altair
   - biopython
   - scipy
   - seaborn
-  - vl-convert-python

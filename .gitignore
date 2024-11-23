@@ -2,4 +2,6 @@ work
 *nextflow*
 data
 output
-test_datapyenv
+test_data
+pyenv
+

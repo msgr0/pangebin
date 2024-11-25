@@ -36,6 +36,9 @@ def main():
         seg.set_datatype("cl", "Z")  # segment List
         seg.cl = ""
 
+        seg.set_datatype("ll", "Z")
+        seg.ll = ""
+
         seg.LN = len(seg.sequence)
 
         seg.set_datatype("aa", "A")  # assembler
@@ -52,11 +55,22 @@ def main():
                 segment.cl = path.name
             else:
                 segment.cl += "," + path.name
+
         path.set_datatype("LN", "i")
         path.LN = path_len
 
+        for seg in segs:
+            segment = gfa.segment(seg.name)
+            segment_perc = segment.LN / path.LN
+            if segment.ll == "":
+                segment.ll = str(segment_perc)
+            else:
+                segment.ll += "," + segment_perc
+        
         path.set_datatype("aa", "A")
         path.aa = _type
+
+
 
     for seg in gfa.segments:
         if seg.LN < 1:
@@ -68,12 +82,14 @@ def main():
 
         contig_list = seg.cl.split(",")
         contig_list = list(set(contig_list))
-        contig_list = sorted(contig_list)
-        if len(contig_list) >= 1:
-            if contig_list[0] != "" and contig_list[0][0] != contig_list[-1][0]:
+        sorted_clist = sorted(contig_list)
+        if len(sorted_clist) >= 1:
+            if sorted_clist[0] != "" and sorted_clist[0][0] != sorted_clist[-1][0]:
                 seg.aa = "b"
-            elif contig_list[0] != "":
-                seg.aa = contig_list[0][0]
+            elif sorted_clist[0] != "":
+                seg.aa = sorted_clist[0][0]
+
+        
 
     gfa.validate()
     gfa.to_file(output_file)

@@ -15,6 +15,11 @@ Data/results, for each sample
 cedric
 """
 
+
+"""
+Evaluate LABELING of the BINS
+"""
+
 import argparse as ap
 
 import pandas as pd
@@ -182,20 +187,6 @@ def main():
             "score": [f1, prec, rec],
         }
     )
-
-    # chart = (
-    #     alt.Chart(data)
-    #     .mark_bar()
-    #     .encode(
-    #         x="type",
-    #         y=alt.Y("score", scale=alt.Scale(domain=(0, 1))),
-    #         color=alt.Color("type").scale(range=["#e7ba52", "#c7c7c7", "#5f9ea0"]),
-    #         order=alt.Order("type", sort="ascending"),
-    #         column="sample",
-    #     )
-    #     .properties(title=f"{args.description}")
-    # )
-    # chart.save(f"{args.output}.scores.pdf")
 
     if args.output:
         with open(f"{args.output}.stats.txt", "w", encoding="utf8") as f:

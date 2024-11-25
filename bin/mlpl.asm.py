@@ -5,6 +5,10 @@ import pandas as pd
 import sys
 
 
+"""
+Converts prediction of mkplasmid for an assembly graph
+"""
+
 def main(args):
     pred = args.pred
     graph = args.graph

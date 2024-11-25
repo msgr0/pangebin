@@ -3,8 +3,7 @@ import argparse as ap
 
 
 """
-this file preprocess a pangenome gfa
-it adds the following tags to the segments:
+Preprocess of a pangenome gfa to add the following tags to each segment:
 - OC: occurences in paths
 - cl: segment list
 - LN: length of the segment

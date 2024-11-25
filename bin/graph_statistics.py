@@ -1,6 +1,10 @@
 import argparse
 import gfapy as gp
 
+"""
+Provide graphs statistics
+"""
+
 
 def main(args):
     gfa_path = args.input

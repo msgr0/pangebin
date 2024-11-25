@@ -11,8 +11,8 @@ null = None
 
 
 """
-this python script removes nodes from a Gfa files based on a provided length threshold
-and then reconnects neighbours of the removed node by pairs
+Remove GFA nodes based on a threshold length.
+Reconnects edges of removed nodes with each respective Left Neighbour and Right Neighbour.
 """
 
 

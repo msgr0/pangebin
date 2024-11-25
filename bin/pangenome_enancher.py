@@ -6,6 +6,13 @@ import gfapy
 import os
 
 
+"""
+Enhance a pangenome graph built with PGGB. Requires the original Assembly graphs used to build the
+pagenome graph in order to reconnect edges.
+"""
+
+
+
 ### penalty_value = seg.LN/1000
 ### add Gfa_edges to Pangenome
 ### add Gfa_segments_tags to Pangenome Paths

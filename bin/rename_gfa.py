@@ -1,6 +1,10 @@
 import gfapy as gp
 import argparse as ap
 
+"""
+Rename GFA contigs with cardinal numbers.
+Convert also KC of skesa assembly graphs to dp of uncycler graphs
+"""
 
 def main(args):
     graph = gp.Gfa.from_file(args.input, vlevel=0)

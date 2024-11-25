@@ -5,6 +5,10 @@ import argparse
 import re
 
 
+"""
+Convert plasbin-flow output bins to 'plaseval' evaluation file.
+"""
+
 def main():
     parser = argparse.ArgumentParser(description='Convert prediction to plaseval')
     parser.add_argument('--input', help='path to prediction mixed file')

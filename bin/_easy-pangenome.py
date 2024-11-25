@@ -5,6 +5,10 @@ import os
 import sys
 
 
+"""
+Pangenome to GPLAS pangenome. Remove Paths and convert the pangenome to 'unicycler' format.
+"""
+
 def main(input, output):
     print("Input: ", input)
     print("Output: ", output)

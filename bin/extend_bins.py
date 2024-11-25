@@ -5,6 +5,12 @@ import numpy as np
 import argparse as ap
 import gfapy as gf
 
+
+"""
+Modifies output bins of Plasbin-Flow applied on a pangenome graph in order to account for contig fragmentation.
+"""
+
+
 def main(): 
     argparse = ap.ArgumentParser(description="Modify pangenome bins based on the input graph")
     argparse.add_argument("-p", "--pred", help="Input bins file", required=True)

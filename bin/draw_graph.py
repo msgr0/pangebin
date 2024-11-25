@@ -1,5 +1,6 @@
 """
 cchauve draw_graph.py from PlasGraph repository
+draw graph using networkx 
 """
 import pandas as pd
 import networkx as nx

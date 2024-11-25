@@ -5,7 +5,7 @@ import os
 import fileinput
 
 """
-this python scripts removes only skesa branching endings based
+Remove Skesa Assembly Graph branching endings based
 on the skesa-provided naming conventions
 """
 

@@ -6,9 +6,10 @@ from itertools import combinations
 
 
 """
-this python script removes nodes from a Gfa files based on a provided length threshold
-and then reconnects neighbours of the removed node by pairs
+Remove FASTA entries based on a threshold sequence length.
 """
+
+
 
 
 def main(args):

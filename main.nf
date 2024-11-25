@@ -42,9 +42,9 @@ workflow {
 
     meta_ch = input_ch.map { meta, _files -> meta }
 
-    uni_ch = input_ch.map { meta, files -> meta += [asm: "u"]; f1 = files[1]  ; [meta, f1]}
+    uni_ch = input_ch.map { meta, files -> meta += [asm: "u"]; def f = files[1] ; [meta, f]}
 
-    ske_ch = input_ch.map { meta, files -> meta += [asm: "s"]; f2 = files[0] ; [meta, f2]}
+    ske_ch = input_ch.map { meta, files -> meta += [asm: "s"]; def f = files[0] ; [meta, f]}
 
 
     PREPROCESS(uni_ch.mix(ske_ch))

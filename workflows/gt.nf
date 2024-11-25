@@ -13,7 +13,7 @@ process NCBI {
     tuple val(meta), path(reference_ren), emit: ref
 
     script:
-    name = "${meta.species}-${meta.id}"
+    name = "${meta.id}"
     referencegz = "${name}.fna.gz"
     reference = "${name}.fna"
     reference_ren = "${name}.ren.fna"

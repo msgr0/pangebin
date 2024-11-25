@@ -85,17 +85,17 @@ process model {
     """
 }
 
-process extendBins {
-  input
+// process extendBins {
+//   input
 
-  output
+//   output
 
   
-  script:
-   """
-    python $projectDir/bin/extend_bins.py --pred ${res} --out ${mod1} --naive -n 1 ${gfa}
-"""
-}
+//   script:
+//    """
+//     python $projectDir/bin/extend_bins.py --pred ${res} --out ${mod1} --naive -n 1 ${gfa}
+// """
+// }
 
 workflow MODEL {
   
@@ -108,10 +108,10 @@ workflow MODEL {
 
   scores_ch = computeScores(gfa_ch.join(fasta_ch), mode)
   bins = model(gfa_ch.join(scores_ch), mode)
-  extendBins(bins)
+  // extendBins(bins)
 
   emit:
-  result = model.out.res
+  res = model.out.res
   bins = model.out.bins
 
 }

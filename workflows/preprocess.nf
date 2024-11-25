@@ -87,7 +87,7 @@ process MIX_FASTA {
     tuple val(meta), path(fasta)
 
     script:
-    fasta = "${meta.species}.${meta.id}.${meta.thr}.fa"
+    fasta = "${meta.id}.${meta.thr}.fa"
     """
     cat ${fasta_a} ${fasta_b} > ${fasta}
     """
@@ -112,7 +112,7 @@ process MAKE_PANGENOME {
     haplos = 2
     paramfile = "$projectDir/pangenome-params.json"
     release = '1.1.2'
-    profile = 'docker'
+    profile = 'podman'
 
     """
     bgzip ${mixed_fasta}
@@ -148,27 +148,31 @@ workflow PREPROCESS {
 
     main:
     extract_ch = EXTRACT_GFA(gfagz)
-    extract_ch.map{meta, files -> meta += [thr:params.cutlen]; [meta, files]} | REMOVE_NODES | EXTRACT_FASTA
+    extract_ch.map{meta, files -> meta += [thr:params.cutlen]; [meta, files]}
+    | REMOVE_NODES
+    | EXTRACT_FASTA
 
     skesa_gfa = REMOVE_NODES.out.gfa.filter { meta, file -> meta['asm'] == 's' }.map{
-        meta, files -> meta = [id: meta.id, species: meta.species, thr:meta.thr]; [meta, files]
+        meta, files -> meta = [id: meta.id, thr:meta.thr]; [meta, files]
     }
 
     unicycler_gfa = REMOVE_NODES.out.gfa.filter { meta, file -> meta['asm'] == 'u' }.map{
-        meta, files -> meta = [id: meta.id, species: meta.species, thr:meta.thr]; [meta, files]
+        meta, files -> meta = [id: meta.id, thr:meta.thr]; [meta, files]
     }
 
     skesa_fasta = EXTRACT_FASTA.out.fasta.filter { meta, file -> meta['asm'] == 's' }.map{
-        meta, files -> meta = [id: meta.id, species: meta.species, thr:meta.thr]; [meta, files]
+        meta, files -> meta = [id: meta.id, thr:meta.thr]; [meta, files]
     } | view
 
     unicycler_fasta = EXTRACT_FASTA.out.fasta.filter { meta, file -> meta['asm'] == 'u' }.map{
-        meta, files -> meta = [id: meta.id, species: meta.species, thr:meta.thr]; [meta, files]
+        meta, files -> meta = [id: meta.id, thr:meta.thr]; [meta, files]
     } | view
 
-    mixed_fasta = skesa_fasta.combine(unicycler_fasta, by: 0) | MIX_FASTA | view
+    mixed_fasta = skesa_fasta.combine(unicycler_fasta, by: 0)
+    | MIX_FASTA | view
 
-    pangenome_gfa = mixed_fasta | MAKE_PANGENOME
+    pangenome_gfa = mixed_fasta
+    | MAKE_PANGENOME
 
     panassembly_gfa = MAKE_PANASSEMBLY(pangenome_gfa.join(skesa_gfa).join(unicycler_gfa)) 
 

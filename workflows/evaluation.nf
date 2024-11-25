@@ -188,7 +188,7 @@ workflow {
 	panassembly_gfa = panassembly_gfa.map{file ->
         def fmeta = [:];
         fmeta.id = file.toString().split('\\.')[1];
-        fmeta.species = file.toString().split('\\.')[0].split('/')[-1];
+        // fmeta.species = file.toString().split('\\.')[0].split('/')[-1];
         fmeta.thr = file.toString().split('\\.')[2];
         [fmeta, file]
     }
@@ -196,14 +196,14 @@ workflow {
     fasta_p_ch = fasta_p_ch.map{file ->
         def fmeta = [:];
         fmeta.id = file.toString().split('/')[-1].split('\\.')[1];
-        fmeta.species = file.toString().split('/')[-1].split('\\.')[0];
+        // fmeta.species = file.toString().split('/')[-1].split('\\.')[0];
         fmeta.thr = file.toString().split('/')[-1].split('\\.')[2];
         [fmeta, file]
     }
     fasta_s_ch = fasta_s_ch.map{file ->
         def fmeta = [:];
         fmeta.id = file.toString().split('/')[-1].split('\\-')[1];
-        fmeta.species = file.toString().split('/')[-1].split('\\-')[0];
+        // fmeta.species = file.toString().split('/')[-1].split('\\-')[0];
         fmeta.thr = file.toString().split('/')[-1].split('\\.')[-2];
         [fmeta, file]
     }
@@ -211,7 +211,7 @@ workflow {
     fasta_u_ch = fasta_u_ch.map{file ->
         def fmeta = [:];
         fmeta.id = file.toString().split('/')[-1].split('\\-')[1];
-        fmeta.species = file.toString().split('/')[-1].split('\\-')[0];
+        // fmeta.species = file.toString().split('/')[-1].split('\\-')[0];
         fmeta.thr = file.toString().split('/')[-1].split('\\.')[-2];
         [fmeta, file]
     }
@@ -264,7 +264,7 @@ workflow {
 	pbf_res = pbf_res.map{file ->
         def fmeta = [:];
         fmeta.id = file.toString().split('/')[-1].split('\\.')[1];
-        fmeta.species = file.toString().split('/')[-1].split('\\.')[0];
+        // fmeta.species = file.toString().split('/')[-1].split('\\.')[0];
         fmeta.thr = file.toString().split('/')[-1].split('\\.')[2];
         [fmeta, file]
     }

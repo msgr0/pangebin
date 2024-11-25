@@ -47,12 +47,12 @@ class AssemblyObject:
             else ""
         )
         self.genebank_rsync = (
-            "ftp://" + self.genebank_genomic.split("//")[1]
+            "https://" + self.genebank_genomic.split("//")[1]
             if len(self.ftp_genebank) > 0
             else ""
         )
         self.refseq_rsync = (
-            "ftp://" + self.refseq_genomic.split("//")[1]
+            "https://" + self.refseq_genomic.split("//")[1]
             if len(self.ftp_refseq) > 0
             else ""
         )

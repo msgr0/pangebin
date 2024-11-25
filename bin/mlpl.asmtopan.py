@@ -5,6 +5,12 @@ import pandas as pd
 import sys
 
 
+"""
+Converts prediction of mlplasmid for a pangenome graph
+"""
+
+
+
 def main(args):
     pred = args.pred
     graph = args.graph

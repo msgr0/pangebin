@@ -44,10 +44,10 @@ process labeling {
     script:
 
     output = prediction.getBaseName()
-    id = output.split(".")[0]
-    asm = output.split(".")[1]
-    thr = output.split(".")[2]
-    tool = output.split(".")[3]
+    id = output.split("\\.")[0]
+    asm = output.split("\\.")[1]
+    thr = output.split("\\.")[2]
+    tool = output.split("\\.")[3]
 
     description = "sample ${id}, ${asm} graph (cut ${thr}) with ${tool}"
     stats = "${output}.lab.txt"

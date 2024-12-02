@@ -77,22 +77,21 @@ process modifyBins {
     tuple val(meta), path(modded)
 
     script:
-    if (mode == "naive")
-    modded = pred.getBaseName()[0..-6] + ".nve.tab"
-    """
-    #!/usr/bin/env bash
-    python $projectDir/bin/extend_bins.py --pred ${pred} --out ${modded} --naive -n 1
+    if (mode == "naive") {
+        modded = pred.getBaseName()[0..-6] + ".nve.tab"
+        """
+        #!/usr/bin/env bash
+        python $projectDir/bin/extend_bins.py --pred ${pred} --out ${modded} --naive -n 1
+        """
+    }
 
-    """
-
-    else if (mode == "overlap")
-    modded = pred.getBaseName()[0..-6] + ".ovl.tab"
-    """
-    #!/usr/bin/env bash
-    python $projectDir/bin/extend_bins.py --pred ${pred} --out ${modded} --super --graph ${graph}
-
-    """
-        
+    else if (mode == "overlap") {
+        modded = pred.getBaseName()[0..-6] + ".ovl.tab"
+        """
+        #!/usr/bin/env bash
+        python $projectDir/bin/extend_bins.py --pred ${pred} --out ${modded} --super --graph ${graph}
+        """
+    }        
 }
 
 workflow OVERLAP {

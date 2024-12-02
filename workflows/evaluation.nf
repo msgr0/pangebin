@@ -68,6 +68,7 @@ process binning {
     tuple val(meta), path(stats)
     // tuple val(meta), path(plots), emit: plots
 
+    script:
     output = prediction.getBaseName()
     stats = "${output}.bin.txt"
     // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",3)}1' ${gt} 

@@ -134,7 +134,8 @@ workflow MODEL {
 
 	main:
 
-	bins_ch = model(gfa_ch.join(gc_ch).join(gd_ch), mode)
+	model(gfa_ch.join(gc_ch).join(gd_ch), mode)
+    bins_ch = model.out.bins
     pred_ch = transform(bins_ch.join(gfa_ch), mode)
 
    

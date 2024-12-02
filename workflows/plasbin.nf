@@ -48,17 +48,17 @@ process model {
     """
 }
 
-process extendBins {
-    input:
+// process extendBins {
+//     input:
 
-    output:
+//     output:
 
   
-    script:
-    """
-    python $projectDir/bin/extend_bins.py --pred ${res} --out ${mod1} --naive -n 1 ${gfa}
-  	"""
-}
+//     script:
+//     """
+//     python $projectDir/bin/extend_bins.py --pred ${res} --out ${mod1} --naive -n 1 ${gfa}
+//   	"""
+// }
 
 workflow MODEL {
   
@@ -72,7 +72,7 @@ workflow MODEL {
 
 	main:
 
-	bins = model(gfa_ch.join(gc_ch).join(gd_ch), mode)
+	model(gfa_ch.join(gc_ch).join(gd_ch), mode)
 
 
 	emit:

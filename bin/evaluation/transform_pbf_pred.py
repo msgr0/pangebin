@@ -19,6 +19,8 @@ def main(args):
     for index, row in df.iterrows():
         plasmid = str(row["#Pls_ID"])
         contigs = []
+        if (str(row("GC_bin")) == "0"):
+            continue
         for contig in str(row["Contigs"]).split(","):
             contigs.append(contig.split(":")[0])
         for contig in contigs:

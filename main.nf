@@ -8,13 +8,10 @@ gtihub: https://github.com/msgr0/pangebin.git
 
 include { GT                   } from './workflows/gt'
 include { PREPROCESS           } from './workflows/preprocess'
-// include { DOWNLOAD_GT          } from './workflows/gt'
 include { MODEL as PBFp        } from './workflows/plasbin'
 include { MODEL as PBFu        } from './workflows/plasbin'
 include { MODEL as PBFs        } from './workflows/plasbin'
-
-// include { EVAL                 } from './workflows/eval'
-// include { PLASEVAL             } from './workflows/eval'
+include { EVALUATION           } from './workflows/evaluation'
 
 
 workflow {
@@ -44,22 +41,30 @@ workflow {
 
     PREPROCESS(uni_ch.mix(ske_ch))
 
+
+
     gt_ch = PREPROCESS.out.panasmGfa.join(PREPROCESS.out.mixFasta).join( PREPROCESS.out.uniFasta ).join ( PREPROCESS.out.skeFasta)
 
     GT(meta_ch, gt_ch)
 
     bin_ch = Channel.empty()
     res_ch = Channel.empty()
+    naive_ch = Channel.empty()
+    overlap_ch = Channel.empty()
+
 
     if (params.pangenome) {
         PBFp('pan', PREPROCESS.out.panasmGfa, PREPROCESS.out.gcPan, PREPROCESS.out.gdPan)
 
         bin_ch = bin_ch.mix(PBFp.out.bins)
-        res_ch = res_ch.mix(PBFp.out.res)  
+        res_ch = res_ch.mix(PBFp.out.res)
+        naive_ch = naive_ch(PBFp.out.naive)
+        overlap_ch = overlap_ch(PBFp.out.overlap)
         // if (params.ml) {
             
         // }
-    } 
+    }
+
     if (params.assembly) {
         PBFu("uni", PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.gdUni)
         bin_ch = bin_ch.mix(PBFu.out.bins)
@@ -70,15 +75,11 @@ workflow {
         res_ch = res_ch.mix(PBFs.out.res)  
     }
 
+    pan_ch = PREPROCESS.out.panasmGfa.map{meta, files -> meta += [asm: "p"]; [meta, files]}
 
+    eval_ch = res_ch.mix(naive_ch).mix(overlap_ch)
     
-// output every bin modification for the pangenome
-// run PLASEVAL
-// run normal_EVAL
-// include in the ID the bin result?
-
-
-    // EVAL(PBFp.out.bins.mix(PBFa.out.bins), graphs, fastas, gt_everything)
+    EVALUATION(eval_ch, gt_ch)
     
 
 }

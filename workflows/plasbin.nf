@@ -48,57 +48,80 @@ process model {
     """
 }
 
-// process MOD_BINS {
-//     cache false
+process transform {
+    input:
+    tuple val(meta), path(bins), path(gfa) 
+    val(mode)
+    
+    output:
+    tuple val(meta), path(res), emit: res
+    
+    script:
 
-//     input:
-//     tuple val(meta), path(pred), path(graph)
-//     val(flag)
-//     val(name)
+    base = "${meta.id}.${mode}.${meta.thr}"
+    res = base + ".pbf.pred.tab"
+    
+    """
+    python $projectDir/bin/evaluation/transform_pbf_pred.py --input ${bins} --gfa ${gfa} --output ${res} 
 
-//     output:
-//     tuple val(meta), path(pred_mod)
+    """
+}
 
-//     script:
-//     pred_mod = pred.baseName + ".${name}.tsv"
+process modifyBins {
+    input:
 
-//     """
-//     python $projectDir/bin/extend_bins.py --pred ${pred} --out ${pred_mod} ${flag} ${graph}
-//     """
+    tuple val(meta), path(pred), path(graph)
+    val(mode)
 
-// }
+    output:
+    tuple val(meta), path(modded)
 
-// process extendBins {
-//     input:
+    script:
+    if (mode == "naive")
+    modded = pred.getBaseName()[0..-6] + ".nve.tab"
+    """
+    #!/usr/bin/env bash
+    python $projectDir/bin/extend_bins.py --pred ${pred} --out ${modded} --naive -n 1
 
-//     output:
+    """
 
-  
-//     script:
-//     """
-//     python $projectDir/bin/extend_bins.py --pred ${res} --out ${mod1} --naive -n 1 ${gfa}
-//   	"""
-// }
+    else if (mode == "overlap")
+    modded = pred.getBaseName()[0..-6] + ".ovl.tab"
+    """
+    #!/usr/bin/env bash
+    python $projectDir/bin/extend_bins.py --pred ${pred} --out ${modded} --super --graph ${graph}
 
-// process MOD_BINS {
-//     cache false
+    """
+        
+}
 
-//     input:
-//     tuple val(meta), path(pred), path(graph)
-//     val(flag)
-//     val(name)
+workflow OVERLAP {
+    take:
 
-//     output:
-//     tuple val(meta), path(pred_mod)
+    gfa_ch
+    pred_ch
 
-//     script:
-//     pred_mod = pred.baseName + ".${name}.tsv"
+    main:
 
-//     """
-//     python $projectDir/bin/extend_bins.py --pred ${pred} --out ${pred_mod} ${flag} ${graph}
-//     """
+    res_ch = modifyBins(pred_ch.join(gfa_ch), "overlap")
 
-// }
+    emit:
+    pred = res_ch
+}
+
+workflow NAIVE
+{
+    take: 
+
+    pred_ch
+
+    main:
+
+    res_ch = modifyBins(pred_ch, "naive")
+
+    emit:
+    pred = res_ch
+}
 
 workflow MODEL {
   
@@ -113,19 +136,23 @@ workflow MODEL {
 	main:
 
 	bins_ch = model(gfa_ch.join(gc_ch).join(gd_ch), mode)
-    
-    // naiveBins_ch        = Channel.empty()
-    // graphOverlapBins_ch = Channel.empty()
+    pred_ch = transform(bins_ch.join(gfa_ch), mode)
 
-    // if (mode == "pan") {
-    //     naiveBins_ch        = extend_naive(bins_ch)
-    //     graphOverlapBins_ch = extend_overlap(bins_ch)
-    // }
+   
+    naiveBins_ch        = Channel.empty()
+    graphOverlapBins_ch = Channel.empty()
+
+    if (mode == "pan") {
+        NAIVE(pred_ch)
+        OVERLAP(gfa_ch, pred_ch)
+        naiveBins_ch        = NAIVE.out.pred
+        graphOverlapBins_ch = OVERLAP.out.pred
+    }
     
 
 	emit:
 	res = model.out.res
 	bins = model.out.bins
-    // naiveB = naiveBins_ch
-    // overlapB = graphOverlapBins_ch
+    naive = naiveBins_ch
+    overlap = graphOverlapBins_ch
 }

@@ -5,3 +5,4 @@ output
 test_data
 pyenv
 venv
+.DS_Store

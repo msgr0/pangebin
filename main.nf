@@ -58,8 +58,8 @@ workflow {
 
         bin_ch = bin_ch.mix(PBFp.out.bins)
         res_ch = res_ch.mix(PBFp.out.res)
-        naive_ch = naive_ch(PBFp.out.naive)
-        overlap_ch = overlap_ch(PBFp.out.overlap)
+        naive_ch = naive_ch.mix(PBFp.out.naive)
+        overlap_ch = overlap_ch.mix(PBFp.out.overlap)
         // if (params.ml) {
             
         // }

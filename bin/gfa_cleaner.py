@@ -59,16 +59,19 @@ def main():
         path.set_datatype("LN", "i")
         path.LN = path_len
 
-        for seg in segs:
-            segment = gfa.segment(seg.name)
-            segment_perc = segment.LN / path.LN
-            if segment.ll == "":
-                segment.ll = str(segment_perc)
-            else:
-                segment.ll += "," + segment_perc
-        
         path.set_datatype("aa", "A")
         path.aa = _type
+
+    for path in gfa.paths:
+        segs = path.segment_names
+        for seg in segs:
+            segment = gfa.segment(seg.name)
+            segment_perc = segment.LN / float(path.LN)
+            if segment.ll == "":
+                segment.ll = f"{segment_perc:.6f}"
+            else:
+                segment.ll += f",{segment_perc:.6f}"
+
 
 
 

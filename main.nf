@@ -4,16 +4,11 @@
 ----------------------------------------------
 gtihub: https://github.com/msgr0/pangebin.git
 ----------------------------------------------
-
-1. preprocessing
-2. pangenome
-3. pbf pangneome model 
-optional. a. ground-truth
-          b. evaluation */
+*/
 
 include { GT                   } from './workflows/gt'
 include { PREPROCESS           } from './workflows/preprocess'
-include { DOWNLOAD_GT          } from './workflows/gt'
+// include { DOWNLOAD_GT          } from './workflows/gt'
 include { MODEL as PBFp        } from './workflows/plasbin'
 include { MODEL as PBFu        } from './workflows/plasbin'
 include { MODEL as PBFs        } from './workflows/plasbin'
@@ -28,8 +23,8 @@ workflow {
     
     input_ch = Channel.fromFilePairs("${params.input}/{unicycler,skesa}.gfa.gz", type: 'file', checkIfExists: true)
 
-    // metaid = file(params.input).toString().split("-")[1]
     metaid = file(params.input).toString().split("/")[-1]
+    // if ... metaspecies ... ok 
     // metaspecies = file(params.input).toString().split("/")[-1].split("-")[0]
     // metaspecies = "generic"
 
@@ -49,7 +44,7 @@ workflow {
 
     PREPROCESS(uni_ch.mix(ske_ch))
 
-    gt_ch = PREPROCESS.out.gfa_psm.join(PREPROCESS.out.fasta_mix).join( PREPROCESS.out.fasta_uni ).join ( PREPROCESS.out.fasta_ske)
+    gt_ch = PREPROCESS.out.panasmGfa.join(PREPROCESS.out.mixFasta).join( PREPROCESS.out.uniFasta ).join ( PREPROCESS.out.skeFasta)
 
     GT(meta_ch, gt_ch)
 
@@ -57,20 +52,26 @@ workflow {
     res_ch = Channel.empty()
 
     if (params.pangenome) {
-        PBFp('pan', PREPROCESS.out.gfa_psm, PREPROCESS.out.fasta_mix)
+        PBFp('pan', PREPROCESS.out.panasmGfa, PREPROCESS.out.gcPan, PREPROCESS.out.gdPan)
+
         bin_ch = bin_ch.mix(PBFp.out.bins)
         res_ch = res_ch.mix(PBFp.out.res)  
+        // if (params.ml) {
+            
+        // }
     } 
-    if (params.assemblers) {
-        PBFu('asm', PREPROCESS.out.gfa_uni, PREPROCESS.out.fasta_uni)
+    if (params.assembly) {
+        PBFu("uni", PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.gdUni)
         bin_ch = bin_ch.mix(PBFu.out.bins)
         res_ch = res_ch.mix(PBFu.out.res) 
         
-        PBFs('asm', PREPROCESS.out.gfa_ske, PREPROCESS.out.fasta_ske)
+        PBFs("ske", PREPROCESS.out.skesaGfa, PREPROCESS.out.gcSke, PREPROCESS.out.gdSke)
         bin_ch = bin_ch.mix(PBFs.out.bins)
         res_ch = res_ch.mix(PBFs.out.res)  
     }
 
+
+    
 // output every bin modification for the pangenome
 // run PLASEVAL
 // run normal_EVAL

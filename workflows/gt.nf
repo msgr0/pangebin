@@ -1,10 +1,7 @@
 #!/usr/bin/env nextflow
 
-// include {PUBLISH; PUBLISH as REF} from "./utils.nf"
-
-process NCBI {
-    publishDir "${params.input}/", mode: 'copy'
-    // errorStrategy 'ignore'
+process ncbi {
+    storeDir "${params.input}/"
 
     input:
     val (meta)
@@ -19,6 +16,8 @@ process NCBI {
     reference_ren = "${name}.ren.fna"
 
     """
+    #!/usr/bin/env bash
+
     python $projectDir/bin/evaluation/ncbi_link.py --input ${meta.id} --output ${referencegz}
     bgzip -d -c ${referencegz} > ${reference}
 
@@ -28,7 +27,8 @@ process NCBI {
 
 }
 
-process BLAST {
+process blast {
+    storeDir "${params.input}/"
 
     input:
     tuple val(meta), path(graph), path(mix), path(uni), path(ske)
@@ -57,6 +57,8 @@ process BLAST {
     pan_ske_gt = outske + ".pan.gt.tsv"
     
     """
+    #!/usr/bin/env bash
+
     python $projectDir/bin/evaluation/build_truth.py --pangenome ${graph} --assembly ${mix} --reference ${reference} --output ${outmix}
     
     python $projectDir/bin/evaluation/build_truth.py --pangenome ${graph} --assembly ${uni} --reference ${reference} --output ${outuni}
@@ -64,95 +66,6 @@ process BLAST {
     python $projectDir/bin/evaluation/build_truth.py --pangenome ${graph} --assembly ${ske} --reference ${reference} --output ${outske}
     """
 
-}
-
-
-process LABELING {
-
-    input:
-    tuple val(meta), path(prediction), path(gt), val(tool)
-
-    output:
-    tuple val(meta), path(stats), emit: stats
-    // tuple val(meta), path(plots), emit: plots
-
-    script:
-
-    output = "${meta.id}.${tool}"
-    description = "${meta.id}.${meta.thr} with ${tool}"
-    stats = "${output}.stats.txt"
-
-    """
-    python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${meta.id} --output ${output} --description '${description}'
-    """
-}
-
-process MOD_BINS {
-    cache false
-
-    input:
-    tuple val(meta), path(pred), path(graph)
-    val(flag)
-    val(name)
-
-    output:
-    tuple val(meta), path(pred_mod)
-
-    script:
-    pred_mod = pred.baseName + ".${name}.tsv"
-
-    """
-    python $projectDir/bin/extend_bins.py --pred ${pred} --out ${pred_mod} ${flag} ${graph}
-    """
-
-}
-
-process PLASEVAL {
-    cache false
-
-    input:
-    tuple val(meta), path(prediction), path(gt), val(tool)
-
-    output:
-    tuple val(meta), path(stats), emit: stats
-    // tuple val(meta), path(plots), emit: plots
-
-    script:
-
-    output = "${meta.id}.${tool}"
-    // description = "${meta.id}.${meta.thr} with ${tool}"
-    // plots = "${output}.scores.pdf"
-    stats = "${output}.plaseval.txt"
-
-    // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",3)}1' ${gt} 
-    // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",4)}1' ${gt} 
-    """
-    #!/bin/bash
-    echo 'plasmid\tcontig\tnan\tnan\tcontig_len' | cat - ${gt} > temp && mv temp ${gt}
-    python $projectDir/PlasEval/src/plaseval.py eval --pred ${prediction} --gt ${gt} --out ${stats} 
-    """
-    // python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${meta.id} --output ${output} --description '${description}'
-
-}
-// workflow EVAL {
-//     take:
-//     mode
-//     result_ch
-
-//     main:
-    
-// }
-
-
-workflow DOWNLOAD_GT {
-    take:
-    meta_ch
-
-    main:
-    NCBI(meta_ch)
-
-    emit:
-    reference = NCBI.out.ref
 }
 
 workflow GT {
@@ -164,12 +77,12 @@ workflow GT {
 
     main:
 
-    NCBI( meta )
+    ncbi( meta )
     
-    BLAST( input_ch, NCBI.out.ref )
+    blast( input_ch, ncbi.out.ref )
 
     emit:
-    all_contigs = BLAST.out.pangt
-    uni_contigs = BLAST.out.unigt
-    ske_contigs = BLAST.out.skegt
+    mixReference = blast.out.pangt
+    uniReference = blast.out.unigt
+    skeReference = blast.out.skegt
 }

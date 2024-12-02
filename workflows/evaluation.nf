@@ -32,35 +32,27 @@ plasmidness, extended+super bins
 */
 
 
-process NCBI {
-    // publishDir "${params.input}/", mode: 'copy'
-    errorStrategy 'ignore'
-    maxForks 1
+process LABELING {
+
     input:
-    val (meta)
+    tuple val(meta), path(prediction), path(gt), val(tool)
 
     output:
-    tuple val(meta), path(reference_ren), emit: ref
+    tuple val(meta), path(stats), emit: stats
+    // tuple val(meta), path(plots), emit: plots
 
     script:
-    name = "${meta.id}"
-    referencegz = "${name}.fna.gz"
-    reference = "${name}.fna"
-    reference_ren = "${name}.ren.fna"
+
+    output = "${meta.id}.${tool}"
+    description = "${meta.id}.${meta.thr} with ${tool}"
+    stats = "${output}.stats.txt"
 
     """
-    sleep \$((RANDOM % 5))
-    python $projectDir/bin/evaluation/ncbi_link.py --input ${meta.id} --output ${referencegz}
-    bgzip -d -c ${referencegz} > ${reference}
-
-    python $projectDir/bin/evaluation/strip_plasmid_fasta.py --input ${reference} --output ${reference_ren}
+    python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${meta.id} --output ${output} --description '${description}'
     """
-
 }
 
-
-
-process EVAL {
+process labeling {
 
     input:
     tuple val(meta), path(prediction), path(gt), val(tool)
@@ -81,25 +73,7 @@ process EVAL {
     """
 }
 
-process MOD_BINS {
-    cache false
 
-    input:
-    tuple val(meta), path(pred), path(graph)
-    val(flag)
-    val(name)
-
-    output:
-    tuple val(meta), path(pred_mod)
-
-    script:
-    pred_mod = pred.baseName + ".${name}.tsv"
-
-    """
-    python $projectDir/bin/extend_bins.py --pred ${pred} --out ${pred_mod} ${flag} ${graph}
-    """
-
-}
 
 process PLASEVAL {
     cache false
@@ -129,48 +103,34 @@ process PLASEVAL {
 
 }
 
-process BLAST {
+
+process binning { //plaseval
+    cache false
 
     input:
-    tuple val(meta), path(graph), path(mix), path(uni), path(ske), path(reference)
+    tuple val(meta), path(prediction), path(gt), val(tool)
 
     output:
-    tuple val(meta), path(pan_mix_gt), emit: panmixgt
-    tuple val(meta), path(mix_gt), emit: mixgt
-
-    tuple val(meta), path(pan_uni_gt), emit: panunigt
-    tuple val(meta), path(uni_gt), emit: unigt
-
-    tuple val(meta), path(pan_ske_gt), emit: panskegt
-    tuple val(meta), path(ske_gt), emit: skegt
-
+    tuple val(meta), path(stats), emit: stats
+    // tuple val(meta), path(plots), emit: plots
 
     script:
-    outmix = meta.id + "." + "mix"
-    // mapping_file = output + ".mapping.tsv"
-    mix_gt = outmix + ".gt.tsv"
-    pan_mix_gt = outmix + ".pan.gt.tsv"
 
-    outuni = meta.id + "." + "uni"
-    // mapping_file = output + ".mapping.tsv"
-    uni_gt = outuni + ".gt.tsv"
-    pan_uni_gt = outuni + ".pan.gt.tsv"
+    output = "${meta.id}.${tool}"
+    // description = "${meta.id}.${meta.thr} with ${tool}"
+    // plots = "${output}.scores.pdf"
+    stats = "${output}.plaseval.txt"
 
-    outske = meta.id + "." + "ske"
-    // mapping_file = output + ".mapping.tsv"
-    ske_gt = outske + ".gt.tsv"
-    pan_ske_gt = outske + ".pan.gt.tsv"
-    
+    // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",3)}1' ${gt} 
+    // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",4)}1' ${gt} 
     """
-    python $projectDir/bin/evaluation/build_truth.py --pangenome ${graph} --assembly ${mix} --reference ${reference} --output ${outmix}
-    
-    python $projectDir/bin/evaluation/build_truth.py --pangenome ${graph} --assembly ${uni} --reference ${reference} --output ${outuni}
-
-    python $projectDir/bin/evaluation/build_truth.py --pangenome ${graph} --assembly ${ske} --reference ${reference} --output ${outske}
+    #!/bin/bash
+    echo 'plasmid\tcontig\tnan\tnan\tcontig_len' | cat - ${gt} > temp && mv temp ${gt}
+    python $projectDir/PlasEval/src/plaseval.py eval --pred ${prediction} --gt ${gt} --out ${stats} 
     """
+    // python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${meta.id} --output ${output} --description '${description}'
 
 }
-
 
 
 workflow {
@@ -286,80 +246,3 @@ workflow {
     PUBLISH(PLASEVAL.out.stats)
 }
 
-
-
-process LABELING {
-
-    input:
-    tuple val(meta), path(prediction), path(gt), val(tool)
-
-    output:
-    tuple val(meta), path(stats), emit: stats
-    // tuple val(meta), path(plots), emit: plots
-
-    script:
-
-    output = "${meta.id}.${tool}"
-    description = "${meta.id}.${meta.thr} with ${tool}"
-    stats = "${output}.stats.txt"
-
-    """
-    python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${meta.id} --output ${output} --description '${description}'
-    """
-}
-
-process MOD_BINS {
-    cache false
-
-    input:
-    tuple val(meta), path(pred), path(graph)
-    val(flag)
-    val(name)
-
-    output:
-    tuple val(meta), path(pred_mod)
-
-    script:
-    pred_mod = pred.baseName + ".${name}.tsv"
-
-    """
-    python $projectDir/bin/extend_bins.py --pred ${pred} --out ${pred_mod} ${flag} ${graph}
-    """
-
-}
-
-process PLASEVAL {
-    cache false
-
-    input:
-    tuple val(meta), path(prediction), path(gt), val(tool)
-
-    output:
-    tuple val(meta), path(stats), emit: stats
-    // tuple val(meta), path(plots), emit: plots
-
-    script:
-
-    output = "${meta.id}.${tool}"
-    // description = "${meta.id}.${meta.thr} with ${tool}"
-    // plots = "${output}.scores.pdf"
-    stats = "${output}.plaseval.txt"
-
-    // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",3)}1' ${gt} 
-    // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",4)}1' ${gt} 
-    """
-    #!/bin/bash
-    echo 'plasmid\tcontig\tnan\tnan\tcontig_len' | cat - ${gt} > temp && mv temp ${gt}
-    python $projectDir/PlasEval/src/plaseval.py eval --pred ${prediction} --gt ${gt} --out ${stats} 
-    """
-    // python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${meta.id} --output ${output} --description '${description}'
-
-}
-// workflow EVAL {
-//     take:
-//     mode
-//     result_ch
-
-//     main:
-    
-// }

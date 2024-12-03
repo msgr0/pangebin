@@ -41,17 +41,17 @@ process blast {
 
 
     script:
-    outmix = meta.id + "." + "mix"
+    outmix = meta.id + "." + meta.thr + ".mix" 
     // mapping_file = output + ".mapping.tsv"
     mix_gt = outmix + ".gt.tsv"
     pan_mix_gt = outmix + ".pan.gt.tsv"
 
-    outuni = meta.id + "." + "uni"
+    outuni = meta.id + "." + meta.thr + ".uni"
     // mapping_file = output + ".mapping.tsv"
     uni_gt = outuni + ".gt.tsv"
     pan_uni_gt = outuni + ".pan.gt.tsv"
 
-    outske = meta.id + "." + "ske"
+    ootske = meta.id + "." + meta.thr + ".ske"
     // mapping_file = output + ".mapping.tsv"
     ske_gt = outske + ".gt.tsv"
     pan_ske_gt = outske + ".pan.gt.tsv"

@@ -10,9 +10,7 @@ process model {
     val(mode)
     
     output:
-    tuple val(meta), path(res), emit: res
-    tuple val(meta), path(bins), emit: bins
-    // tuple val(meta), path(bins_mod1), emit: mod1
+    tuple val(meta), path(bins)
 
     script:
 
@@ -36,22 +34,17 @@ process model {
 
     base = "${meta.id}.${mode}.${meta.thr}"
     bins = base + ".pbf.bins.tsv"
-    res = base + ".pbf.pred.tab"
-    pflow = "$projectDir/PlasBin-flow-pangenome/code/plasbin_flow.py"
-    // mod1 = base + 'pbf.mod1.tab'
+    pflow = "$projectDir/PlasBin-flow-pangenohttps://github.com/nextflow-io/vim-language-nextflowme/code/plasbin_flow.py"
 
     """
     bgzip -k ${gfa}
     python ${pflow} ${args} -alpha4 1 -ag ${gfa}.gz -gc ${gc} -out_dir . -out_file ${bins}  -score ${plscore} -assembler ${assembler} -seed_len ${seed_len}  -seed_score ${seed_score} -min_pls_len ${min_pls_len}
-    python $projectDir/bin/evaluation/transform_pbf_pred.py --input ${bins} --gfa ${gfa} --output ${res} 
-
     """
 }
 
 process transform {
     input:
-    tuple val(meta), path(bins), path(gfa) 
-    val(mode)
+    tuple val(meta), path(bins), path(gfa)
     
     output:
     tuple val(meta), path(res), emit: res
@@ -63,9 +56,9 @@ process transform {
     
     """
     python $projectDir/bin/evaluation/transform_pbf_pred.py --input ${bins} --gfa ${gfa} --output ${res} 
-
     """
-}
+} 
+
 
 process modifyBins {
     input:
@@ -124,19 +117,18 @@ workflow NAIVE
 
 workflow MODEL {
   
-	take:
+    take:
 
-	mode
-	gfa_ch
+	  mode
+	  gfa_ch
 
-	gc_ch
-	gd_ch
+	  gc_ch
+	  gd_ch
 
-	main:
+    main:
 
-	model(gfa_ch.join(gc_ch).join(gd_ch), mode)
-    bins_ch = model.out.bins
-    pred_ch = transform(bins_ch.join(gfa_ch), mode)
+	  bins_ch = model(gfa_ch.join(gc_ch).join(gd_ch), mode)
+    pred_ch = transform(bins_ch.join(gfa_ch))
 
    
     naiveBins_ch        = Channel.empty()
@@ -150,9 +142,9 @@ workflow MODEL {
     }
     
 
-	emit:
-	res = model.out.res
-	bins = model.out.bins
+	  emit:
+	  res = model.out.res
+	  bins = model.out.bins
     naive = naiveBins_ch
     overlap = graphOverlapBins_ch
 }

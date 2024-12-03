@@ -49,8 +49,10 @@ process labeling {
     thr = output.split("\\.")[2]
     tool = output.split("\\.")[3]
 
-    description = "sample ${id}, ${asm} graph (cut ${thr}) with ${tool}"
-    stats = "${output}.lab.txt"
+    reference = gt.getBaseName().split("\\.")[1]
+
+    description = "sample ${id}, ${asm} graph (cut ${thr}, ref ${reference}) with ${tool}"
+    stats = "${output}.${reference}.lab.txt"
 
     """
     python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${output} --output ${output} --description '${description}'
@@ -70,7 +72,8 @@ process binning {
 
     script:
     output = prediction.getBaseName()
-    stats = "${output}.bin.txt"
+    reference = gt.getBaseName().split("\\.")[1]
+    stats = "${output}.${reference}.bin.txt"
     // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",3)}1' ${gt} 
     // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",4)}1' ${gt} 
     """
@@ -83,16 +86,15 @@ process binning {
 
 workflow EVALUATION {
     take:
-    eval_ch // prediction
-    gt_ch
+    input_ch
 
     main:
     
-    labeling_ch = labeling(eval_ch.join(gt_ch))
-    binning_ch = binning(eval_ch.join(gt_ch))
+    labeling_ch = labeling(input_ch)
+    binning_ch = binning(input_ch)
 
     emit:
-
+    
     labeling = labeling_ch
     binning = binning_ch
 }

@@ -45,7 +45,8 @@ process model {
 process transform {
     input:
     tuple val(meta), path(bins), path(gfa)
-    
+    val(mode)
+
     output:
     tuple val(meta), path(res), emit: res
     
@@ -128,7 +129,7 @@ workflow MODEL {
     main:
 
 	  bins_ch = model(gfa_ch.join(gc_ch).join(gd_ch), mode)
-    pred_ch = transform(bins_ch.join(gfa_ch))
+    pred_ch = transform(bins_ch.join(gfa_ch), mode)
 
    
     naiveBins_ch        = Channel.empty()

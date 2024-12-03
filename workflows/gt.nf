@@ -51,7 +51,7 @@ process blast {
     uni_gt = outuni + ".gt.tsv"
     pan_uni_gt = outuni + ".pan.gt.tsv"
 
-    ootske = meta.id + "." + meta.thr + ".ske"
+    outske = meta.id + "." + meta.thr + ".ske"
     // mapping_file = output + ".mapping.tsv"
     ske_gt = outske + ".gt.tsv"
     pan_ske_gt = outske + ".pan.gt.tsv"

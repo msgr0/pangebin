@@ -75,7 +75,7 @@ process modifyBins {
         modded = pred.getBaseName()[0..-6] + ".nve.tab"
         """
         #!/usr/bin/env bash
-        python $projectDir/bin/extend_bins.py --pred ${pred} --out ${modded} --naive -n 1
+        python $projectDir/bin/extend_bins.py --pred ${pred} --out ${modded} --naive --n 1
         """
     }
 

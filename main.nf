@@ -76,7 +76,7 @@ workflow {
 
     if (params.assembly) {
         PBFu("uni", PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.gdUni)
-        bin_ch = bin_ch.mix(PBFu.out.bin)
+        bin_ch = bin_ch.mix(PBFu.out.bins)
         res_ch = res_ch.mix(PBFu.out.res) 
         evalu_ch = res_ch.join(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, contigs]})
 

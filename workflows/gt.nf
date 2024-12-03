@@ -2,6 +2,7 @@
 
 process ncbi {
     storeDir "${params.input}/"
+    errorStrategy 'terminate'
 
     input:
     val (meta)
@@ -29,6 +30,7 @@ process ncbi {
 
 process blast {
     storeDir "${params.input}/"
+    errorStrategy 'terminate'
 
     input:
     tuple val(meta), path(graph), path(mix), path(uni), path(ske)

@@ -57,7 +57,12 @@ workflow {
     evalu_ch = Channel.empty()
 
     if (params.pangenome) {
-        PBFp('pan', PREPROCESS.out.panasmGfa, PREPROCESS.out.gcPan, PREPROCESS.out.gdPan)
+        if (params.mlp) {
+            PBFp('pan', 'mlp', PREPROCESS.out.panasmGfa, PREPROCESS.out.gcPan, PREPROCESS.out.mlPan)
+        }
+        else {
+            PBFp('pan', 'pbf', PREPROCESS.out.panasmGfa, PREPROCESS.out.gcPan, PREPROCESS.out.gdPan)
+        }
 
         bin_ch = bin_ch.mix(PBFp.out.bins)
         res_ch = res_ch.mix(PBFp.out.res)
@@ -75,12 +80,19 @@ workflow {
     }
 
     if (params.assembly) {
-        PBFu("uni", PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.gdUni)
+        if (params.mlp) {
+            PBFu("uni", 'mlp', PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.mlUni)
+            PBFs("ske", 'mlp', PREPROCESS.out.skesaGfa, PREPROCESS.out.gcSke, PREPROCESS.out.mlSke)
+        }
+        else {
+            PBFu("uni", 'pbf', PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.gdUni)
+            PBFs("ske", 'pbf', PREPROCESS.out.skesaGfa, PREPROCESS.out.gcSke, PREPROCESS.out.gdSke)
+        }
+        
         bin_ch = bin_ch.mix(PBFu.out.bins)
         res_ch = res_ch.mix(PBFu.out.res) 
         evalu_ch = res_ch.join(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, contigs]})
 
-        PBFs("ske", PREPROCESS.out.skesaGfa, PREPROCESS.out.gcSke, PREPROCESS.out.gdSke)
         bin_ch = bin_ch.mix(PBFs.out.bins)
         res_ch = res_ch.mix(PBFs.out.res)  
         evals_ch = res_ch.join(GT.out.skeReference.map{ meta, fragments, contigs -> [meta, contigs]})

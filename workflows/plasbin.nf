@@ -8,6 +8,7 @@ process model {
     input:
     tuple val(meta), path(gfa), path(gc), path(plscore)
     val(mode)
+    val(scoring)
     
     output:
     tuple val(meta), path(bins)
@@ -33,7 +34,7 @@ process model {
     }
 
     base = "${meta.id}.${mode}.${meta.thr}"
-    bins = base + ".pbf.bins.tsv"
+    bins = "${base}.${scoring}.bins.tsv"
     pflow = "$projectDir/PlasBin-flow-pangenome/code/plasbin_flow.py"
 
     """
@@ -46,15 +47,13 @@ process transform {
     cache false
     input:
     tuple val(meta), path(bins), path(gfa)
-    val(mode)
 
     output:
-    tuple val(meta), path(res), emit: res
+    tuple val(meta), path(res)
     
     script:
 
-    base = "${meta.id}.${mode}.${meta.thr}"
-    res = base + ".pbf.pred.tab"
+    res = bins.getBaseName()[0..-6] + ".pred.tab"
     
     """
     python $projectDir/bin/evaluation/transform_pbf_pred.py --input ${bins} --gfa ${gfa} --output ${res} 
@@ -124,6 +123,7 @@ workflow MODEL {
     take:
 
 	mode
+    scoring
 	gfa_ch
 
 	gc_ch
@@ -131,8 +131,8 @@ workflow MODEL {
 
     main:
 
-	bins_ch = model(gfa_ch.join(gc_ch).join(gd_ch), mode)
-    pred_ch = transform(bins_ch.join(gfa_ch), mode)
+	bins_ch = model(gfa_ch.join(gc_ch).join(gd_ch), mode, scoring)
+    pred_ch = transform(bins_ch.join(gfa_ch))
 
    
     naiveBins_ch        = Channel.empty()
@@ -146,9 +146,10 @@ workflow MODEL {
     }
     
 
-	  emit:
-	  res = pred_ch
-	  bins = bins_ch
+    emit:
+
+    res = pred_ch
+    bins = bins_ch
     naive = naiveBins_ch
     overlap = graphOverlapBins_ch
 }

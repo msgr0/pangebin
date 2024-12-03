@@ -49,7 +49,7 @@ process labeling {
     thr = output.split("\\.")[2]
     tool = output.split("\\.")[3]
 
-    reference = gt.getBaseName().split("\\.")[1]
+    reference = gt.getBaseName().split("\\.")[2]
 
     description = "sample ${id}, ${asm} graph (cut ${thr}, ref ${reference}) with ${tool}"
     stats = "${output}.${reference}.lab.txt"
@@ -72,7 +72,7 @@ process binning {
 
     script:
     output = prediction.getBaseName()
-    reference = gt.getBaseName().split("\\.")[1]
+    reference = gt.getBaseName().split("\\.")[2]
     stats = "${output}.${reference}.bin.txt"
     // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",3)}1' ${gt} 
     // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",4)}1' ${gt} 

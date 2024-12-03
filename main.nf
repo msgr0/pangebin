@@ -89,7 +89,6 @@ workflow {
 
     pan_ch = PREPROCESS.out.panasmGfa.map{meta, files -> meta += [asm: "p"]; [meta, files]}
 
-    eval_ch = evalp_ch.mix(evalu_ch).mix(evals_ch)
     
     EVALUATION(evalp_ch.mix(evalu_ch).mix(evals_ch))
     

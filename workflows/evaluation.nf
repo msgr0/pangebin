@@ -89,9 +89,9 @@ workflow EVALUATION {
     input_ch
 
     main:
-    input_ch | view
-    labeling_ch = labeling(input_ch) | view
-    binning_ch = binning(input_ch) | view
+    input_ch
+    labeling_ch = labeling(input_ch)
+    binning_ch = binning(input_ch)
 
     emit:
     

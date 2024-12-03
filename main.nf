@@ -64,23 +64,27 @@ workflow {
         naive_ch = naive_ch.mix(PBFp.out.naive)
         overlap_ch = overlap_ch.mix(PBFp.out.overlap)
         
-
-        evalp_ch = res_ch.mix(naive_ch).mix(overlap_ch)
-        evalp_ch = evalp_ch.join(GT.out.mixReference.map{ meta, fragments, contigs -> [meta, fragments]})
-
         
+        evalpu_ch = res_ch.mix(naive_ch).mix(overlap_ch)
+        evalpu_ch = evalpu_ch.join(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, fragments]})
+        
+        evalps_ch = res_ch.mix(naive_ch).mix(overlap_ch)
+        evalps_ch = evalps_ch.join(GT.out.skeReference.map { meta, fragments, contigs -> [meta, fragments]})        
+        
+        evalp_ch = evalpu_ch.mix(evalps_ch)
     }
 
     if (params.assembly) {
         PBFu("uni", PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.gdUni)
-        bin_ch = bin_ch.mix(PBFu.out.bins)
+        bin_ch = bin_ch.mix(PBFu.out.bin)
         res_ch = res_ch.mix(PBFu.out.res) 
         evalu_ch = res_ch.join(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, contigs]})
 
         PBFs("ske", PREPROCESS.out.skesaGfa, PREPROCESS.out.gcSke, PREPROCESS.out.gdSke)
         bin_ch = bin_ch.mix(PBFs.out.bins)
         res_ch = res_ch.mix(PBFs.out.res)  
-        evals_ch = res_ch.join(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, contigs]})
+        evals_ch = res_ch.join(GT.out.skeReference.map{ meta, fragments, contigs -> [meta, contigs]})
+
     }
 
     pan_ch = PREPROCESS.out.panasmGfa.map{meta, files -> meta += [asm: "p"]; [meta, files]}

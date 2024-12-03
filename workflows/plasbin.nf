@@ -43,6 +43,7 @@ process model {
 }
 
 process transform {
+    cache false
     input:
     tuple val(meta), path(bins), path(gfa)
     val(mode)
@@ -62,6 +63,7 @@ process transform {
 
 
 process modifyBins {
+    cache false
     input:
 
     tuple val(meta), path(pred), path(graph)

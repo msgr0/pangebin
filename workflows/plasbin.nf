@@ -34,7 +34,7 @@ process model {
 
     base = "${meta.id}.${mode}.${meta.thr}"
     bins = base + ".pbf.bins.tsv"
-    pflow = "$projectDir/PlasBin-flow-pangenohttps://github.com/nextflow-io/vim-language-nextflowme/code/plasbin_flow.py"
+    pflow = "$projectDir/PlasBin-flow-pangenome/code/plasbin_flow.py"
 
     """
     bgzip -k ${gfa}

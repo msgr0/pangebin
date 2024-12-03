@@ -145,7 +145,7 @@ def main():
     # gtruth_header = {0: label, 1: contig, 3:pl_lenght, 4:contig_len}
     for _, row in ground_truth.iterrows():
         if (
-            row[0] != "chromosome"
+            "chromosome" not in row[0]
         ):  ## here we can find TRUE POSITIVE and FALSE NEGATIVES plasmids
             if row[1] in bin_file["contig"].values:
                 if row[1] not in t_pos:
@@ -157,7 +157,7 @@ def main():
                     f_neg_len += row[4]
 
         elif (
-            row[0] == "chromosome"
+            "chromosome" in row[0]
         ):  ## here we can find FALSE PLASMIDS (FALSE POSITIVES)
             if row[1] in bin_file["contig"].values:
                 if row[1] not in f_pos:

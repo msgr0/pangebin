@@ -52,8 +52,6 @@ workflow {
     naive_ch = Channel.empty()
     overlap_ch = Channel.empty()
 
-    eval_ch = Channel.empty()
-
     evalp_ch = Channel.empty()
     evals_ch = Channel.empty()
     evalu_ch = Channel.empty()
@@ -89,7 +87,7 @@ workflow {
 
     eval_ch = evalp_ch.mix(evalu_ch).mix(evals_ch)
     
-    EVALUATION(eval_ch)
+    EVALUATION(evalp_ch.mix(evalu_ch).mix(evals_ch))
     
 
 }

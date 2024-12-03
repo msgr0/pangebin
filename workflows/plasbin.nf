@@ -143,8 +143,8 @@ workflow MODEL {
     
 
 	  emit:
-	  res = model.out.res
-	  bins = model.out.bins
+	  res = pred_ch
+	  bins = bins_ch
     naive = naiveBins_ch
     overlap = graphOverlapBins_ch
 }

@@ -189,7 +189,7 @@ def main():
     )
 
     if args.output:
-        with open(f"{args.output}.stats.txt", "w", encoding="utf8") as f:
+        with open(f"{args.output}", "w", encoding="utf8") as f:
             f.write(out)
 
     else:

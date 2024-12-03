@@ -55,7 +55,7 @@ process labeling {
     stats = "${output}.${reference}.lab.txt"
 
     """
-    python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${output} --output ${output} --description '${description}'
+    python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${output} --output ${stats} --description '${description}'
     """
 }
 

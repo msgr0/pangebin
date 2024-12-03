@@ -30,7 +30,7 @@ workflow {
         fmeta.id = metaid;
         // fmeta.species = metaspecies;
         [fmeta, filepair]
-    }
+    } | view
 
     meta_ch = input_ch.map { meta, _files -> meta }
 
@@ -65,13 +65,13 @@ workflow {
         overlap_ch = overlap_ch.mix(PBFp.out.overlap)
         
         
-        evalpu_ch = res_ch.mix(naive_ch).mix(overlap_ch)
-        evalpu_ch = evalpu_ch.join(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, fragments]})
+        evalpu_ch = res_ch.mix(naive_ch).mix(overlap_ch) | view
+        evalpu_ch = evalpu_ch.combine(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, fragments]}, by: 0)
         
         evalps_ch = res_ch.mix(naive_ch).mix(overlap_ch)
-        evalps_ch = evalps_ch.join(GT.out.skeReference.map { meta, fragments, contigs -> [meta, fragments]})        
+        evalps_ch = evalps_ch.combine(GT.out.skeReference.map { meta, fragments, contigs -> [meta, fragments]}, by: 0)        
         
-        evalp_ch = evalpu_ch.mix(evalps_ch) | view
+        evalp_ch = evalpu_ch.mix(evalps_ch)
     }
 
     if (params.assembly) {

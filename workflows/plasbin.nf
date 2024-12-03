@@ -106,11 +106,12 @@ workflow NAIVE
 {
     take: 
 
+    gfa_ch
     pred_ch
 
     main:
 
-    res_ch = modifyBins(pred_ch, "naive")
+    res_ch = modifyBins(pred_ch.join(gfa_ch), "naive")
 
     emit:
     pred = res_ch
@@ -120,15 +121,15 @@ workflow MODEL {
   
     take:
 
-	  mode
-	  gfa_ch
+	mode
+	gfa_ch
 
-	  gc_ch
-	  gd_ch
+	gc_ch
+	gd_ch
 
     main:
 
-	  bins_ch = model(gfa_ch.join(gc_ch).join(gd_ch), mode)
+	bins_ch = model(gfa_ch.join(gc_ch).join(gd_ch), mode)
     pred_ch = transform(bins_ch.join(gfa_ch), mode)
 
    
@@ -136,7 +137,7 @@ workflow MODEL {
     graphOverlapBins_ch = Channel.empty()
 
     if (mode == "pan") {
-        NAIVE(pred_ch)
+        NAIVE(gfa_ch, pred_ch)
         OVERLAP(gfa_ch, pred_ch)
         naiveBins_ch        = NAIVE.out.pred
         graphOverlapBins_ch = OVERLAP.out.pred

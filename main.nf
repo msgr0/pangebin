@@ -99,9 +99,11 @@ workflow {
 
     }
 
-    pan_ch = PREPROCESS.out.panasmGfa.map{meta, files -> meta += [asm: "p"]; [meta, files]}
+    // pan_ch = PREPROCESS.out.panasmGfa.map{meta, files -> meta += [asm: "p"]; [meta, files]}
 
-    
+    evalp_ch | view
+    evalu_ch | view
+    evals_ch | view 
     EVALUATION(evalp_ch.mix(evalu_ch).mix(evals_ch))
     
 

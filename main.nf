@@ -43,7 +43,7 @@ workflow {
 
 
 
-    gt_ch = PREPROCESS.out.panasmGfa.join(PREPROCESS.out.mixFasta).join( PREPROCESS.out.uniFasta ).join ( PREPROCESS.out.skeFasta)
+    gt_ch = PREPROCESS.out.panasmGfa.join(PREPROCESS.out.mixFasta).join( PREPROCESS.out.skeFasta ).join ( PREPROCESS.out.uniFasta)
 
     GT(meta_ch, gt_ch)
 
@@ -91,11 +91,11 @@ workflow {
         
         bin_ch = bin_ch.mix(PBFu.out.bins)
         res_ch = res_ch.mix(PBFu.out.res) 
-        evalu_ch = res_ch.join(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, contigs]})
+        evalu_ch = res_ch.combine(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, contigs]}, by: 0)
 
         bin_ch = bin_ch.mix(PBFs.out.bins)
         res_ch = res_ch.mix(PBFs.out.res)  
-        evals_ch = res_ch.join(GT.out.skeReference.map{ meta, fragments, contigs -> [meta, contigs]})
+        evals_ch = res_ch.combine(GT.out.skeReference.map{ meta, fragments, contigs -> [meta, contigs]}, by: 0)
 
     }
 
@@ -104,7 +104,7 @@ workflow {
     evalp_ch | view
     evalu_ch | view
     evals_ch | view 
-    EVALUATION(evalp_ch.mix(evalu_ch).mix(evals_ch))
+    EVALUATION(evalp_ch.mix(evals_ch).mix(evalu_ch))
     
 
 }

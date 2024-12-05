@@ -1,24 +1,24 @@
 #!/usr/bin/env nextflow
 
-def convert_species(spec) {
-  switch(spec) {
-    case 'efea':
-      species = 'Enterococcus faecium'
-      break
-    case 'kpne':
-      species = 'Klebsiella pneumoniae'
-      break
-    case 'abau':
-      species = 'Acinetobacter baumannii'
-      break
-    case 'ecol':
-      species = 'Escherichia coli'
-      break
-    default:
-      species = 'Other species'
-  }
-  return species
-}
+// def convert_species(spec) {
+//   switch(spec) {
+//     case 'efea':
+//       species = 'Enterococcus faecium'
+//       break
+//     case 'kpne':
+//       species = 'Klebsiella pneumoniae'
+//       break
+//     case 'abau':
+//       species = 'Acinetobacter baumannii'
+//       break
+//     case 'ecol':
+//       species = 'Escherichia coli'
+//       break
+//     default:
+//       species = 'Other species'
+//   }
+//   return species
+// }
 
 process extractGfa {
     storeDir "${params.input}/"
@@ -173,6 +173,7 @@ process computeScores {
     output:
     tuple val(meta), path(gc_ske), emit: gc_ske
     tuple val(meta), path(gd_ske), emit: gd_ske
+    
     tuple val(meta), path(gc_uni), emit: gc_uni
     tuple val(meta), path(gd_uni), emit: gd_uni
     

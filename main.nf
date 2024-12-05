@@ -89,15 +89,16 @@ workflow {
             PBFs("ske", 'pbf', PREPROCESS.out.skesaGfa, PREPROCESS.out.gcSke, PREPROCESS.out.gdSke)
         }
         
-        bin_ch = bin_ch.mix(PBFu.out.bins)
-        res_ch = res_ch.mix(PBFu.out.res) 
-        evalu_ch = res_ch.combine(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, contigs]}, by: 0)
+        // bin_ch = bin_ch.mix(PBFu.out.bins)
+        // res_ch = res_ch.mix(PBFu.out.res) 
+        evalu_ch = PBFu.out.res.combine(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, contigs]}, by: 0)
 
         evalu_ch | view
 
-        bin_ch = bin_ch.mix(PBFs.out.bins)
-        res_ch = res_ch.mix(PBFs.out.res)  
-        evals_ch = res_ch.combine(GT.out.skeReference.map{ meta, fragments, contigs -> [meta, contigs]}, by: 0)
+        // bin_ch = bin_ch.mix(PBFs.out.bins)
+        // res_ch = res_ch.mix(PBFs.out.res)  
+        evals_ch = PBFs.out.res.combine(GT.out.skeReference.map{ meta, fragments, contigs -> [meta, contigs]}, by: 0)
+        evals_ch | view
 
     }
 

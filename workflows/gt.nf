@@ -33,13 +33,13 @@ process blast {
     errorStrategy 'terminate'
 
     input:
-    tuple val(meta), path(graph), path(mix), path(uni), path(ske)
+    tuple val(meta), path(graph), path(mix), path(ske), path(uni)
     tuple val(meta2), path(reference)
 
     output:
     tuple val(meta), path(pan_mix_gt), path(mix_gt), emit: pangt
-    tuple val(meta), path(pan_uni_gt), path(uni_gt), emit: unigt
     tuple val(meta), path(pan_ske_gt), path(ske_gt), emit: skegt
+    tuple val(meta), path(pan_uni_gt), path(uni_gt), emit: unigt
 
 
     script:
@@ -85,6 +85,6 @@ workflow GT {
 
     emit:
     mixReference = blast.out.pangt
-    uniReference = blast.out.unigt
     skeReference = blast.out.skegt
+    uniReference = blast.out.unigt
 }

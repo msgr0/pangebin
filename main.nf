@@ -76,7 +76,7 @@ workflow {
         evalps_ch = res_ch.mix(naive_ch).mix(overlap_ch)
         evalps_ch = evalps_ch.combine(GT.out.skeReference.map { meta, fragments, contigs -> [meta, fragments]}, by: 0)        
         
-        evalp_ch = evalpu_ch.mix(evalps_ch) | view
+        evalp_ch = evalpu_ch.mix(evalps_ch)
     }
 
     if (params.assembly) {
@@ -92,6 +92,8 @@ workflow {
         bin_ch = bin_ch.mix(PBFu.out.bins)
         res_ch = res_ch.mix(PBFu.out.res) 
         evalu_ch = res_ch.combine(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, contigs]}, by: 0)
+
+        evalu_ch | view
 
         bin_ch = bin_ch.mix(PBFs.out.bins)
         res_ch = res_ch.mix(PBFs.out.res)  

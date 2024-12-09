@@ -191,8 +191,6 @@ GT_COL = 'ground_truth'
 GC_COL = 'gc_probabilities'
 MAPPINGS_COL = 'genes2ctgs_mappings'
 PLS_SCORE_COL = 'pls_score'
-BINNING_COL = 'binning'
-PREDICTION_COL = 'prediction'
 
 def check_missing_data(samples_df, required_columns):
     """
@@ -295,18 +293,6 @@ def _get_pls_score(samples_df, sample):
 def _set_pls_score(samples_df, sample, gd_file):
     """ Set path to plasmid score (gene density) file """
     samples_df.at[sample,PLS_SCORE_COL] = gd_file
-def _get_binning(samples_df, sample):
-    """ Path to binning file """
-    return _get_sample_col(samples_df, sample, BINNING_COL)
-def _set_binning(samples_df, sample, binning_file):
-    """ Set path to binning file """
-    samples_df.at[sample,BINNING_COL] = binning_file
-def _get_prediction(samples_df, sample):
-    """ Path to prediction file """
-    return _get_sample_col(samples_df, sample, PREDICTION_COL)
-def _set_prediction(samples_df, sample, prediction_file):
-    """ Set path to prediction file """
-    samples_df.at[sample,PREDICTION_COL] = prediction_file
 
 def _write_samples_df(samples_df, out_file):
     """
@@ -344,13 +330,6 @@ GC_FILE_PREFIX='gc'
 def _gc_proba_file(in_dir, sample):
     """ GC probabilities file """
     return os.path.join(in_dir, f'{sample}.{GC_FILE_PREFIX}.tsv')
-def _binning_file(in_dir, sample):
-    """ Binning file """
-    return os.path.join(in_dir, f'{sample}.bin.tsv')
-def _prediction_file(in_dir, sample):
-    """ Prediction file """
-    return os.path.join(in_dir, f'{sample}.pred.tsv')
-
 ## Datasets wide files
 def _pls_genes_db_file(in_dir):
     """ Plasmids genes FASTA database file """
@@ -367,7 +346,6 @@ def _gc_png_file(in_dir):
 def _gc_intervals_file(in_dir):
     """ GC content intervals TXT file """
     return os.path.join(in_dir, f'{GC_FILE_PREFIX}.txt')
-
 
 # Processing functions
 
@@ -656,9 +634,6 @@ def create_seeds_parameters_file(out_dir, tmp_dir, samples_df):
     log_file(seeds_parameters_file)
 
 
-# def create_binning_mode_file(out_dir, tmp_dir, samples_df):
-# def create_prediction_file(out_dir, tmp_dir, samples_df):
-
 """ Main functions """
 
 ## Command names
@@ -671,8 +646,6 @@ CMD_TUNING = 'tuning'
 CMD_GENE_DENSITY = 'gene_density'
 CMD_GC_PROBABILITIES = 'gc_probabilities'
 CMD_PREPROCESSING = 'preprocessing'
-CMD_BINNING_MODE = 'binning_mode'
-CMD_PREDICTION = 'prediction'
 
 def _read_input_samples_file(cmd, input_file):
     check_file(input_file)
@@ -685,9 +658,7 @@ def _read_input_samples_file(cmd, input_file):
         CMD_TUNING: [GFA_COL,PLS_COL,CHR_COL],
         CMD_GENE_DENSITY: [GFA_COL,MAPPINGS_COL],
         CMD_GC_PROBABILITIES: [GFA_COL],
-        CMD_PREPROCESSING: [GFA_COL],
-        CMD_BINNING_MODE: [BINNING_COL],
-        CMD_PREDICTION: [PREDICTION_COL]
+        CMD_PREPROCESSING: [GFA_COL]
     }
     samples_df = read_samples(input_file, required_columns[cmd])
     return samples_df
@@ -725,16 +696,7 @@ def _clean_output_files(cmd, samples_df, out_dir, tmp_dir):
         CMD_GC_PROBABILITIES: [
             _gc_proba_file(out_dir, sample)
             for sample in samples_list
-        ],
-        CMD_BINNING_MODE: [
-            _binning_file(out_dir, sample)
-            for sample in samples_list
-        ],
-        CMD_PREDICTION: [
-            _prediction_file(out_dir, sample)
-            for sample in samples_list
         ]
-
     }
     clean_files(files2clean[cmd])
 
@@ -823,21 +785,6 @@ def _cmd_preprocessing(args, samples_df):
         if MAPPINGS_COL not in samples_df.columns:
             _cmd_map_genes_to_ctgs(args, samples_df, create_tmp_dir=True)
         _cmd_gene_density(args, samples_df)
-
-# def _cmd_binning_mode(args, samples_df):
-#     """ Command to create the binning mode file """
-#     _clean_output_files(CMD_BINNING_MODE, samples_df, args.out_dir, args.tmp_dir)
-#     create_binning_mode_file(
-#         args.out_dir, args.tmp_dir, samples_df
-#     )
-
-# def _cmd_prediction(args, samples_df):
-#     """ Command to create the prediction file """
-#     _clean_output_files(CMD_PREDICTION, samples_df, args.out_dir, args.tmp_dir)
-#     create_prediction_file(
-#         args.out_dir, args.tmp_dir, samples_df
-#     )
-
     
 def _read_arguments():
     argparser = argparse.ArgumentParser(description='PlasBin-flow utils')
@@ -898,15 +845,6 @@ def _read_arguments():
     preprocessing_parser.add_argument('--pid_threshold', type=float, default=DEFAULT_PID_THRESHOLD, help='Percent identity threshold in [0,1]')
     preprocessing_parser.add_argument('--cov_threshold', type=float, default=DEFAULT_COV_THRESHOLD, help='Percent gene coverage threshold in [0,1]')
     preprocessing_parser.add_argument('--db_file', type=str, help='Plasmids genes database FASTA file')
-    binning_parser = subparsers.add_parser(CMD_BINNING_MODE, parents=[argparser], add_help=False)
-    binning_parser.set_defaults(cmd=CMD_BINNING_MODE)
-    binning_parser.add_argument('--out_file', type=str, help='Path to dataset file with added binning mode files')
-    binning_parser.add_argument('--mode', type=str, help='Binning mode to extend bins. Options: [naive, overlap]')
-
-    prediction_parser = subparsers.add_parser(CMD_PREDICTION, parents=[argparser], add_help=False)
-    prediction_parser.set_defaults(cmd=CMD_PREDICTION)
-    prediction_parser.add_argument('--out_file', type=str, help='Path to dataset file with added prediction files')
-
 
     return argparser.parse_args()
 
@@ -947,13 +885,6 @@ def main(args):
     elif args.cmd == CMD_PREPROCESSING:
         _cmd_preprocessing(args, samples_df)        
         _write_output_samples_file(args, samples_df)
-    # elif args.cmd == CMD_BINNING_MODE:
-    #     _cmd_binning_mode(args, samples_df)
-    #     _write_output_samples_file(args, samples_df)
-    # elif args.cmd == CMD_PREDICTION:
-    #     _cmd_prediction(args, samples_df)
-    #     _write_output_samples_file(args, samples_df)
-
         
     if not args.keep_tmp_dir:
         shutil.rmtree(args.tmp_dir)

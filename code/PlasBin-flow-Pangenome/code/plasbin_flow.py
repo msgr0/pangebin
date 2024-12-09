@@ -17,6 +17,8 @@ import pandas as pd
 
 import model_setup
 
+import extend_bins
+
 from data_utils import (
     LEN_KEY,
     SEED_KEY,
@@ -105,6 +107,7 @@ def parse_arguments():
     other.add_argument("-min_pls_len", type=int, default=DEFAULT_MIN_PLS_LEN, help="Minimum plasmid length to be reported")
     other.add_argument("-min_ctg_len", type=int, default=DEFAULT_MIN_CTG_LEN, help="Minimum contig length to account for plasmid score")
     other.add_argument("-default_pls_score", type=float, default=DEFAULT_PLS_SCORE, help="Default plasmid score")
+    other.add_argument("-bin_mode", type=str, default="std", help="Binning mode (standard[std] / overlap[ovl] / naive[nve])")
     other.add_argument("--nopenalty", action='store_true', default=False, help="No penalty for contigs")
     
     return parser.parse_args()
@@ -138,6 +141,7 @@ if __name__ == "__main__":
     min_pls_len = args.min_pls_len
     min_ctg_len = args.min_ctg_len
     default_pls_score = args.default_pls_score
+    binning_mode = args.bin_mode
 
     # Initialize logging
     logging.basicConfig(
@@ -568,18 +572,35 @@ if __name__ == "__main__":
 
          
     output_bins.write('#Pls_ID\tFlow\tGC_bin\tLength\tContigs\n')
-    for p in pbf_bins:
-        fval = "%.2f" % pbf_bins[p]["Flow"]
-        gcb = pbf_bins[p]["GC_bin"]
-        pl_length = pbf_bins[p]["Length"]
+    if (binning_mode == "standard" or binning_mode == "std"):
+        for p in pbf_bins:
+            fval = "%.2f" % pbf_bins[p]["Flow"]
+            gcb = pbf_bins[p]["GC_bin"]
+            pl_length = pbf_bins[p]["Length"]
+            
+            output_bins.write("P" + str(p) + "\t" + str(fval)  + "\t"+ str(gcb) + "\t" + str(pl_length) + "\t" )
+            nctg = 0
+            for c in pbf_bins[p]["Contigs"]:
+                ctg_mul = pbf_bins[p]["Contigs"][c]
+                if nctg == 0:
+                    output_bins.write(c + ":" + str(ctg_mul))
+                else:
+                    output_bins.write("," + c + ":" + str(ctg_mul))
+                nctg += 1
+            output_bins.write('\n')
+    elif (binning_mode == "overlap" or binning_mode == "ovl"):
+        # extend_bins(ovl, pbf_bins)["Flow"]
+        # extend_bins(pbf_bins)["GC_bin"]
+        # extend_bins(pbf_bins)["Length"]
+        # extend_bins(pbf_bins)["Contigs"][c] for loop
         
-        output_bins.write("P" + str(p) + "\t" + str(fval)  + "\t"+ str(gcb) + "\t" + str(pl_length) + "\t" )
-        nctg = 0
-        for c in pbf_bins[p]["Contigs"]:
-            ctg_mul = pbf_bins[p]["Contigs"][c]
-            if nctg == 0:
-                output_bins.write(c + ":" + str(ctg_mul))
-            else:
-                output_bins.write("," + c + ":" + str(ctg_mul))
-            nctg += 1
-        output_bins.write('\n')
+        pass
+    elif (binning_mode == "naive" or binning_mode == "nve"):
+        # extend_bins
+        # extend_bins(nve, pbf_bins)["Flow"]
+        # extend_bins(pbf_bins)["GC_bin"]
+        # extend_bins(pbf_bins)["Length"]
+        # extend_bins(pbf_bins)["Contigs"][c] for loop
+        pass
+    else:
+        logging.error("Invalid binning mode. Exiting")

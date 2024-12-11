@@ -22,7 +22,7 @@ from pangebin.graph_utils import (
     rename_contigs,
 )
 
-APP = typer.Typer(rich_markup_mode="rich")
+APP = typer.Typer()
 
 
 @dataclass
@@ -41,13 +41,14 @@ class PreprocessArgs:
         help="Unicler GFA assembly graph file",
     )
 
-    ARG_OUTPUT_DIR = typer.Argument(
+    ARG_OUTPUT_DIR = typer.Option(
+        "--outdir",
         # DOCU: here we will place unicycler.gfa skesa.gfa, unicycler.fasta, skesa.fasta, mixed.fasta.gz
         help="Output folder",
     )
 
     OPT_THRESHOLD = typer.Option(
-        1,
+        "--thr",
         help="Threshold length for removing nodes",
     )
 
@@ -97,26 +98,34 @@ class ModArgs:
 def preprocess(
     outdir: Annotated[Path, PreprocessArgs.ARG_OUTPUT_DIR],
     sample: Annotated[str, PreprocessArgs.ARG_SAMPLE_NAME],
-    u_gfa: Annotated[Path, PreprocessArgs.ARG_INPUT_UNI_GFA],
-    s_gfa: Annotated[Path, PreprocessArgs.ARG_INPUT_SKE_GFA],
-    threshold: Annotated[str, PreprocessArgs.OPT_THRESHOLD],
+    ugfa: Annotated[Path, PreprocessArgs.ARG_INPUT_UNI_GFA],
+    sgfa: Annotated[Path, PreprocessArgs.ARG_INPUT_SKE_GFA],
+    threshold: Annotated[int, PreprocessArgs.OPT_THRESHOLD],
 ):
-    """Preprocess GFA Gfa Assembly files files."""
+    """Preprocess GFA Gfa Assembly files."""
     typer.echo("Preprocessing GFA files")
     outdir.mkdir(parents=True, exist_ok=True)
 
-    ext_u_gfa = extract_gfagz(u_gfa)
-    ext_s_gfa = extract_gfagz(s_gfa)
+    ext_u_gfa = extract_gfagz(ugfa)
+    ext_s_gfa = extract_gfagz(sgfa)
 
-    r_u_gfa = rename_contigs(ext_u_gfa, "u")
-    r_s_gfa = convert_kc_to_dp(rename_contigs(ext_s_gfa, "s"))
+    r_u_gfa = rename_contigs(ext_u_gfa, "uni")
+    r_s_gfa = convert_kc_to_dp(rename_contigs(ext_s_gfa, "ske"))
 
-    rnode_u_gfa = remove_nodes(r_u_gfa, threshold, f"{outdir}/{sample}.u.gfa")
-    rnode_s_gfa = remove_nodes(r_s_gfa, threshold, f"{outdir}/{sample}.s.gfa")
+    rnode_u_gfa = remove_nodes(
+        r_u_gfa,
+        threshold,
+        f"{outdir}/{sample}.{threshold}.u.gfa",
+    )
+    rnode_s_gfa = remove_nodes(
+        r_s_gfa,
+        threshold,
+        f"{outdir}/{sample}.{threshold}.s.gfa",
+    )
 
-    u_fasta = gfa_to_fasta(rnode_u_gfa, f"{outdir}/{sample}.u.fasta")
-    s_fasta = gfa_to_fasta(rnode_s_gfa, f"{outdir}/{sample}.s.fasta")
-    mix_fasta([u_fasta, s_fasta], f"{outdir}/{sample}.mixed.fasta")
+    u_fasta = gfa_to_fasta(rnode_u_gfa, f"{outdir}/{sample}.{threshold}.u.fasta")
+    s_fasta = gfa_to_fasta(rnode_s_gfa, f"{outdir}/{sample}.{threshold}.s.fasta")
+    mix_fasta([u_fasta, s_fasta], f"{outdir}/{sample}.{threshold}.mix.fasta")
 
 
 @APP.command()
@@ -240,3 +249,7 @@ def mod_bins(
 
     else:
         pass
+
+
+if __name__ == "__main__":
+    APP()

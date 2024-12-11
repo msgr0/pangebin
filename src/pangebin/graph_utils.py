@@ -65,7 +65,7 @@ def etos(edge):
     elif edge[1][2] == "r":
         r_orient = edge[1][1]
 
-    return gfapy.line(f"l\t{edge[0][0]}\t{l_orient}\t{edge[1][0]}\t{r_orient}\t0m")
+    return gfapy.Line(f"L\t{edge[0][0]}\t{l_orient}\t{edge[1][0]}\t{r_orient}\t0M")
 
 
 def extract_node(edge, orient, name):
@@ -99,47 +99,47 @@ def rename_contigs(
     gfa,
     prefix,
 ) -> gfapy.gfa:
-    graph = gfapy.gfa.from_file(gfa, vlevel=0)
+    graph = gfa
+    # graph = gfapy.gfa.Gfa.from_file(gfa, vlevel=0)
     graph.validate()
     graph.vlevel = 3
     counter = 1
     for seg in graph.segments:
-        if seg.ln is not None:
-            if seg.ln == 0:
+        if seg.LN is not None:
+            if seg.LN == 0:
                 seg.sequence = "*"
-                seg.ln = 0
+                seg.LN = 0
                 graph.validate()
         elif len(seg.sequence) == 0:
             seg.sequence = "*"
-            seg.ln = 0
+            seg.LN = 0
             graph.validate()
         seg.name = f"{prefix}{counter}"
         counter += 1
     graph.validate()
-    graph.to_file(gfa)
+    # graph.to_file(gfa)
     return graph
 
 
 def convert_kc_to_dp(
     gfa,
 ) -> gfapy.gfa:
-    graph = gfapy.gfa.from_file(gfa, vlevel=0)
+    graph = gfa
     graph.validate()
     total_coverage = 0
     total_length = 0
     for seg in graph.segments:
-        total_coverage += seg.kc
-        if seg.ln is None:
-            seg.set_datatype("ln", "i")
-            seg.ln = len(seg.sequence)
-        total_length += seg.ln
+        total_coverage += seg.KC
+        if seg.LN is None:
+            seg.set_datatype("LN", "i")
+            seg.LN = len(seg.sequence)
+        total_length += seg.LN
 
     for seg in graph.segments:
         seg.set_datatype("dp", "f")
-        seg.dp = float((seg.kc * total_length) / (seg.ln * total_coverage))
-        seg.kc = None
+        seg.dp = float((seg.KC * total_length) / (seg.LN * total_coverage))
+        seg.KC = None
     graph.validate()
-    graph.to_file(gfa)
     return graph
 
 
@@ -158,14 +158,14 @@ def remove_nodes_fasta(fasta, threshold, output):
 
 def remove_nodes(gfa, threshold, output):
     for seg in gfa.segments:
-        if (seg.ln is not None and threshold >= seg.ln) or (
+        if (seg.LN is not None and threshold >= seg.LN) or (
             len(seg.sequence) <= threshold
         ):
             pass
         else:
             continue
-        right_edges = list(seg.dovetails_r)
-        left_edges = list(seg.dovetails_l)
+        right_edges = list(seg.dovetails_R)
+        left_edges = list(seg.dovetails_L)
         right_nodes = set()  # edge(node, orient, 'r')
         left_nodes = set()
 
@@ -185,15 +185,17 @@ def remove_nodes(gfa, threshold, output):
         gfa.validate()
         for edge in pairs:
             new_edge = etos(edge)
-            with contextlib.suppress(exception):
+            with contextlib.suppress(gfapy.error.NotUniqueError):
                 gfa.add_line(new_edge)
         gfa.validate()
     gfa.to_file(output)
+    return output
 
 
 def gfa_to_fasta(gfa, fasta):
-    command = f'awk \'/^s/\u007bprint ">"$2; print ""$3\u007d\' {gfa} > {fasta}'
+    command = f'awk \'/^S/\u007bprint ">"$2; print ""$3\u007d\' {gfa} > {fasta}'
     subprocess.call(command, shell=True)
+    return fasta
 
 
 def mix_fasta(fasta_list, output):
@@ -246,11 +248,12 @@ def add_gfa_to_pangenome(gfa, pangenome):
         from_orient = edge.from_orient
         to_orient = edge.to_orient
 
-        with contextlib.suppress(exception):
+        try:
             path_from_contig = get_path_by_name(pangenome, from_contig.name)
-
-        with contextlib.suppress(exception):
             path_to_contig = get_path_by_name(pangenome, to_contig.name)
+        except:
+            print("path not found")
+            sys.exit(1)
 
         if path_from_contig is None or path_to_contig is None:
             continue
@@ -280,8 +283,8 @@ def add_gfa_to_pangenome(gfa, pangenome):
             right_frag = [x.name for x in path_from_contig.segment_names][0]
             right_orient = "+"
 
-        new_edge = gfapy.line(
-            f"l\t{left_frag}\t{left_orient}\t{right_frag}\t{right_orient}\t0m\taa:a:{_type}\tlt:z:{_type}{_type}",
+        new_edge = gfapy.Line(
+            f"L\t{left_frag}\t{left_orient}\t{right_frag}\t{right_orient}\t0M\taa:A:{_type}\tlt:Z:{_type}{_type}",
         )
 
         try:
@@ -302,9 +305,9 @@ def add_gfa_to_pangenome(gfa, pangenome):
 def compute_scores(pangenome):
     for edge in pangenome.dovetails:
         if edge.lt is None:
-            edge.set_datatype("aa", "a")
+            edge.set_datatype("aa", "A")
             edge.aa = "p"
-            edge.set_datatype("lt", "z")
+            edge.set_datatype("lt", "Z")
             inc = pangenome.segment(edge.from_segment.name).aa
             out = pangenome.segment(edge.to_segment.name).aa
             if inc is None:
@@ -348,7 +351,7 @@ def compute_scores(pangenome):
     for seg in pangenome.segments:
         seg.set_datatype("ap", "f")
         if seg.aa in ("u", "s"):
-            penalty_value = seg.ln / 1000
+            penalty_value = seg.LN / 1000
             penalty_value = min(penalty_value, 1)
             seg.ap = penalty_value
         else:
@@ -359,14 +362,14 @@ def clean_pangenome(gfa):
     gfa.validate()
 
     for seg in gfa.segments:
-        seg.set_datatype("oc", "i")  # occurences in paths
-        seg.oc = 0
-        seg.set_datatype("cl", "z")  # segment list
+        seg.set_datatype("OC", "i")  # occurences in paths
+        seg.OC = 0
+        seg.set_datatype("cl", "Z")  # segment list
         seg.cl = ""
-        seg.set_datatype("ll", "z")  # length of segment list
+        seg.set_datatype("ll", "Z")  # length of segment list
         seg.ll = ""
-        seg.ln = len(seg.sequence)
-        seg.set_datatype("aa", "a")  # assembly type
+        seg.LN = len(seg.sequence)
+        seg.set_datatype("aa", "A")  # assembly type
 
     for path in gfa.paths:
         segs = path.segment_names
@@ -374,34 +377,34 @@ def clean_pangenome(gfa):
         path_len = 0
         for seg in segs:
             segment = gfa.segment(seg.name)
-            segment.oc += 1
-            path_len += segment.ln
+            segment.OC += 1
+            path_len += segment.LN
             if segment.cl == "":
                 segment.cl = path.name
             else:
                 segment.cl += "," + path.name
 
-        path.set_datatype("ln", "i")
-        path.ln = path_len
+        path.set_datatype("LN", "i")
+        path.LN = path_len
 
-        path.set_datatype("aa", "a")
+        path.set_datatype("aa", "A")
         path.aa = _type
 
     for path in gfa.paths:
         segs = path.segment_names
         for seg in segs:
             segment = gfa.segment(seg.name)
-            segment_perc = segment.ln / float(path.ln)
+            segment_perc = segment.LN / float(path.LN)
             if segment.ll == "":
                 segment.ll = f"{segment_perc:.6f}"
             else:
                 segment.ll += f",{segment_perc:.6f}"
 
     for seg in gfa.segments:
-        if seg.ln < 1:
+        if seg.LN < 1:
             seg.disconnect()
             continue
-        if seg.oc == 0:
+        if seg.OC == 0:
             seg.disconnect()
             continue
 
@@ -415,10 +418,12 @@ def clean_pangenome(gfa):
                 seg.aa = sorted_clist[0][0]
 
     gfa.validate()
+    return gfa
 
 
 def extract_gfagz(gfagz) -> gfapy.Gfa:
-    command = f"bgzip -d {gfagz}"
+    command = f"bgzip -dkf {gfagz}"
+
     subprocess.call(command, shell=True)
     filename = str(gfagz)[:-3]
     gfa = gfapy.Gfa.from_file(filename, vlevel=0)

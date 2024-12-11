@@ -1,11 +1,11 @@
-"""
-    #!/usr/bin/env bash
+"""#!/usr/bin/env bash
 
-    python $projectDir/bin/evaluation/ncbi_link.py --input ${meta.id} --output ${referencegz}
-    bgzip -d -c ${referencegz} > ${reference}
+python $projectDir/bin/evaluation/ncbi_link.py --input ${meta.id} --output ${referencegz}
+bgzip -d -c ${referencegz} > ${reference}
 
-    python $projectDir/bin/evaluation/strip_plasmid_fasta.py --input ${reference} --output ${reference_ren}
+python $projectDir/bin/evaluation/strip_plasmid_fasta.py --input ${reference} --output ${reference_ren}
 """
+
 """
 
  python $projectDir/bin/evaluation/build_truth.py --pangenome ${graph} --assembly ${mix} --reference ${reference} --output ${outmix}

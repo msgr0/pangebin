@@ -1,0 +1,7 @@
+[project]
+    name = "pangebin"
+    version = "0.0.2"
+    [project.scripts]
+        pangebin = "pangebin.__main__:main"
+
+    

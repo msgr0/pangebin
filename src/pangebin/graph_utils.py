@@ -304,6 +304,8 @@ def add_gfa_to_pangenome(gfa, pangenome):
 
 def compute_scores(pangenome):
     for edge in pangenome.dovetails:
+        if pangenome.segment(edge.from_segment.name).name == "1":
+            print(pangenome.segment(edge.from_segment.name))
         if edge.lt is None:
             edge.set_datatype("aa", "A")
             edge.aa = "p"
@@ -314,7 +316,21 @@ def compute_scores(pangenome):
                 inc = "n"
             if out is None:
                 out = "n"
+
             edge.lt = inc + out
+        inc = pangenome.segment(edge.from_segment.name).aa
+        out = pangenome.segment(edge.to_segment.name).aa
+        if (
+            pangenome.segment(edge.from_segment.name).OC == 1
+            and float(pangenome.segment(edge.from_segment.name).ll.split(",")[0]) == 1.0
+        ):
+            inc = inc.upper()
+        if (
+            pangenome.segment(edge.to_segment.name).OC == 1
+            and float(pangenome.segment(edge.to_segment.name).ll.split(",")[0]) == 1.0
+        ):
+            out = out.upper()
+        edge.lt = inc + out
 
     for path in pangenome.paths:
         path.set_datatype("cv", "f")  # normalized coverage

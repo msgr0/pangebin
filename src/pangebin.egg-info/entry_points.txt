@@ -1,2 +1,0 @@
-[console_scripts]
-pangebin = pangebin.__main__:main

@@ -1,3 +1,5 @@
+"""Utilities to manipulate assemblis and pangenomes in GFA format."""
+
 import contextlib
 import subprocess
 import sys

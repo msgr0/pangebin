@@ -137,7 +137,8 @@ process makePangenome {
     nextflow run nf-core/pangenome -r ${release} -profile $profile -resume --input ${mixed_fasta}.gz --n_haplotypes ${haplos} --outdir ${out_core} -params-file ${paramfile}
     cp ${out_core}/FINAL_GFA/${mixed_fasta}.gz.gfaffix.unchop.Ygs.view.gfa ${pangenome}
     """
-
+    // bgzip /data/proj/pangebin/data-test/SAMN02786856/SAMN02786856.1.fa 
+    // nextflow run nf-core/pangenome -r 1.1.2 -profile podman -resume --input /data/proj/pangebin/data-test/SAMN02786856/SAMN02786856.1.fa.gz --n_haplotypes 2 --outdir test-nfcore.txt -params-file pangenome-params.json
 }
 
 process makePanassembly {

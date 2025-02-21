@@ -1,48 +1,52 @@
 # Pangebin Pipeline (WIP)
 
-Pangebin is a collection of methods aimed at performing the task of "plasmid binning" on a bacterial sample,
-exploiting a pangenome construction on a pair of assembly graph, running a modified version of @chauvec 's Plasbin-Flow
-and, lastly, 
+Pangebin is a pipeline aimed at performing the task of "plasmid binning" on a bacterial sample
+exploiting a pangenome construction on a pair of assembly graph using `nf-core/pangenome`,
+running a modified version of @chauvec's `Plasbin-Flow`.
 
 **Requirements**
-- nextflow
-- PBF requirements:
+- nextflow + java 17
+- python 3.11
+- gurobi license
+- conda/mamba
 
-using conda
-using docker/podman, a single docker image prebuilt for this task
-using singularity, a single singularity image prebuilt for this task
- 
-using it locally (we assume that every requirement is satisfied locally)
+**Prior to run the pipeline**
+Clone the repoistory, cd into it and checkout the `ismb2025` branch:
+```
+git clone ...
+cd pangebin
+git checkout ismb2025
+```
 
+Prepare your samples: provide for each sample a folder named after its biosample_id,
+inside put the gfa(s) built for your short read sample using Unicycler and Skesa, named
+respectively as `unicycler.gfa.gz` and `skesa.gfa.gz`.
+Note that the `gfa` files are compressed using `bgzip` (from `htslib`).
 
+The dataset used for the experiment used for ISMB2025 submission can be found in the `dataset-input.tar.gz` file.
+De-compress it to the `dataset` folder
+```
+tar xvf dataset-input.tar.gz --directory=./dataset
+```
+<!-- Moreover, you can find the whole dataset (complete of intermediate and output files) at ...
+```
+tar xvf dataset-whole.tar.gz --directory=./dataset-processed
+``` -->
 **Running the pipeline**
-1. pangenome construction   `--profile step1`\
-     input: `u.gfa.gz`, `s.gfa.gz`\
-     output: `psm.gfa.gz`
-     
-2. model + binning          `--profile step2`\
-    input:  `psm.gfa.gz`\
-    output:  `bins.tsv`
-
-3. evaluation               `--profile step3`\
-     input:  `psm.gfa.gz`, `bins.tsv`, ID\
-     output:  `eval.labeling.txt`, `eval.binning.txt`
-     
-- whole pipeline             `--profile all` (or no profile)\
-     input:  `u.gfa.gz`, `s.gfa.gz`, ID\
-     output:  `pangenome`, `bins`, `eval.labeling.txt`, `eval.binning.txt`\
-
-## Assembly graphs and Pangenome construction
-
-The input is composed by:
- - unicycler and skesa graphs in .gfa or .gfagz format
- - pangenome graph built with nf-core Pangenome (PGGB).
 
 
-## Plasbin-Flow + pangenome
-tbd
-
-## Output Bins
-tbd
-
-
+Run the pipeline on a sample of choice in the dataset:
+```
+$SAMPLE_ID=""
+nextflow run . --input dataset/$SAMPLE_ID
+```
+You can find the results in the same input folder:
+- binning output
+     - plasbin-flow `$SAMPLE_ID.{ske,uni}.1.pbf.bins.tsv`
+     - pangebin `$SAMPLE_ID.pan.1.pbf.bins.tsv`
+- binning results 
+     - plasbin-flow `$SAMPLE_ID.{ske,uni}.1.pbf.pred.{ske,uni}.bin.txt`
+     - pangebin: `$SAMPLE_ID.pan.1.pbf.pred.{uni,ske}.bin.txt`
+- labeling results
+     - plasbin-flow `$SAMPLE_ID.{ske,uni}.1.pbf.pred.{ske,uni}.lab.txt`
+     - pangebin `$SAMPLE_ID.pan.1.pbf.pred.{uni,ske}.lab.txt`

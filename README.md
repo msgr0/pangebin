@@ -39,6 +39,7 @@ Run the pipeline on a sample of choice in the dataset (replace xxxxxx with an ac
 ```
 export SAMPLE_ID="xxxxxxxx"
 ```
+
 Chose either `conda` or `mamba` as running backend, to run the main `pangebin` pipeline:
 ```
 nextflow run . --input dataset/$SAMPLE_ID -profile conda
@@ -47,7 +48,8 @@ or
 ```
 nextflow run . --input dataset/$SAMPLE_ID -profile mamba
 ```
-To run original plasbin-flow on skesa and unicycler assemblies separately run
+
+To run also original `plasbin-flow` on skesa and unicycler assemblies separately run:
 ```
 nextflow run . --input dataset/$SAMPLE_ID -profile conda --assemblers
 ```

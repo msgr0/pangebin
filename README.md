@@ -1,4 +1,4 @@
-# Pangebin [ISMB 2025]
+# Pangebin Pipeline (WIP)
 
 Pangebin is a pipeline aimed at performing the task of "plasmid binning" on a bacterial sample
 exploiting a pangenome construction on a pair of assembly graph using `nf-core/pangenome`,
@@ -36,15 +36,26 @@ tar xvf dataset-whole.tar.gz --directory=./dataset-processed
 
 
 Run the pipeline on a sample of choice in the dataset (replace xxxxxx with an actual folder name found in `dataset`).
-To run `pangebin`, building the pangenome:
 ```
 export SAMPLE_ID="xxxxxxxx"
-nextflow run . --input dataset/$SAMPLE_ID -profile {conda,mamba} --pangenome
 ```
-To run original plasbin-flow on skesa and unicycler assemblies separately run
+
+Chose either `conda` or `mamba` as running backend, to run the main `pangebin` pipeline:
 ```
-export SAMPLE_ID="xxxxxxxx"
-nextflow run . --input dataset/$SAMPLE_ID -profile {conda,mamba} --assemblers
+nextflow run . --input dataset/$SAMPLE_ID -profile conda
+```
+or 
+```
+nextflow run . --input dataset/$SAMPLE_ID -profile mamba
+```
+
+To run also original `plasbin-flow` on skesa and unicycler assemblies separately run:
+```
+nextflow run . --input dataset/$SAMPLE_ID -profile conda --assemblers
+```
+or
+```
+nextflow run . --input dataset/$SAMPLE_ID -profile mamba --assemblers
 ```
 You can find the results in the same input folder:
 - binning output

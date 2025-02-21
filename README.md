@@ -1,4 +1,4 @@
-# Pangebin Pipeline (WIP)
+# Pangebin [ISMB 2025]
 
 Pangebin is a pipeline aimed at performing the task of "plasmid binning" on a bacterial sample
 exploiting a pangenome construction on a pair of assembly graph using `nf-core/pangenome`,

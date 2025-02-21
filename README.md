@@ -6,7 +6,7 @@ running a modified version of @chauvec's `Plasbin-Flow`.
 
 **Requirements**
 - nextflow + java 17
-- python 3.11
+- python 3.10
 - gurobi license
 - conda/mamba
 

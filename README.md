@@ -36,11 +36,10 @@ tar xvf dataset-whole.tar.gz --directory=./dataset-processed
 
 
 Run the pipeline on a sample of choice in the dataset (replace xxxxxx with an actual folder name found in `dataset`).
-Chose either `conda` or `mamba` as running backend.
-To run `pangebin`, building the pangenome:
 ```
 export SAMPLE_ID="xxxxxxxx"
 ```
+Chose either `conda` or `mamba` as running backend, to run the main `pangebin` pipeline:
 ```
 nextflow run . --input dataset/$SAMPLE_ID -profile conda
 ```

@@ -6,3 +6,6 @@ test_data
 pyenv
 venv
 .DS_Store
+dataset/
+misc/
+__pycache__/

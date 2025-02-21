@@ -418,7 +418,7 @@ workflow PREPROCESS {
         // }
 
     }   
-    if (params.assembly && ! params.pangenome) {         
+    if (params.assemblers && ! params.pangenome) {         
         result = computeScores(skesaGfa_ch.join(uniGfa_ch))
         // if (params.ml) {
         //     mlres = computeMLscores(skesaGfa_ch.join(uniGfa_ch))

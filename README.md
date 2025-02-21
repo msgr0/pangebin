@@ -23,10 +23,10 @@ inside put the gfa(s) built for your short read sample using Unicycler and Skesa
 respectively as `unicycler.gfa.gz` and `skesa.gfa.gz`.
 Note that the `gfa` files are compressed using `bgzip` (from `htslib`).
 
-The dataset used for the experiment used for ISMB2025 submission can be found in the `dataset-input.tar.gz` file.
-De-compress it to the `dataset` folder
+The dataset used for the experiment used for ISMB2025 submission can be found in the `dataset.tar.gz` file.
+De-compress it, the command will create a `database` folder.
 ```
-tar xvf dataset-input.tar.gz --directory=./dataset
+tar xavf dataset.tar.gz
 ```
 <!-- Moreover, you can find the whole dataset (complete of intermediate and output files) at ...
 ```
@@ -35,10 +35,16 @@ tar xvf dataset-whole.tar.gz --directory=./dataset-processed
 **Running the pipeline**
 
 
-Run the pipeline on a sample of choice in the dataset:
+Run the pipeline on a sample of choice in the dataset (replace xxxxxx with an actual folder name found in `dataset`).
+To run `pangebin`, building the pangenome:
 ```
-$SAMPLE_ID=""
-nextflow run . --input dataset/$SAMPLE_ID
+export SAMPLE_ID="xxxxxxxx"
+nextflow run . --input dataset/$SAMPLE_ID -profile {conda,mamba} --pangenome
+```
+To run original plasbin-flow on skesa and unicycler assemblies separately run
+```
+export SAMPLE_ID="xxxxxxxx"
+nextflow run . --input dataset/$SAMPLE_ID -profile {conda,mamba} --assemblers
 ```
 You can find the results in the same input folder:
 - binning output

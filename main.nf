@@ -57,12 +57,8 @@ workflow {
     evalu_ch = Channel.empty()
 
     if (params.pangenome) {
-        if (params.mlp) {
-            PBFp('pan', 'mlp', PREPROCESS.out.panasmGfa, PREPROCESS.out.gcPan, PREPROCESS.out.mlPan)
-        }
-        else {
             PBFp('pan', 'pbf', PREPROCESS.out.panasmGfa, PREPROCESS.out.gcPan, PREPROCESS.out.gdPan)
-        }
+
 
         bin_ch = bin_ch.mix(PBFp.out.bins)
         res_ch = res_ch.mix(PBFp.out.res)
@@ -79,15 +75,9 @@ workflow {
         evalp_ch = evalpu_ch.mix(evalps_ch)
     }
 
-    if (params.assembly) {
-        if (params.mlp) {
-            PBFu("uni", 'mlp', PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.mlUni)
-            PBFs("ske", 'mlp', PREPROCESS.out.skesaGfa, PREPROCESS.out.gcSke, PREPROCESS.out.mlSke)
-        }
-        else {
+    if (params.assemblers) {
             PBFu("uni", 'pbf', PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.gdUni)
             PBFs("ske", 'pbf', PREPROCESS.out.skesaGfa, PREPROCESS.out.gcSke, PREPROCESS.out.gdSke)
-        }
         
         // bin_ch = bin_ch.mix(PBFu.out.bins)
         // res_ch = res_ch.mix(PBFu.out.res) 

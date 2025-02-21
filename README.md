@@ -36,15 +36,25 @@ tar xvf dataset-whole.tar.gz --directory=./dataset-processed
 
 
 Run the pipeline on a sample of choice in the dataset (replace xxxxxx with an actual folder name found in `dataset`).
+Chose either `conda` or `mamba` as running backend.
 To run `pangebin`, building the pangenome:
 ```
 export SAMPLE_ID="xxxxxxxx"
-nextflow run . --input dataset/$SAMPLE_ID -profile {conda,mamba} --pangenome
+```
+```
+nextflow run . --input dataset/$SAMPLE_ID -profile conda
+```
+or 
+```
+nextflow run . --input dataset/$SAMPLE_ID -profile mamba
 ```
 To run original plasbin-flow on skesa and unicycler assemblies separately run
 ```
-export SAMPLE_ID="xxxxxxxx"
-nextflow run . --input dataset/$SAMPLE_ID -profile {conda,mamba} --assemblers
+nextflow run . --input dataset/$SAMPLE_ID -profile conda --assemblers
+```
+or
+```
+nextflow run . --input dataset/$SAMPLE_ID -profile mamba
 ```
 You can find the results in the same input folder:
 - binning output

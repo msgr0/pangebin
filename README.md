@@ -53,7 +53,7 @@ nextflow run . --input dataset/$SAMPLE_ID -profile conda --assemblers
 ```
 or
 ```
-nextflow run . --input dataset/$SAMPLE_ID -profile mamba
+nextflow run . --input dataset/$SAMPLE_ID -profile mamba --assemblers
 ```
 You can find the results in the same input folder:
 - binning output

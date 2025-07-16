@@ -31,6 +31,7 @@ process ncbi {
 process blast {
     storeDir "${params.input}/"
     errorStrategy 'terminate'
+    cache false
 
     input:
     tuple val(meta), path(graph), path(mix), path(ske), path(uni)
@@ -61,7 +62,7 @@ process blast {
     """
     #!/usr/bin/env bash
 
-    python $projectDir/bin/evaluation/build_truth.py --pangenome ${graph} --assembly ${mix} --reference ${reference} --output ${outmix}
+    python $projectDir/bin/evaluation/build_truth.py --pangenome ${graph} --assembly ${mix} --reference ${reference} --output ${outmix} --mix
     
     python $projectDir/bin/evaluation/build_truth.py --pangenome ${graph} --assembly ${uni} --reference ${reference} --output ${outuni}
 

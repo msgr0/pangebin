@@ -46,58 +46,63 @@ workflow {
     gt_ch = PREPROCESS.out.panasmGfa.join(PREPROCESS.out.mixFasta).join( PREPROCESS.out.skeFasta ).join ( PREPROCESS.out.uniFasta)
 
     GT(meta_ch, gt_ch)
+    
+    GT.out.mixReference
+    GT.out.skeReference
+    GT.out.uniReference
+}
 
-    bin_ch = Channel.empty()
-    res_ch = Channel.empty()
-    naive_ch = Channel.empty()
-    overlap_ch = Channel.empty()
+//     bin_ch = Channel.empty()
+//     res_ch = Channel.empty()
+//     naive_ch = Channel.empty()
+//     overlap_ch = Channel.empty()
 
-    evalp_ch = Channel.empty()
-    evals_ch = Channel.empty()
-    evalu_ch = Channel.empty()
+//     evalp_ch = Channel.empty()
+//     evals_ch = Channel.empty()
+//     evalu_ch = Channel.empty()
 
-    if (params.pangenome) {
-            PBFp('pan', 'pbf', PREPROCESS.out.panasmGfa, PREPROCESS.out.gcPan, PREPROCESS.out.gdPan)
+//     if (params.pangenome) {
+//             PBFp('pan', 'pbf', PREPROCESS.out.panasmGfa, PREPROCESS.out.gcPan, PREPROCESS.out.gdPan)
 
 
-        bin_ch = bin_ch.mix(PBFp.out.bins)
-        res_ch = res_ch.mix(PBFp.out.res)
-        naive_ch = naive_ch.mix(PBFp.out.naive)
-        overlap_ch = overlap_ch.mix(PBFp.out.overlap)
+//         bin_ch = bin_ch.mix(PBFp.out.bins)
+//         res_ch = res_ch.mix(PBFp.out.res)
+//         naive_ch = naive_ch.mix(PBFp.out.naive)
+//         overlap_ch = overlap_ch.mix(PBFp.out.overlap)
         
         
-        evalpu_ch = res_ch.mix(naive_ch).mix(overlap_ch)
-        evalpu_ch = evalpu_ch.combine(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, fragments]}, by: 0)
+//         evalpu_ch = res_ch.mix(naive_ch).mix(overlap_ch)
+//         evalpu_ch = evalpu_ch.combine(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, fragments]}, by: 0)
         
-        evalps_ch = res_ch.mix(naive_ch).mix(overlap_ch)
-        evalps_ch = evalps_ch.combine(GT.out.skeReference.map { meta, fragments, contigs -> [meta, fragments]}, by: 0)        
+//         evalps_ch = res_ch.mix(naive_ch).mix(overlap_ch)
+//         evalps_ch = evalps_ch.combine(GT.out.skeReference.map { meta, fragments, contigs -> [meta, fragments]}, by: 0)        
         
-        evalp_ch = evalpu_ch.mix(evalps_ch)
-    }
+//         evalp_ch = evalpu_ch.mix(evalps_ch)
+//     }
 
-    if (params.assemblers) {
-            PBFu("uni", 'pbf', PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.gdUni)
-            PBFs("ske", 'pbf', PREPROCESS.out.skesaGfa, PREPROCESS.out.gcSke, PREPROCESS.out.gdSke)
+//     if (params.assemblers) {
+//             PBFu("uni", 'pbf', PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.gdUni)
+//             PBFs("ske", 'pbf', PREPROCESS.out.skesaGfa, PREPROCESS.out.gcSke, PREPROCESS.out.gdSke)
         
-        // bin_ch = bin_ch.mix(PBFu.out.bins)
-        // res_ch = res_ch.mix(PBFu.out.res) 
-        evalu_ch = PBFu.out.res.combine(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, contigs]}, by: 0)
+//         // bin_ch = bin_ch.mix(PBFu.out.bins)
+//         // res_ch = res_ch.mix(PBFu.out.res) 
+//         evalu_ch = PBFu.out.res.combine(GT.out.uniReference.map{ meta, fragments, contigs -> [meta, contigs]}, by: 0)
 
-        evalu_ch | view
+//         evalu_ch | view
 
-        // bin_ch = bin_ch.mix(PBFs.out.bins)
-        // res_ch = res_ch.mix(PBFs.out.res)  
-        evals_ch = PBFs.out.res.combine(GT.out.skeReference.map{ meta, fragments, contigs -> [meta, contigs]}, by: 0)
-        evals_ch | view
+//         // bin_ch = bin_ch.mix(PBFs.out.bins)
+//         // res_ch = res_ch.mix(PBFs.out.res)  
+//         evals_ch = PBFs.out.res.combine(GT.out.skeReference.map{ meta, fragments, contigs -> [meta, contigs]}, by: 0)
+//         evals_ch | view
 
-    }
+//     }
 
-    // pan_ch = PREPROCESS.out.panasmGfa.map{meta, files -> meta += [asm: "p"]; [meta, files]}
+//     // pan_ch = PREPROCESS.out.panasmGfa.map{meta, files -> meta += [asm: "p"]; [meta, files]}
 
-    // evalp_ch | view
-    // evalu_ch | view
-    // evals_ch | view 
-    EVALUATION(evalp_ch.mix(evals_ch).mix(evalu_ch))
+//     // evalp_ch | view
+//     // evalu_ch | view
+//     // evals_ch | view 
+//     EVALUATION(evalp_ch.mix(evals_ch).mix(evalu_ch))
     
 
-}
+// }

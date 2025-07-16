@@ -37,7 +37,7 @@ pid_threshold = DEFAULT_PID_THRESHOLD
 cov_threshold = DEFAULT_COV_THRESHOLD
 
 
-def convert_gt(pangenome_graph, gt_csv_file, pangenome_gt_file):
+def convert_gt(pangenome_graph, gt_csv_file, pangenome_gt_file, mix):
 
     header_def = ["pls_id", "ctg_id", "coverage_str", "pls_len", "ctg_len"]
     gt_csv = pd.read_csv(gt_csv_file, sep="\t", header=None)
@@ -56,7 +56,7 @@ def convert_gt(pangenome_graph, gt_csv_file, pangenome_gt_file):
         length = 0
 
         for contig in contig_list:
-            if not contig.startswith(prefix):
+            if not contig.startswith(prefix) and not mix:
                 continue
 
             if (
@@ -142,6 +142,7 @@ def main(args):
     mapping_file = args.output + ".mapping.tsv"
     assembly_gt = args.output + ".gt.tsv"
     pangenome_gt = args.output + ".pan.gt.tsv"
+    
 
     # split fasta based on provenience, plasmid-chromosome?? or just strip the chromosome
 
@@ -157,7 +158,8 @@ def main(args):
         assembly_gt,
     )
 
-    convert_gt(args.pangenome, assembly_gt, pangenome_gt)
+    mix = args.mix if args.mix else False
+    convert_gt(args.pangenome, assembly_gt, pangenome_gt, mix)
 
 
 if __name__ == "__main__":
@@ -167,6 +169,13 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--pangenome", "-p", help="Input pangenome graph built from Skesa and Unicycler"
+    )
+    parser.add_argument(
+        "--mix",
+        "-m",
+        help="if mixed mode, provide the plasmid-mixed pangenome graph (MIXED)",
+        default=False,
+        action="store_true",
     )
     parser.add_argument(
         "--assembly",

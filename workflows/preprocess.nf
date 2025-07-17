@@ -128,7 +128,7 @@ process makePangenome {
     haplos = 2
     paramfile = "${meta.id}.params.json"
     release = '1.1.2'
-    profile = 'podman'
+    profile = 'apptainer'
 
     """
     #!/usr/bin/env bash

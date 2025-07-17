@@ -1,0 +1,14 @@
+testing samples
+
+SAMN16357453
+pbf:shows optimal results for skesa and no results for unicycler
+gplas: skesa no results, unicycler optimal result
+
+SAMN16357452
+gplas: optimal results
+pbf: unicycler precision is shit, the pangenome work good here
+
+SAMN16357470
+gplas:
+pbf: 
+shows inverted performances, pbf good recall, shitty precision, gplas good precision, shitty recall

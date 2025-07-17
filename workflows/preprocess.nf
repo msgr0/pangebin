@@ -126,7 +126,7 @@ process makePangenome {
     pangenome = "${meta.id}.pan.gfa"
     out_core = "${meta.id}_nfcore"
     haplos = 2
-    paramfile = "${meta.id}.params.conf"
+    paramfile = "${meta.id}.params.json"
     release = '1.1.2'
     profile = 'podman'
 

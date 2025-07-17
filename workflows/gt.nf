@@ -22,6 +22,10 @@ process ncbi {
 
     python $projectDir/bin/evaluation/ncbi_link.py --input ${meta.id} --output ${referencegz}
     bgzip -d -c ${referencegz} > ${reference}
+    if [ -f ${reference} ] && [ ! -s ${reference} ]; then
+        echo "File exists and is empty"
+        exit 1
+    fi
 
     python $projectDir/bin/evaluation/strip_plasmid_fasta.py --input ${reference} --output ${reference_ren}
     """

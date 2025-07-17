@@ -9,3 +9,4 @@ venv
 dataset/
 misc/
 __pycache__/
+!nextflow.config

@@ -133,7 +133,7 @@ process makePangenome {
     """
     #!/usr/bin/env bash
     touch ${paramfile}
-    echo -e '{\n\t"max_memory": "16.GB",\n\t"wfmash_segment_length": $meta.minlen,\n\t"seqwish_min_match_length": 0,\n\t"smoothxg_poa_params": "asm5",\n\t"wfmash_map_pct_id": $meta.pctid,\n\t"max_cpus": 16,\n\t"wfmash_merge_segments": true\n}' > ${paramfile}
+    echo -e '{\n\t"max_memory": "16.GB",\n\t"wfmash_segment_length": $params.minlen,\n\t"seqwish_min_match_length": 0,\n\t"smoothxg_poa_params": "asm5",\n\t"wfmash_map_pct_id": $params.pctid,\n\t"max_cpus": 16,\n\t"wfmash_merge_segments": true\n}' > ${paramfile}
 
 
     bgzip ${mixed_fasta}
@@ -405,7 +405,7 @@ workflow PREPROCESS {
         mixFasta_ch = skesaFasta_ch.combine(uniFasta_ch, by: 0)
         | mixFasta
      
-        pangenome_ch = mixFasta_ch.map{meta, file -> meta += [minlen: 1000, pctid: 95]; [meta, file]} | makePangenome
+        pangenome_ch = mixFasta_ch | makePangenome
         
         panasmGfa_ch = makePanassembly(pangenome_ch.join(skesaGfa_ch).join(uniGfa_ch)) 
         result = computeAllScores(panasmGfa_ch.join(skesaGfa_ch).join(uniGfa_ch))

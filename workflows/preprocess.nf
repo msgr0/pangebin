@@ -133,7 +133,7 @@ process makePangenome {
     """
     #!/usr/bin/env bash
     touch ${paramfile}
-    echo -e "{\n\t"max_memory": "64.GB",\n\t"wfmash_segment_length": $meta.minlen,\n\t"seqwish_min_match_length": 0,\n\t"smoothxg_poa_params": "asm5",\n\t"wfmash_map_pct_id": $meta.pctid,\n\t"max_cpus": 32,\n\t"wfmash_merge_segments": true\n}" > ${paramfile}
+    echo -e "{\n\t"max_memory": '64.GB',\n\t'wfmash_segment_length': $meta.minlen,\n\t'seqwish_min_match_length': 0,\n\t'smoothxg_poa_params': 'asm5',\n\t'wfmash_map_pct_id': $meta.pctid,\n\t'max_cpus': 32,\n\t'wfmash_merge_segments': true\n}" > ${paramfile}
 
 
     bgzip ${mixed_fasta}

@@ -2,7 +2,8 @@
 
 process ncbi {
     storeDir "${params.input}/"
-    errorStrategy 'terminate'
+    errorStrategy { sleep(Math.pow(2, task.attempt) * 5 as long); return 'retry' }
+    maxRetries 5
 
     input:
     val (meta)

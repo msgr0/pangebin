@@ -3,9 +3,7 @@
 process model {
     executor 'slurm'
     cpus 16
-    mem '32.GB'
-    time '24h'
-        
+    memory '32 GB'    
     cache 'lenient'
 
     input:

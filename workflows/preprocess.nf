@@ -117,7 +117,7 @@ process mixFasta {
 
 process makePangenome {
     executor 'slurm'
-    mem '16.GB'
+    memory '16 GB'
     cpus 16
     time '12h'
     cache 'lenient'
@@ -148,7 +148,7 @@ process makePangenome {
 
 process makePanassembly {
     executor 'slurm'
-    mem '16.GB'
+    memory '16 GB'
     cpus 8
     time '6h'
     cache 'lenient'

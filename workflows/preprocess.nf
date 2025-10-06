@@ -116,11 +116,11 @@ process mixFasta {
 }
 
 process makePangenome {
-    if (executor == 'local') {
+    if (process.executor == 'local') {
         cpus 4
         maxForks 1
         time '8h'
-    } else if (executor == 'slurm') {
+    } else if (process.executor == 'slurm') {
         cpus 16
         time '12h'
     }

@@ -1,4 +1,7 @@
 #!/usr/bin/env nextflow
+
+include { PANGENOME                } from '$projectDir/modules/nf-core/pangenome/workflows/pangenome'
+
 def metaname(meta) {
     def name = meta.id
     if (meta.containsKey('species')) {
@@ -129,6 +132,9 @@ process makePangenome {
     tuple val(meta), path(pangenome), emit: pangenome
 
     script:
+
+    PANGENOME()
+
     pangenome = metaname(meta) + "pan.gfa"
     out_core = "${meta.id}_nfcore"
     haplos = 2
@@ -278,6 +284,21 @@ process computeAllScores {
   
     """
 }
+workflow PANGENOME_WRAP {
+    take:
+    mixFasta_ch
+
+    main:
+    meta = mixFasta_ch.map { meta, _ -> meta }
+    fasta = mixFasta_ch.map { _, files -> files }
+    PANGENOME(fasta)
+
+    out_ch = Channel.empty()
+    out_ch = meta.combine(PANGENOME.out.gfa)
+    
+    emit:
+    pangenome = out_ch
+}
 
 workflow PREPROCESS {
     take:
@@ -324,10 +345,15 @@ workflow PREPROCESS {
         mixFasta_ch = skesaFasta_ch.map{meta, files -> meta_t = [:]; meta_t['id'] = meta['id']; meta_t['cutlen'] = meta['cutlen']; [meta_t, files]
             }.combine(uniFasta_ch.map{meta, files -> meta_t = [:]; meta_t['id'] = meta['id']; meta_t['cutlen'] = meta['cutlen']; [meta_t, files]}, by: 0).view()
         | mixFasta
-
         mixFasta_ch = mixFasta_ch.combine( Channel.fromList(pctid) ).combine( Channel.fromList(thr) ).map{meta, files, _pctid, _thr -> meta += [pctid: _pctid, thr: _thr]; [meta, files]}
+
+
         
-        pangenome_ch = mixFasta_ch | makePangenome
+        // pangenome_ch = mixFasta_ch | makePangenome
+        
+        PANGENOME_WRAP(mixFasta_ch)
+        pangenome_ch = PANGENOME_WRAP.out.pangenome
+
         skesa_ch = skesaGfa_ch.combine( Channel.fromList(pctid) ).combine( Channel.fromList(thr) ).map{meta, files, _pctid, _thr -> meta += [pctid: _pctid, thr: _thr]; [meta, files]}
         uni_ch = uniGfa_ch.combine( Channel.fromList(pctid) ).combine( Channel.fromList(thr) ).map{meta, files, _pctid, _thr -> meta += [pctid: _pctid, thr: _thr]; [meta, files]}
         result = Channel.empty()

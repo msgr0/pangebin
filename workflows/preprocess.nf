@@ -316,8 +316,8 @@ workflow PREPROCESS {
 
 
     if (params.pangenome) {
-        mixFasta_ch = skesaGfa_ch.map{meta, files -> meta_t = [:]; meta_t['id'] = meta['id']; meta_t['cutlen'] = meta['cutlen']; [meta_t, files]
-            }.combine(uniGfa_ch.map{meta, files -> meta_t = [:]; meta_t['id'] = meta['id']; meta_t['cutlen'] = meta['cutlen']; [meta_t, files]}, by: 0).view()
+        mixFasta_ch = skesaFasta_ch.map{meta, files -> meta_t = [:]; meta_t['id'] = meta['id']; meta_t['cutlen'] = meta['cutlen']; [meta_t, files]
+            }.combine(uniFasta_ch.map{meta, files -> meta_t = [:]; meta_t['id'] = meta['id']; meta_t['cutlen'] = meta['cutlen']; [meta_t, files]}, by: 0).view()
         | mixFasta
 
         mixFasta_ch = mixFasta_ch.combine( Channel.fromList(pctid) ).combine( Channel.fromList(thr) ).map{meta, files, _pctid, _thr -> meta += [pctid: _pctid, thr: _thr]; [meta, files]}

@@ -138,6 +138,8 @@ process makePangenome {
     """
     #!/usr/bin/env bash
     export NXF_OPTS="-XX:ActiveProcessorCount=16 -Xmx16g"
+    module restore pbf
+    source $projectDir/.venv/bin/activate
     touch ${paramfile}
     echo -e '{\n\t"max_memory": "16.GB",\n\t"wfmash_segment_length": ${meta.thr},\n\t"seqwish_min_match_length": 0,\n\t"smoothxg_poa_params": "asm5",\n\t"wfmash_map_pct_id": ${meta.pctid},\n\t"max_cpus": ${task.cpus},\n\t"wfmash_merge_segments": true\n}' > ${paramfile}
 
@@ -148,7 +150,6 @@ process makePangenome {
 }
 
 process makePanassembly {
-    beforeScript "source .venv/bin/activate; module restore pbf"
     executor 'slurm'
     memory '16 GB'
     cpus 8
@@ -168,6 +169,8 @@ process makePanassembly {
     """
     #!/usr/bin/env bash
 
+    module restore pbf
+    source $projectDir/.venv/bin/activate
     python $projectDir/bin/gfa_cleaner.py --input ${pangenome} --output ${pangenomecl}
     python $projectDir/bin/pangenome_enancher.py --input ${pangenomecl} --output ${panassembly} --assembly ${uni} ${ske}
     """

@@ -34,7 +34,6 @@ process ncbi {
 }
 
 process blast {
-    storeDir "${params.input}/"
     errorStrategy 'terminate'
     cache false
 

@@ -147,6 +147,7 @@ process makePangenome {
 }
 
 process makePanassembly {
+    beforeScript "source .venv/bin/activate; module restore pbf"
     executor 'slurm'
     memory '16 GB'
     cpus 8

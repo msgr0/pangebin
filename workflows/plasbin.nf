@@ -1,9 +1,12 @@
 #!/usr/bin/env nextflow
 
 process model {
-    
+    executor 'slurm'
+    cpus 16
+    mem '32.GB'
+    time '24h'
+        
     cache 'lenient'
-    maxForks 1
 
     input:
     tuple val(meta), path(gfa), path(gc), path(plscore)

@@ -117,6 +117,7 @@ process mixFasta {
 
 process makePangenome {
     executor 'slurm'
+    mem '16.GB'
     cpus 16
     time '12h'
     cache 'lenient'
@@ -146,7 +147,10 @@ process makePangenome {
 }
 
 process makePanassembly {
-    storeDir "${params.output}/${meta.id}/"
+    executor 'slurm'
+    mem '16.GB'
+    cpus 8
+    time '6h'
     cache 'lenient'
 
     input:
@@ -269,95 +273,6 @@ process computeAllScores {
   
     """
 }
-
-// process computeMLscores {
-
-// }
-
-// process computeAllMLscores {
-//     cache 'lenient'
-
-//     input:
-//     tuple val(meta), path(gpan), path(gske), path(guni)
-//     tuple val(meta2), path(fpan), path(fske), path(funi)
-//     val(species)
-
-//     output:
-//     tuple val(meta), path(pred_pan), emit: pan
-//     tuple val(meta), path(pred_uni), emit: uni
-//     tuple val(meta), path(pred_ske), emit: ske
-    
-//     script:
-//     mlplas_threshold = '0.5'
-//     species = convert_species("${species}")
-//     pred_pan = fpan.getBaseName() + ".mlp.tab"
-//     pred_uni = funi.getBaseName() + ".mlp.tab"
-//     pred_ske = fske.getBaseName() + ".mlp.tab"
-//     """
-//     #!/bin/bash
-//     Rscript $projectDir/bin/run_mlplasmids.R ${fpan} ${pred_pan} ${mlplas_threshold} '${species}' TRUE
-//     Rscript $projectDir/bin/run_mlplasmids.R ${funi} ${pred_uni} ${mlplas_threshold} '${species}' TRUE
-//     Rscript $projectDir/bin/run_mlplasmids.R ${fske} ${pred_ske} ${mlplas_threshold} '${species}' TRUE
-
-//     python $projectDir/bin/mlpl.asmtopan.py --pred ${pred_pan} --graph ${gfa}  --pbf ${pred_pbf}
-//     python $projectDir/bin/mlpl.asm.py --pred ${pred_uni} --graph ${gfa}  --pbf ${pred_ske}
-//     python $projectDir/bin/mlpl.asm.py --pred ${pred_ske} --graph ${gfa}  --pbf ${pred_uni}
-
-//     """
-//     // python $projectDir/bin/mlpl.asm.py --pred ${pred} --graph ${gfa}  --output ${pred_gplas}
-
-//     input:
-//     tuple val(meta), path(pangenome), path(skesa), path(unicycler)
-
-//     output:
-//     tuple val(meta), path(gc_pan), emit: gc_pan
-//     tuple val(meta), path(gd_pan), emit: gd_pan
-//     tuple val(meta), path(gc_ske), emit: gc_ske
-//     tuple val(meta), path(gd_ske), emit: gd_ske
-//     tuple val(meta), path(gc_uni), emit: gc_uni
-//     tuple val(meta), path(gd_uni), emit: gd_uni
-    
-
-//     script:
-//     base_pan = "${meta.id}.pan.${meta.thr}"
-//     base_ske = "${meta.id}.ske.${meta.thr}"
-//     base_uni = "${meta.id}.uni.${meta.thr}"
-
-//     gd_pan = base_pan + ".gd.tsv"
-//     gd_ske = base_ske + ".gd.tsv"
-//     gd_uni = base_uni + ".gd.tsv"
-
-//     gc_pan = base_pan + ".gc.tsv"
-//     gc_ske = base_ske + ".gc.tsv"
-//     gc_uni = base_uni + ".gc.tsv"
-
-//     input_csv = "${meta.id}.${meta.thr}.input.csv"
-
-//     putils = "$projectDir/PlasBin-flow-pangenome/code/plasbin_utils.py"
-//     pls_db_file = "$projectDir/PlasBin-flow-pangenome/database/genes.fasta"
-
-//     """
-//     #!/usr/bin/env bash
-
-//     bgzip -k ${skesa}
-//     bgzip -k ${unicycler}
-
-//     echo "sample,gfa" > "${input_csv}"
-//     echo "${base_ske},${skesa}.gz" >> "${input_csv}"
-//     echo "${base_uni},${unicycler}.gz" >> "${input_csv}"
-
-//     python ${putils} preprocessing --input_file ${input_csv} --out_dir . --tmp_dir ./tmp --out_file out_file.csv --db_file ${pls_db_file}
-
-
-
-//     cat ${gd_ske} ${gd_uni} > ${meta.id}.${meta.thr}.mix.gd.tsv
-//     cat ${gc_ske} ${gc_uni} > ${meta.id}.${meta.thr}.mix.gc.tsv
-
-//     python3 $projectDir/bin/pbf_preprocess.py --input ${pangenome} --gd  ${meta.id}.${meta.thr}.mix.gd.tsv --gc ${meta.id}.${meta.thr}.mix.gc.tsv --output ${meta.id}.pan.${meta.thr}
-  
-//     """
-// }
-
 
 workflow PREPROCESS {
     take:

@@ -116,10 +116,14 @@ process mixFasta {
 }
 
 process makePangenome {
-    storeDir "${params.output}/${meta.id}/"
-    cpus 8
-    maxForks 4
-    time '4h'
+    if executor == 'local' {
+        cpus 4
+        maxForks 1
+        time '8h'
+    } else if executor == 'slurm' {
+        cpus 16
+        time '12h'
+    }
     cache 'lenient'
 
     input:

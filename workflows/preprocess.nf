@@ -133,7 +133,7 @@ process makePangenome {
 
     script:
 
-    PANGENOME()
+
 
     pangenome = metaname(meta) + "pan.gfa"
     out_core = "${meta.id}_nfcore"
@@ -350,10 +350,10 @@ workflow PREPROCESS {
 
 
         
-        // pangenome_ch = mixFasta_ch | makePangenome
+        pangenome_ch = mixFasta_ch | makePangenome
         
-        PANGENOME_WRAP(mixFasta_ch)
-        pangenome_ch = PANGENOME_WRAP.out.pangenome
+        // PANGENOME_WRAP(mixFasta_ch)
+        // pangenome_ch = PANGENOME_WRAP.out.pangenome
 
         skesa_ch = skesaGfa_ch.combine( Channel.fromList(pctid) ).combine( Channel.fromList(thr) ).map{meta, files, _pctid, _thr -> meta += [pctid: _pctid, thr: _thr]; [meta, files]}
         uni_ch = uniGfa_ch.combine( Channel.fromList(pctid) ).combine( Channel.fromList(thr) ).map{meta, files, _pctid, _thr -> meta += [pctid: _pctid, thr: _thr]; [meta, files]}

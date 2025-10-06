@@ -1,9 +1,7 @@
 {
-  "max_memory": "64.GB",
-  "wfmash_segment_length": 1000,
+  "max_memory": "32.GB",
   "seqwish_min_match_length": 0,
   "smoothxg_poa_params": "asm5",
-  "wfmash_map_pct_id": 95.0,
   "max_cpus": 32,
   "wfmash_merge_segments": true
 }

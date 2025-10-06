@@ -7,34 +7,38 @@ process model {
 
     input:
     tuple val(meta), path(gfa), path(gc), path(plscore)
-    val(mode)
-    val(scoring)
+
     
     output:
     tuple val(meta), path(bins)
 
     script:
 
-    if (mode == "pan") {
+    if (meta.t == "pan") {
         assembler = "pangenome"
-        asm = "pan"
-        args = ""
+        // asm = "pan"
+        if (meta.pty == 0) {
+            args = "--nopenalty"
+        }
+        else if (meta.pty == 1) {
+            args = ""
+        }
         seed_len = params.pangenome_seedlen
         seed_score = params.pangenome_seedscore
         min_pls_len = params.pangenome_minplaslen
     }
 
-    else if (mode == "uni" || mode == "ske") {
-        asm = mode
-        assembler = "unicycler"
+    else if (meta.t == "asm") {
+        assembler = meta.asm == "s" ? "skesa" : "unicycler"
+        // asm = meta.asm == "s" ? "ske" : "uni"
         args = "--nopenalty"
         seed_len = params.assembly_seedlen
         seed_score = params.assembly_seedscore
         min_pls_len = params.assembly_minplaslen
     }
 
-    base = "${meta.id}.${mode}.${meta.thr}"
-    bins = "${base}.${scoring}.bins.tsv"
+    base = "${meta.id}.${meta.t}.${meta.thr}"
+    bins = "${base}.pbf.bins.tsv"
     pflow = "$projectDir/PlasBin-flow-pangenome/code/plasbin_flow.py"
 
     """
@@ -122,8 +126,8 @@ workflow MODEL {
   
     take:
 
-	mode
-    scoring
+	// mode
+    // scoring
 	gfa_ch
 
 	gc_ch
@@ -131,19 +135,19 @@ workflow MODEL {
 
     main:
 
-	bins_ch = model(gfa_ch.join(gc_ch).join(gd_ch), mode, scoring)
+	bins_ch = model(gfa_ch.join(gc_ch).join(gd_ch))
     pred_ch = transform(bins_ch.join(gfa_ch))
 
    
     naiveBins_ch        = Channel.empty()
     graphOverlapBins_ch = Channel.empty()
 
-    if (mode == "pan") {
-        NAIVE(gfa_ch, pred_ch)
-        OVERLAP(gfa_ch, pred_ch)
-        naiveBins_ch        = NAIVE.out.pred
-        graphOverlapBins_ch = OVERLAP.out.pred
-    }
+    // if (mode == "pan") {
+    //     NAIVE(gfa_ch, pred_ch)
+    //     OVERLAP(gfa_ch, pred_ch)
+    //     naiveBins_ch        = NAIVE.out.pred
+    //     graphOverlapBins_ch = OVERLAP.out.pred
+    // }
     
 
     emit:

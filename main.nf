@@ -14,24 +14,13 @@ include { MODEL as PBFs        } from './workflows/plasbin'
 include { EVALUATION           } from './workflows/evaluation'
 
 
-params.cutlen = 1
-workflow {
-    
-    // input_ch = Channel.fromFilePairs("${params.input}/*-S*-{s,u}.gfa.gz", type: 'file', checkIfExists: true)
-    
-    input_ch = Channel.fromFilePairs("${params.input}/{unicycler,skesa}.gfa.gz", type: 'file', checkIfExists: true)
 
-    metaid = file(params.input).toString().split("/")[-1]
-    // if ... metaspecies ... ok 
-    // metaspecies = file(params.input).toString().split("/")[-1].split("-")[0]
-    // metaspecies = "generic"
 
-    input_ch = input_ch.map { _m, filepair ->
-        def fmeta = [:];
-        fmeta.id = metaid;
-        // fmeta.species = metaspecies;
-        [fmeta, filepair]
-    } | view
+workflow MAIN {
+    take:
+    input_ch
+
+    main:
 
     meta_ch = input_ch.map { meta, _files -> meta }
 
@@ -62,7 +51,7 @@ workflow {
     evalu_ch = Channel.empty()
 
     if (params.pangenome) {
-        PBFp('pan', 'pbf', PREPROCESS.out.panasmGfa, PREPROCESS.out.gcPan, PREPROCESS.out.gdPan)
+        PBFp(PREPROCESS.out.panasmGfa, PREPROCESS.out.gcPan, PREPROCESS.out.gdPan)
 
 
         bin_ch = bin_ch.mix(PBFp.out.bins)
@@ -81,8 +70,8 @@ workflow {
     }
 
     if (params.assemblers) {
-            PBFu("uni", 'pbf', PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.gdUni)
-            PBFs("ske", 'pbf', PREPROCESS.out.skesaGfa, PREPROCESS.out.gcSke, PREPROCESS.out.gdSke)
+            PBFu(PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.gdUni)
+            PBFs(PREPROCESS.out.skesaGfa, PREPROCESS.out.gcSke, PREPROCESS.out.gdSke)
         
         // bin_ch = bin_ch.mix(PBFu.out.bins)
         // res_ch = res_ch.mix(PBFu.out.res) 
@@ -105,4 +94,27 @@ workflow {
     EVALUATION(evalp_ch.mix(evals_ch).mix(evalu_ch))
     
 
+}
+
+
+workflow { // single input workflow, for dataset input use pipeline.nf
+
+    // input as in plasgraph
+    // input_ch = Channel.fromFilePairs("${params.input}/*-S*-{s,u}.gfa.gz", type: 'file', checkIfExists: true)
+
+    // standard input type for a sample folder SAMPLE/{skesa,unicycler}.gfa.gz
+    input_ch = Channel.fromFilePairs("${params.input}/{skesa,unicycler}.gfa.gz", type: 'file', checkIfExists: true)
+
+
+    metaid = file(params.input).toString().split("/")[-1]
+
+
+    input_ch = input_ch.map { _m, filepair ->
+        def fmeta = [:];
+        fmeta.id = metaid;
+        [fmeta, filepair]
+    } | view
+
+
+    MAIN(input_ch) 
 }

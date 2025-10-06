@@ -1,34 +1,42 @@
 #!/usr/bin/env nextflow
-
-// def convert_species(spec) {
-//   switch(spec) {
-//     case 'efea':
-//       species = 'Enterococcus faecium'
-//       break
-//     case 'kpne':
-//       species = 'Klebsiella pneumoniae'
-//       break
-//     case 'abau':
-//       species = 'Acinetobacter baumannii'
-//       break
-//     case 'ecol':
-//       species = 'Escherichia coli'
-//       break
-//     default:
-//       species = 'Other species'
-//   }
-//   return species
-// }
+def metaname(meta) {
+    def name = meta.id
+    if (meta.containsKey('species')) {
+        name += "-${meta.species}"
+    }
+    if (meta.containsKey('asm')) {
+        name += "-${meta.asm}"
+    }
+    if (meta.containsKey('cutlen')) {
+        name += "-c${meta.cutlen}"
+    }
+    if (meta.containsKey('pctid')) {
+        name += "-${meta.pctid}p"
+    }
+    if (meta.containsKey('thr')) {
+        name += "-t${meta.thr}"
+    }
+    if (meta.containsKey('pty')) {
+        name += "-p${meta.pty}"
+    }
+    if (meta.containsKey('t')) {
+        name += "-${meta.t}"
+    }    
+    return name
+}
+def species_map = ["efea": "Enterococcus faecium", "kpne": "Klebsiella pneumoniae", "abau": "Acinetobacter baumannii", "ecol": "Escherichia coli", "oth": "other"]
+def pctid = [0.95, 0.92, 0.98]
+def cutlen = [0, 1, 50, 100]
+def thr = [250, 500, 1000, 2000, 5000]
 
 process extractGfa {
-    storeDir "${params.input}/"
     cache 'lenient'
 
     input:
     tuple val(meta), path(gfa)
     
     output:
-    tuple val(meta), path(gfa_std)
+    tuple val(meta), path(gfao)
 
     script:
     if (meta.asm == 's') { // transform skesa graph into unicycler
@@ -39,44 +47,42 @@ process extractGfa {
         param = ''
         asm = "uni" 
     }
-    
-    gfa_xtracted = gfa.getBaseName()
-    gfa_std = gfa.getBaseName()[0..-5] + ".r.gfa"
+
+    basen = metaname(meta)
+    gfao = basen + ".gfa"
 
     """
     #!/usr/bin/env bash
-    bgzip -d ${gfa}
-    python $projectDir/bin/rename_gfa.py -i ${gfa_xtracted} -o ${gfa_std} -p ${asm} ${param}
+    bgzip -d -c ${gfa} > ${basen}.tmp.gfa
+    python $projectDir/bin/rename_gfa.py -i ${basen}.tmp.gfa -o ${gfao} -p ${asm} ${param}
     """
 }
 
 process removeNodes {
-    storeDir "${params.input}/"
     cache 'lenient'
     
     input:
     tuple val(meta), path(gfa)
 
     output:
-    tuple val(meta), path(trimmed), emit: gfa
+    tuple val(meta), path(gfat), emit: gfa
 
     script:
-    trimmed = gfa.getBaseName() + ".${meta.thr}.gfa"
+    gfat = metaname(meta) + ".gfa"
 
-    if (meta.thr == 0 )
+    if (meta.cutlen == 0 || meta.cutlen == null)
     """
     #!/usr/bin/env bash
-    mv ${gfa} ${trimmed}
+    mv ${gfa} ${gfat}
     """
     else
     """
     #!/usr/bin/env bash
-    python $projectDir/bin/remove_nodes.py -v 2 -i ${gfa} -o ${trimmed} -t ${meta.thr}
+    python $projectDir/bin/remove_nodes.py -v 2 -i ${gfa} -o ${gfat} -t ${meta.cutlen}
     """
 }
 
 process extractFasta {
-    storeDir "${params.input}/"
     cache 'lenient'
 
     input:
@@ -86,7 +92,7 @@ process extractFasta {
     tuple val (meta), path(fasta), emit: fasta
 
     script:
-    fasta = gfa.getBaseName() + ".fasta"
+    fasta = metaname(meta) + ".fa"
 
     """
     #!/usr/bin/env bash
@@ -95,7 +101,6 @@ process extractFasta {
 }
 
 process mixFasta {
-    storeDir "${params.input}/"
     cache 'lenient'
 
     input:
@@ -104,16 +109,17 @@ process mixFasta {
     tuple val(meta), path(fasta)
 
     script:
-    fasta = "${meta.id}.${meta.thr}.fa"
+    fasta = metaname(meta) + ".fa"
     """
     cat ${fasta_a} ${fasta_b} > ${fasta}
     """
 }
 
 process makePangenome {
-    storeDir "${params.input}/"
+    storeDir "${params.output}/${meta.id}/"
+    cpus 8
     maxForks 4
-    time '60m'
+    time '4h'
     cache 'lenient'
 
     input:
@@ -123,29 +129,25 @@ process makePangenome {
     tuple val(meta), path(pangenome), emit: pangenome
 
     script:
-    pangenome = "${meta.id}.pan.gfa"
+    pangenome = metaname(meta) + "pan.gfa"
     out_core = "${meta.id}_nfcore"
     haplos = 2
     paramfile = "${meta.id}.params.json"
-    release = '1.1.2'
-    profile = 'apptainer'
-
+    release = params.pan_release
+    profile = params.panexec
     """
     #!/usr/bin/env bash
     touch ${paramfile}
-    echo -e '{\n\t"max_memory": "16.GB",\n\t"wfmash_segment_length": $params.minlen,\n\t"seqwish_min_match_length": 0,\n\t"smoothxg_poa_params": "asm5",\n\t"wfmash_map_pct_id": $params.pctid,\n\t"max_cpus": 16,\n\t"wfmash_merge_segments": true\n}' > ${paramfile}
-
+    echo -e '{\n\t"max_memory": "16.GB",\n\t"wfmash_segment_length": ${meta.thr},\n\t"seqwish_min_match_length": 0,\n\t"smoothxg_poa_params": "asm5",\n\t"wfmash_map_pct_id": ${meta.pctid},\n\t"max_cpus": ${task.cpus},\n\t"wfmash_merge_segments": true\n}' > ${paramfile}
 
     bgzip ${mixed_fasta}
-    nextflow run nf-core/pangenome -r ${release} -profile $profile -resume --input ${mixed_fasta}.gz --n_haplotypes ${haplos} --outdir ${out_core} -params-file ${paramfile}
+    nextflow run nf-core/pangenome -r ${release} -profile $profile -resume --input ${mixed_fasta}.gz --n_haplotypes ${haplos} --outdir ${out_core} -params-file ${paramfile} --wfmash_segment_length ${meta.thr} --wfmash_map_pct_id ${meta.pctid}
     cp ${out_core}/FINAL_GFA/${mixed_fasta}.gz.gfaffix.unchop.Ygs.view.gfa ${pangenome}
     """
-    // bgzip /data/proj/pangebin/data-test/SAMN02786856/SAMN02786856.1.fa 
-    // nextflow run nf-core/pangenome -r 1.1.2 -profile podman -resume --input /data/proj/pangebin/data-test/SAMN02786856/SAMN02786856.1.fa.gz --n_haplotypes 2 --outdir test-nfcore.txt -params-file pangenome-params.json
 }
 
 process makePanassembly {
-    storeDir "${params.input}/"
+    storeDir "${params.output}/${meta.id}/"
     cache 'lenient'
 
     input:
@@ -156,8 +158,8 @@ process makePanassembly {
     // tuple val(meta), path(panassemblycut), emit: panassembly
 
     script:
-    panassembly = pangenome.baseName + "asm.gfa"
-    pangenomecl = pangenome.baseName + "cl.gfa"
+    panassembly = metaname(meta) + "asm.gfa"
+    pangenomecl = metaname(meta) + "cl.gfa"
     """
     #!/usr/bin/env bash
 
@@ -168,7 +170,7 @@ process makePanassembly {
 
 
 process computeScores {
-    storeDir "${params.input}/"
+    storeDir "${params.output}/${meta.id}/"
     cache 'lenient'
 
     input:
@@ -183,8 +185,8 @@ process computeScores {
     
 
     script:
-    base_ske = "${meta.id}.ske.${meta.thr}"
-    base_uni = "${meta.id}.uni.${meta.thr}"
+    base_ske = metaname(meta) + ".s"
+    base_uni = metaname(meta) + ".u"
 
     gd_ske = base_ske + ".gd.tsv"
     gd_uni = base_uni + ".gd.tsv"
@@ -192,7 +194,7 @@ process computeScores {
     gc_ske = base_ske + ".gc.tsv"
     gc_uni = base_uni + ".gc.tsv"
 
-    input_csv = "${meta.id}.${meta.thr}.input.csv"
+    input_csv = metaname(meta) + ".in.csv"
 
     putils = "$projectDir/PlasBin-flow-pangenome/code/plasbin_utils.py"
     pls_db_file = "$projectDir/PlasBin-flow-pangenome/database/genes.fasta"
@@ -229,9 +231,10 @@ process computeAllScores {
     
 
     script:
-    base_pan = "${meta.id}.pan.${meta.thr}"
-    base_ske = "${meta.id}.ske.${meta.thr}"
-    base_uni = "${meta.id}.uni.${meta.thr}"
+    base_pan = metaname(meta) + ".p"
+    base_ske = metaname(meta) + ".s"
+    base_uni = metaname(meta) + ".u"
+    base_mix = metaname(meta) + ".m"
 
     gd_pan = base_pan + ".gd.tsv"
     gd_ske = base_ske + ".gd.tsv"
@@ -241,7 +244,7 @@ process computeAllScores {
     gc_ske = base_ske + ".gc.tsv"
     gc_uni = base_uni + ".gc.tsv"
 
-    input_csv = "${meta.id}.${meta.thr}.input.csv"
+    input_csv = metaname(meta) + ".in.csv"
 
     putils = "$projectDir/PlasBin-flow-pangenome/code/plasbin_utils.py"
     pls_db_file = "$projectDir/PlasBin-flow-pangenome/database/genes.fasta"
@@ -260,10 +263,10 @@ process computeAllScores {
 
 
 
-    cat ${gd_ske} ${gd_uni} > ${meta.id}.${meta.thr}.mix.gd.tsv
-    cat ${gc_ske} ${gc_uni} > ${meta.id}.${meta.thr}.mix.gc.tsv
+    cat ${gd_ske} ${gd_uni} > ${base_mix}.gd.tsv
+    cat ${gc_ske} ${gc_uni} > ${base_mix}.gc.tsv
 
-    python3 $projectDir/bin/pbf_preprocess.py --input ${pangenome} --gd  ${meta.id}.${meta.thr}.mix.gd.tsv --gc ${meta.id}.${meta.thr}.mix.gc.tsv --output ${meta.id}.pan.${meta.thr}
+    python3 $projectDir/bin/pbf_preprocess.py --input ${pangenome} --gd  ${base_mix}.gd.tsv --gc ${base_mix}.gc.tsv --output ${base_pan}
   
     """
 }
@@ -363,26 +366,22 @@ workflow PREPROCESS {
 
     main:
     extracted_gfa = extractGfa(input_ch)
-    extracted_gfa.map{meta, files -> meta += [thr:params.cutlen]; [meta, files]}
+
+    extracted_gfa.combine( Channel.fromList(cutlen) ).map{meta, files, _cutlen -> meta += [cutlen: _cutlen]; [meta, files]}
     | removeNodes
     | extractFasta
 
-    skesaGfa_ch = removeNodes.out.gfa.filter { meta, file -> meta['asm'] == 's' }.map{
-        meta, files -> meta = [id: meta.id, thr:meta.thr]; [meta, files]
-    }
+    // extracted_gfa.map{meta, files -> meta += [cutlen:params.cutlen]; [meta, files]}
+    // | removeNodes
+    // | extractFasta
 
-    uniGfa_ch = removeNodes.out.gfa.filter { meta, file -> meta['asm'] == 'u' }.map{
-        meta, files -> meta = [id: meta.id, thr:meta.thr]; [meta, files]
-    }
+    skesaGfa_ch = removeNodes.out.gfa.filter { meta, file -> meta['asm'] == 's' }
 
-    skesaFasta_ch = extractFasta.out.fasta.filter { meta, file -> meta['asm'] == 's' }.map{
-        meta, files -> meta = [id: meta.id, thr:meta.thr]; [meta, files]
-    } | view
+    uniGfa_ch = removeNodes.out.gfa.filter { meta, file -> meta['asm'] == 'u' }
 
-    uniFasta_ch = extractFasta.out.fasta.filter { meta, file -> meta['asm'] == 'u' }.map{
-        meta, files -> meta = [id: meta.id, thr:meta.thr]; [meta, files]
-    } | view
+    skesaFasta_ch = extractFasta.out.fasta.filter { meta, file -> meta['asm'] == 's' }
 
+    uniFasta_ch = extractFasta.out.fasta.filter { meta, file -> meta['asm'] == 'u' }
     mixFasta_ch = Channel.empty() 
     pangeGfa_ch = Channel.empty()
     panasmGfa_ch = Channel.empty()
@@ -401,24 +400,22 @@ workflow PREPROCESS {
 
     result_ch = Channel.empty()
 
+
     if (params.pangenome) {
-        mixFasta_ch = skesaFasta_ch.combine(uniFasta_ch, by: 0)
+        mixFasta_ch = skesaGfa_ch.map{meta, files -> meta_t = [:]; meta_t['id'] = meta['id']; meta_t['cutlen'] = meta['cutlen']; [meta_t, files]
+            }.combine(uniGfa_ch.map{meta, files -> meta_t = [:]; meta_t['id'] = meta['id']; meta_t['cutlen'] = meta['cutlen']; [meta_t, files]}, by: 0).view()
         | mixFasta
-     
-        pangenome_ch = mixFasta_ch | makePangenome
+
+        mixFasta_ch = mixFasta_ch.combine( Channel.fromList(pctid) ).combine( Channel.fromList(thr) ).map{meta, files, _pctid, _thr -> meta += [pctid: _pctid, thr: _thr]; [meta, files]}
         
-        panasmGfa_ch = makePanassembly(pangenome_ch.join(skesaGfa_ch).join(uniGfa_ch)) 
-        result = computeAllScores(panasmGfa_ch.join(skesaGfa_ch).join(uniGfa_ch))
+        pangenome_ch = mixFasta_ch | makePangenome
+        skesa_ch = skesaGfa_ch.combine( Channel.fromList(pctid) ).combine( Channel.fromList(thr) ).map{meta, files, _pctid, _thr -> meta += [pctid: _pctid, thr: _thr]; [meta, files]}
+        uni_ch = uniGfa_ch.combine( Channel.fromList(pctid) ).combine( Channel.fromList(thr) ).map{meta, files, _pctid, _thr -> meta += [pctid: _pctid, thr: _thr]; [meta, files]}
+        result = Channel.empty()
+        panasmGfa_ch = makePanassembly(pangenome_ch.join(skesa_ch).join(uni_ch)) 
+        result = computeAllScores(panasmGfa_ch.join(skesa_ch).join(uni_ch))
         gcPan_ch = gcPan_ch.mix(result.gc_pan)
         gdPan_ch = gdPan_ch.mix(result.gd_pan)
-        // if (params.ml) {
-        //     mlres = computeAllMLscores(panasmGfa_ch.join(skesaGfa_ch).join(uniGfa_ch))
-        //     mlPan_ch = mlPan_ch.mix(mlres.pan)
-        //     mlSke_ch = mlSke_ch.mix(mlres.ske)
-        //     mlUni_ch = mlUni_ch.mix(mlres.uni)
-
-
-        // }
 
     }   
     if (params.assemblers && ! params.pangenome) {         

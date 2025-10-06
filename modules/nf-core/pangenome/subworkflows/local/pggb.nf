@@ -57,13 +57,6 @@ workflow PGGB {
             ch_versions = ch_versions.mix(WFMASH_ALIGN.out.versions)
         }
     } else {
-        if (params.seqwish_paf != null) {
-            file_fasta = file(params.input)
-            ch_combined = Channel.of([ [ id:file_fasta.getName() ], file(params.seqwish_paf), file_fasta ])
-            SEQWISH(ch_combined)
-            ch_versions = ch_versions.mix(SEQWISH.out.versions)
-        } else {
-            if (params.wfmash_chunks == 1) {
                 ch_wfmash_map_align = fasta.map{meta, fasta -> [ meta, fasta, [] ]}
                 ch_wfmash_map_align = ch_wfmash_map_align.join(gzi).join(fai)
                 WFMASH_MAP_ALIGN(ch_wfmash_map_align,
@@ -73,24 +66,6 @@ workflow PGGB {
                 ch_seqwish_input = WFMASH_MAP_ALIGN.out.paf.join(fasta)
                 SEQWISH(ch_seqwish_input)
                 ch_versions = ch_versions.mix(SEQWISH.out.versions)
-            } else {
-                ch_wfmash_map = fasta.map{meta, fasta -> [ meta, fasta, [] ]}
-                ch_wfmash_map = ch_wfmash_map.join(gzi).join(fai)
-                WFMASH_MAP(ch_wfmash_map,
-                        query_self,
-                        [])
-                ch_versions = ch_versions.mix(WFMASH_MAP.out.versions)
-                SPLIT_APPROX_MAPPINGS_IN_CHUNKS(WFMASH_MAP.out.paf)
-                ch_versions = ch_versions.mix(SPLIT_APPROX_MAPPINGS_IN_CHUNKS.out.versions)
-                ch_wfmash_align = fasta.combine(SPLIT_APPROX_MAPPINGS_IN_CHUNKS.out.pafs.transpose(), by:0).combine(gzi, by:0).combine(fai, by:0)
-                WFMASH_ALIGN(ch_wfmash_align,
-                        query_self,
-                        [])
-                ch_versions = ch_versions.mix(WFMASH_ALIGN.out.versions)
-                SEQWISH(WFMASH_ALIGN.out.paf.groupTuple(by: 0, size: params.wfmash_chunks).join(fasta))
-                ch_versions = ch_versions.mix(SEQWISH.out.versions)
-            }
-        }
 
         if (params.skip_smoothxg) {
             GFAFFIX(SEQWISH.out.gfa)

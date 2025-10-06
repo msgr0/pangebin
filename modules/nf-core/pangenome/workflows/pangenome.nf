@@ -10,24 +10,15 @@
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { PGGB        } from '../subworkflows/local/pggb'
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    RUN MAIN WORKFLOW
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
+
 
 workflow PANGENOME {
     take:
     input_ch
     main:
 
-    ch_versions = Channel.empty()
-    ch_multiqc_report = Channel.empty()
-
-    //
-    // SUBWORKFLOW: Read in FASTA, validate and generate appropriate indices
-    //
     INPUT_CHECK (
-            input_ch.map{ meta, file -> [ file ] },  // only fasta
+            input_ch  // only fasta
     )
 
     PGGB (

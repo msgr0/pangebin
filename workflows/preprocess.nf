@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-include { PANGENOME                } from '$projectDir/modules/nf-core/pangenome/workflows/pangenome'
+include { PANGENOME                } from "$projectDir/modules/nf-core/pangenome/workflows/pangenome"
 
 def metaname(meta) {
     def name = meta.id
@@ -289,13 +289,14 @@ workflow PANGENOME_WRAP {
     mixFasta_ch
 
     main:
-    meta = mixFasta_ch.map { meta, _ -> meta }
-    fasta = mixFasta_ch.map { _, files -> files }
-    PANGENOME(fasta)
+
+    meta = mixFasta_ch.map { meta, _files -> meta }
+    input_ch = mixFasta_ch.map { meta, files -> [[meta.id], files] }
+    PANGENOME(input_ch)
 
     out_ch = Channel.empty()
     out_ch = meta.combine(PANGENOME.out.gfa)
-    
+
     emit:
     pangenome = out_ch
 }

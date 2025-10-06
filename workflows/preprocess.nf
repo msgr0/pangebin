@@ -116,14 +116,9 @@ process mixFasta {
 }
 
 process makePangenome {
-    if (process.executor == 'local') {
-        cpus 4
-        maxForks 1
-        time '8h'
-    } else if (process.executor == 'slurm') {
-        cpus 16
-        time '12h'
-    }
+    executor 'slurm'
+    cpus 16
+    time '12h'
     cache 'lenient'
 
     input:

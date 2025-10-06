@@ -137,6 +137,7 @@ process makePangenome {
     profile = params.panexec
     """
     #!/usr/bin/env bash
+    export NXF_OPTS="-XX:ActiveProcessorCount=${task.cpus} -Xmx${task.memory}g"
     touch ${paramfile}
     echo -e '{\n\t"max_memory": "16.GB",\n\t"wfmash_segment_length": ${meta.thr},\n\t"seqwish_min_match_length": 0,\n\t"smoothxg_poa_params": "asm5",\n\t"wfmash_map_pct_id": ${meta.pctid},\n\t"max_cpus": ${task.cpus},\n\t"wfmash_merge_segments": true\n}' > ${paramfile}
 

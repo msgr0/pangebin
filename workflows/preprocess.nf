@@ -1,6 +1,5 @@
 #!/usr/bin/env nextflow
 
-include { PANGENOME                } from "$projectDir/modules/nf-core/pangenome/workflows/pangenome"
 
 def metaname(meta) {
     def name = meta.id
@@ -132,9 +131,6 @@ process makePangenome {
     tuple val(meta), path(pangenome), emit: pangenome
 
     script:
-
-
-
     pangenome = metaname(meta) + "pan.gfa"
     out_core = "${meta.id}_nfcore"
     haplos = 2
@@ -143,9 +139,9 @@ process makePangenome {
     profile = params.panexec
     """
     #!/usr/bin/env bash
-    export NXF_OPTS="-XX:ActiveProcessorCount=16 -Xmx16g"
-    module restore pbf
-    source $projectDir/.venv/bin/activate
+    # export NXF_OPTS="-XX:ActiveProcessorCount=16 -Xmx16g"
+    # module restore pbf
+    # source $projectDir/.venv/bin/activate
     touch ${paramfile}
     echo -e '{\n\t"max_memory": "16.GB",\n\t"wfmash_segment_length": ${meta.thr},\n\t"seqwish_min_match_length": 0,\n\t"smoothxg_poa_params": "asm5",\n\t"wfmash_map_pct_id": ${meta.pctid},\n\t"max_cpus": ${task.cpus},\n\t"wfmash_merge_segments": true\n}' > ${paramfile}
 
@@ -158,8 +154,8 @@ process makePangenome {
 process makePanassembly {
     executor 'slurm'
     memory '16 GB'
-    cpus 8
-    time '6h'
+    cpus 1
+    time '1h'
     cache 'lenient'
 
     input:
@@ -175,8 +171,8 @@ process makePanassembly {
     """
     #!/usr/bin/env bash
 
-    module restore pbf
-    source $projectDir/.venv/bin/activate
+    # module restore pbf
+    # source $projectDir/.venv/bin/activate
     python $projectDir/bin/gfa_cleaner.py --input ${pangenome} --output ${pangenomecl}
     python $projectDir/bin/pangenome_enancher.py --input ${pangenomecl} --output ${panassembly} --assembly ${uni} ${ske}
     """
@@ -184,7 +180,6 @@ process makePanassembly {
 
 
 process computeScores {
-    storeDir "${params.output}/${meta.id}/"
     cache 'lenient'
 
     input:
@@ -284,22 +279,22 @@ process computeAllScores {
   
     """
 }
-workflow PANGENOME_WRAP {
-    take:
-    mixFasta_ch
+// workflow PANGENOME_WRAP {
+//     take:
+//     mixFasta_ch
 
-    main:
+//     main:
 
-    meta = mixFasta_ch.map { meta, _files -> meta }
-    input_ch = mixFasta_ch.map { meta, files -> [[meta.id], files] }
-    PANGENOME(input_ch)
+//     meta = mixFasta_ch.map { meta, _files -> meta }
+//     input_ch = mixFasta_ch.map { meta, files -> [[meta.id], files] }
+//     PANGENOME(input_ch)
 
-    out_ch = Channel.empty()
-    out_ch = meta.combine(PANGENOME.out.gfa)
+//     out_ch = Channel.empty()
+//     out_ch = meta.combine(PANGENOME.out.gfa)
 
-    emit:
-    pangenome = out_ch
-}
+//     emit:
+//     pangenome = out_ch
+// }
 
 workflow PREPROCESS {
     take:
@@ -359,7 +354,7 @@ workflow PREPROCESS {
         uni_ch = uniGfa_ch.combine( Channel.fromList(pctid) ).combine( Channel.fromList(thr) ).map{meta, files, _pctid, _thr -> meta += [pctid: _pctid, thr: _thr]; [meta, files]}
         result = Channel.empty()
         panasmGfa_ch = makePanassembly(pangenome_ch.join(skesa_ch).join(uni_ch)) 
-        result = computeAllScores(panasmGfa_ch.join(skesa_ch).join(uni_ch))
+        result = computeAllScores(panasmGfa_ch.join(skesa_ch).join(uni_ch)) // transform this in a collect, lunching only one preprocess?
         gcPan_ch = gcPan_ch.mix(result.gc_pan)
         gdPan_ch = gdPan_ch.mix(result.gd_pan)
 

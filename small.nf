@@ -168,6 +168,7 @@ process refcheck{
 
 process gt {
 
+    maxForks 6
     errorStrategy { sleep(Math.pow(2, task.attempt) * 5 as long); return 'retry' }
     maxRetries 2
 
@@ -198,6 +199,7 @@ process gt {
 //................//
 process make_pangenome {
     memory '16 GB'
+    executor 'slurm'
     cpus 8 
     time '12h'
     cache 'lenient'
@@ -234,6 +236,8 @@ process make_pangenome {
 }
 
 process make_panassembly {
+    executor 'slurm'
+
     memory '16 GB'
     cpus 1
     time '15m'
@@ -344,6 +348,7 @@ touch ${gc_uni}
 }
 
 process model {
+    executor 'slurm'
     cpus 8
     memory '16 GB'    
     cache 'lenient'

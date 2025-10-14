@@ -27,7 +27,7 @@ def metaname(meta) {
     return name
 }
 def species_map = ["efea": "Enterococcus faecium", "kpne": "Klebsiella pneumoniae", "abau": "Acinetobacter baumannii", "ecol": "Escherichia coli", "oth": "other"]
-def pctid = [0.95, 0.92, 0.98]
+def pctid = [95, 92, 98]
 def cutlen = [0, 1, 50, 100]
 def thr = [250, 500, 1000, 2000, 5000]
 
@@ -117,7 +117,7 @@ process mixFasta {
     """
 }
 
-process makePangenome {
+process make_pangenome {
     executor 'slurm'
     memory '16 GB'
     cpus 16
@@ -132,16 +132,14 @@ process makePangenome {
 
     script:
     pangenome = metaname(meta) + "pan.gfa"
-    out_core = "${meta.id}_nfcore"
+    out_core = metaname(meta) + "_nfcore"
     haplos = 2
-    paramfile = "${meta.id}.params.json"
+    paramfile = metaname(meta) + ".params.json"
     release = params.pan_release
     profile = params.panexec
     """
     #!/usr/bin/env bash
-    # export NXF_OPTS="-XX:ActiveProcessorCount=16 -Xmx16g"
-    # module restore pbf
-    # source $projectDir/.venv/bin/activate
+    
     touch ${paramfile}
     echo -e '{\n\t"max_memory": "16.GB",\n\t"wfmash_segment_length": ${meta.thr},\n\t"seqwish_min_match_length": 0,\n\t"smoothxg_poa_params": "asm5",\n\t"wfmash_map_pct_id": ${meta.pctid},\n\t"max_cpus": ${task.cpus},\n\t"wfmash_merge_segments": true\n}' > ${paramfile}
 
@@ -155,7 +153,7 @@ process makePanassembly {
     executor 'slurm'
     memory '16 GB'
     cpus 1
-    time '1h'
+    time '15m'
     cache 'lenient'
 
     input:

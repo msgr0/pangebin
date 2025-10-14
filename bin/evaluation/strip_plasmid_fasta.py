@@ -30,13 +30,15 @@ def main(args):
     ctgs_chr = ctgs_seq.copy()
     for key in ctgs_dict:
         desc = str(ctgs_dict[key])
-        if "plasmid" in desc:
+        if "chromosome" not in desc:
             print("adding...", key, desc)
             ctgs_chr.pop(key)
             continue
         else:
             print("removing... ", key, desc)
             ctgs_seq.pop(key)
+    if len(ctgs_seq.keys()) == 0:
+        return -1
     with open(fasta_o, "w") as f:
         counter = 0
         for key in ctgs_chr:
@@ -49,6 +51,8 @@ def main(args):
             # out = ">plasmid" + str(counter) + "\n"
             f.write(">plasmid" + str(counter) + "\n")
             f.write(str(ctgs_seq[key]) + "\n")
+
+        
 
 
 if __name__ == "__main__":

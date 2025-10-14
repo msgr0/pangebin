@@ -540,7 +540,7 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     | bgzip_d // decompress gfa.gz
     | rename_gfa 
     | combine(Channel.fromList(cutl)) // add cut parameter
-    | map {_m, _f, _c -> _m.cut = _c; [_m, _f]} // map to meta
+    | map {_m, _f, _c -> _m['cut'] = _c; [_m, _f]} // map to meta
     | remove_nodes
 
     fasta_ch = gfa_ch
@@ -548,28 +548,28 @@ workflow { // single input workflow, for dataset input use pipeline.nf
 
     fasta_ch_s = fasta_ch
     | filter {meta, f -> meta['asm'] == 's'}
-    | map {meta, f -> def m = [:]; m.id = meta.id; m.spc = meta.spc; m.cut = meta.cut; [m, f]}
+    | map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['cut'] = meta['cut']; [m, f]}
 
     fasta_ch_u = fasta_ch
     | filter {meta, f -> meta['asm'] == 'u'}
-    | map {meta, f -> def m = [:]; m.id = meta.id; m.spc = meta.spc; m.cut = meta.cut; [m, f]}
+    | map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['cut'] = meta['cut']; [m, f]}
 
     pangenome_ch = Channel.empty()
     panassembly_ch = Channel.empty()
     
     gfa_ch_s = gfa_ch
     | filter {meta, f -> meta['asm'] == 's' }
-    | map {meta, f -> def m = [:]; m.id = meta.id; m.spc = meta.spc; m.cut = meta.cut; [m, f]}
+    | map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['cut'] = meta['cut']; [m, f]}
     | combine(Channel.fromList(pctid))
     | combine(Channel.fromList(thr))
-    | map {meta, f, _p, _t -> meta += [pctid: _p, thr: _t] ;[meta, f] }
+    | map {meta, f, _p, _t -> meta += ['pctid': _p, 'thr': _t] ;[meta, f] }
     
     gfa_ch_u = gfa_ch
     | filter {meta, f -> meta['asm'] == 'u' }
-    | map {meta, f -> def m = [:]; m.id = meta.id; m.spc = meta.spc; m.cut = meta.cut; [m, f]}
+    | map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['cut'] = meta['cut']; [m, f]}
     | combine(Channel.fromList(pctid))
     | combine(Channel.fromList(thr))
-    | map {meta, f, _p, _t -> meta += [pctid: _p, thr: _t] ;[meta, f] } 
+    | map {meta, f, _p, _t -> meta += ['pctid': _p, 'thr': _t] ;[meta, f] }
     
     fastamix_ch = fasta_ch_s.join(fasta_ch_u)
 

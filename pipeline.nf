@@ -47,7 +47,7 @@ workflow {
     }
 
 
-    samples_ch.view()
+    samples_ch.iew()
 
     input_ch = samples_ch.map { sample, path ->
         def fmeta = [:];

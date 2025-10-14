@@ -85,7 +85,7 @@ def parse_arguments():
     obj_params.add_argument("-alpha1", type=int, default=DEFAULT_ALPHA1, help="Weight of flow term")
     obj_params.add_argument("-alpha2", type=int, default=DEFAULT_ALPHA2, help="Weight of GC content term")
     obj_params.add_argument("-alpha3", type=int, default=DEFAULT_ALPHA3, help="Weight of plasmid score term")
-    obj_params.add_argument("-alpha4", type=int, default=DEFAULT_ALPHA4, help="Weight of assembly PENALTY term")
+    obj_params.add_argument("-alpha4", type=float, default=DEFAULT_ALPHA4, help="Weight of assembly PENALTY term")
 
     #Parameters for fixing seed contigs	
     seed_params = parser.add_argument_group('Seed contig threshold parameters')
@@ -338,8 +338,6 @@ if __name__ == "__main__":
             expr.addTerms(alpha3*(contigs_dict[c][SCORE_KEY] - p), contigs[c])
             if not args.nopenalty:
                 assembly_penalty = alpha4 * contigs_dict[c][ASS_PENALTY_KEY]
-                if assembly_penalty > 1.0:
-                    assembly_penalty = 1.0
                 expr.addTerms(-assembly_penalty, contigs[c])
 
         m.setObjective(expr, GRB.MAXIMIZE)

@@ -1,5 +1,30 @@
 #!/usr/bin/env nextflow
 
+def metaname(meta) {
+    def name = meta.id
+    if (meta.containsKey('species')) {
+        name += "-${meta.species}"
+    }
+    if (meta.containsKey('asm')) {
+        name += "-${meta.asm}"
+    }
+    if (meta.containsKey('cutlen')) {
+        name += "-c${meta.cutlen}"
+    }
+    if (meta.containsKey('pctid')) {
+        name += "-${meta.pctid}p"
+    }
+    if (meta.containsKey('thr')) {
+        name += "-t${meta.thr}"
+    }
+    if (meta.containsKey('pty')) {
+        name += "-p${meta.pty}"
+    }
+    if (meta.containsKey('t')) {
+        name += "-${meta.t}"
+    }    
+    return name
+}
 /*
 EVALUATION pre-preprocessing
 . unicycler and skesa bins

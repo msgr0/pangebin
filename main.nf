@@ -50,8 +50,10 @@ workflow MAIN {
     evals_ch = Channel.empty()
     evalu_ch = Channel.empty()
 
+  return
+
     if (params.pangenome) {
-        PBFp(PREPROCESS.out.panasmGfa, PREPROCESS.out.gcPan, PREPROCESS.out.gdPan)
+        PBFp(PREPROCESS.out.panasmGfa, PREPROCESS.out.gcPan, PREPROCESS.out.gdPan, "pan")
 
 
         bin_ch = bin_ch.mix(PBFp.out.bins)
@@ -70,8 +72,8 @@ workflow MAIN {
     }
 
     if (params.assemblers) {
-            PBFu(PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.gdUni)
-            PBFs(PREPROCESS.out.skesaGfa, PREPROCESS.out.gcSke, PREPROCESS.out.gdSke)
+            PBFu(PREPROCESS.out.uniGfa, PREPROCESS.out.gcUni, PREPROCESS.out.gdUni, "uni")
+            PBFs(PREPROCESS.out.skesaGfa, PREPROCESS.out.gcSke, PREPROCESS.out.gdSke, "ske")
         
         // bin_ch = bin_ch.mix(PBFu.out.bins)
         // res_ch = res_ch.mix(PBFu.out.res) 
@@ -113,7 +115,7 @@ workflow { // single input workflow, for dataset input use pipeline.nf
         def fmeta = [:];
         fmeta.id = metaid;
         [fmeta, filepair]
-    } | view
+    } 
 
 
     MAIN(input_ch) 

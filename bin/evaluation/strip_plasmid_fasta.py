@@ -30,7 +30,7 @@ def main(args):
     ctgs_chr = ctgs_seq.copy()
     for key in ctgs_dict:
         desc = str(ctgs_dict[key])
-        if "chromosome" not in desc:
+        if "chromosome" not in desc: # not every plasmid is tagged with plasmid, we try to take the more used tag convention chromosome / not chromosome.
             print("adding...", key, desc)
             ctgs_chr.pop(key)
             continue

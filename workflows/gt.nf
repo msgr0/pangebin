@@ -1,7 +1,32 @@
 #!/usr/bin/env nextflow
 
+def metaname(meta) {
+    def name = meta.id
+    if (meta.containsKey('species')) {
+        name += "-${meta.species}"
+    }
+    if (meta.containsKey('asm')) {
+        name += "-${meta.asm}"
+    }
+    if (meta.containsKey('cutlen')) {
+        name += "-c${meta.cutlen}"
+    }
+    if (meta.containsKey('pctid')) {
+        name += "-${meta.pctid}p"
+    }
+    if (meta.containsKey('thr')) {
+        name += "-t${meta.thr}"
+    }
+    if (meta.containsKey('pty')) {
+        name += "-p${meta.pty}"
+    }
+    if (meta.containsKey('t')) {
+        name += "-${meta.t}"
+    }    
+    return name
+}
 process ncbi {
-    storeDir "${params.input}/"
+
     errorStrategy { sleep(Math.pow(2, task.attempt) * 5 as long); return 'retry' }
     maxRetries 5
 
@@ -12,7 +37,7 @@ process ncbi {
     tuple val(meta), path(reference_ren), emit: ref
 
     script:
-    name = "${meta.id}"
+    name = metaname(meta)
     referencegz = "${name}.fna.gz"
     reference = "${name}.fna"
     reference_ren = "${name}.ren.fna"
@@ -23,7 +48,7 @@ process ncbi {
     python $projectDir/bin/evaluation/ncbi_link.py --input ${meta.id} --output ${referencegz}
     bgzip -d -c ${referencegz} > ${reference}
     if [ -f ${reference} ] && [ ! -s ${reference} ]; then
-        echo "File exists and is empty"
+        echo "File exists and it's empty"
         exit 1
     fi
 
@@ -48,17 +73,18 @@ process blast {
 
 
     script:
-    outmix = meta.id + "." + meta.thr + ".mix" 
+    name = metaname(meta)
+    outmix = name + ".mix" 
     // mapping_file = output + ".mapping.tsv"
     mix_gt = outmix + ".gt.tsv"
     pan_mix_gt = outmix + ".pan.gt.tsv"
 
-    outuni = meta.id + "." + meta.thr + ".uni"
+    outuni = metaname(meta) + ".uni"
     // mapping_file = output + ".mapping.tsv"
     uni_gt = outuni + ".gt.tsv"
     pan_uni_gt = outuni + ".pan.gt.tsv"
 
-    outske = meta.id + "." + meta.thr + ".ske"
+    outske = metaname(meta) + ".ske"
     // mapping_file = output + ".mapping.tsv"
     ske_gt = outske + ".gt.tsv"
     pan_ske_gt = outske + ".pan.gt.tsv"

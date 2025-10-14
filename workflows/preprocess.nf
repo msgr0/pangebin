@@ -121,7 +121,7 @@ process make_pangenome {
     executor 'slurm'
     memory '16 GB'
     cpus 16
-    time '12h'
+    time '6h'
     cache 'lenient'
 
     input:
@@ -131,7 +131,7 @@ process make_pangenome {
     tuple val(meta), path(pangenome), emit: pangenome
 
     script:
-    pangenome = metaname(meta) + "pan.gfa"
+    pangenome = metaname(meta) + ".pan.gfa"
     out_core = metaname(meta) + "_nfcore"
     haplos = 2
     paramfile = metaname(meta) + ".params.json"
@@ -151,9 +151,9 @@ process make_pangenome {
 
 process makePanassembly {
     executor 'slurm'
-    memory '16 GB'
+    memory '8 GB'
     cpus 1
-    time '15m'
+    time '10m'
     cache 'lenient'
 
     input:
@@ -164,8 +164,8 @@ process makePanassembly {
     // tuple val(meta), path(panassemblycut), emit: panassembly
 
     script:
-    panassembly = metaname(meta) + "asm.gfa"
-    pangenomecl = metaname(meta) + "cl.gfa"
+    panassembly = metaname(meta) + ".pasm.gfa"
+    pangenomecl = metaname(meta) + ".cl.gfa"
     """
     #!/usr/bin/env bash
 
@@ -222,7 +222,6 @@ process computeScores {
 }
 
 process computeAllScores {
-    storeDir "${params.input}/"
     cache 'lenient'
 
     input:
@@ -310,8 +309,21 @@ workflow PREPROCESS {
     // | extractFasta
 
     skesaGfa_ch = removeNodes.out.gfa.filter { meta, file -> meta['asm'] == 's' }
+    skesaGfa_ch = skesaGfa_ch.map { meta, file
+                                    -> def meta_t = [:];
+                                        meta_t['id'] = meta['id'];
+                                        meta_t['cutlen'] = meta['cutlen'];
+                                    [meta_t, file]
+                                    }
+
 
     uniGfa_ch = removeNodes.out.gfa.filter { meta, file -> meta['asm'] == 'u' }
+    uniGfa_ch = uniGfa_ch.map { meta, file
+                                    -> def meta_t = [:];
+                                        meta_t['id'] = meta['id'];
+                                        meta_t['cutlen'] = meta['cutlen'];
+                                    [meta_t, file]
+                                    }
 
     skesaFasta_ch = extractFasta.out.fasta.filter { meta, file -> meta['asm'] == 's' }
 
@@ -337,7 +349,7 @@ workflow PREPROCESS {
 
     if (params.pangenome) {
         mixFasta_ch = skesaFasta_ch.map{meta, files -> meta_t = [:]; meta_t['id'] = meta['id']; meta_t['cutlen'] = meta['cutlen']; [meta_t, files]
-            }.combine(uniFasta_ch.map{meta, files -> meta_t = [:]; meta_t['id'] = meta['id']; meta_t['cutlen'] = meta['cutlen']; [meta_t, files]}, by: 0).view()
+            }.combine(uniFasta_ch.map{meta, files -> meta_t = [:]; meta_t['id'] = meta['id']; meta_t['cutlen'] = meta['cutlen']; [meta_t, files]}, by: 0)
         | mixFasta
         mixFasta_ch = mixFasta_ch.combine( Channel.fromList(pctid) ).combine( Channel.fromList(thr) ).map{meta, files, _pctid, _thr -> meta += [pctid: _pctid, thr: _thr]; [meta, files]}
 
@@ -351,6 +363,9 @@ workflow PREPROCESS {
         skesa_ch = skesaGfa_ch.combine( Channel.fromList(pctid) ).combine( Channel.fromList(thr) ).map{meta, files, _pctid, _thr -> meta += [pctid: _pctid, thr: _thr]; [meta, files]}
         uni_ch = uniGfa_ch.combine( Channel.fromList(pctid) ).combine( Channel.fromList(thr) ).map{meta, files, _pctid, _thr -> meta += [pctid: _pctid, thr: _thr]; [meta, files]}
         result = Channel.empty()
+        pangenome_ch
+        skesa_ch
+        uni_ch
         panasmGfa_ch = makePanassembly(pangenome_ch.join(skesa_ch).join(uni_ch)) 
         result = computeAllScores(panasmGfa_ch.join(skesa_ch).join(uni_ch)) // transform this in a collect, lunching only one preprocess?
         gcPan_ch = gcPan_ch.mix(result.gc_pan)

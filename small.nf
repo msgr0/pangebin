@@ -6,8 +6,8 @@ def metaname(meta) {
     if (meta.containsKey('asm')) {
         name += "-${meta.asm}"
     }
-    if (meta.containsKey('cutlen')) {
-        name += "-c${meta.cutlen}"
+    if (meta.containsKey('cut')) {
+        name += "-c${meta.cut}"
     }
     if (meta.containsKey('pctid')) {
         name += "-${meta.pctid}p"

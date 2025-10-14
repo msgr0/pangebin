@@ -41,7 +41,7 @@ process bgzip_d {
 
     """
     #!/usr/bin/env bash
-    bgzip -d ${gz}
+    bgzip -k -d ${gz}
     """
 }
 
@@ -149,13 +149,14 @@ process mix_fasta {
 
 // GROUND TRUTH
 process refcheck{
+    storeDir null
     errorStrategy 'ignore'
     input:
 
     tuple val(meta), path(refin)
 
     output:
-    tuple val(meta), path(ref)
+    tuple val(meta), path(ref), optional: true
 
     script:
     ref = metaname(meta) + ".fna"
@@ -543,8 +544,7 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     | map {_m, _f, _c -> _m['cut'] = _c; [_m, _f]} // map to meta
     | remove_nodes
 
-    fasta_ch = gfa_ch
-    | extract_fasta
+    fasta_ch = gfa_ch | extract_fasta
 
     fasta_ch_s = fasta_ch
     | filter {meta, f -> meta['asm'] == 's'}
@@ -577,7 +577,7 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     | mix_fasta
     | combine(Channel.fromList(pctid))
     | combine(Channel.fromList(thr))
-    | map {meta, f, _p, _t -> meta += [pctid: _p, thr: _t] ;[meta, f] } 
+    | map {meta, f, _p, _t -> meta += ['pctid': _p, 'thr': _t] ;[meta, f] }
     | make_pangenome
     
     panassembly_ch = pangenome_ch

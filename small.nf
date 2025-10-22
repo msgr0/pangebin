@@ -28,6 +28,7 @@ def cutl = [0, 1, 50, 100]
 def species_map = ["efea": "Enterococcus faecium", "kpne": "Klebsiella pneumoniae", "abau": "Acinetobacter baumannii", "ecol": "Escherichia coli", "oth": "other"]
 def pctid = [95, 92, 98]
 def thr = [250, 500, 1000, 2000, 5000]
+def pty = [0, 0.5, 1, 2]
 // Gfa to Panassembly
 process bgzip_d {
     input:
@@ -41,7 +42,7 @@ process bgzip_d {
 
     """
     #!/usr/bin/env bash
-    bgzip -d ${gz}
+    bgzip -k -d ${gz}
     """
 }
 
@@ -62,7 +63,6 @@ process bgzip  {
 }
 
 process remove_nodes {
-    cache 'lenient'
     input:
     tuple val(meta), path(gfa)
 
@@ -114,7 +114,6 @@ process rename_gfa {
 }
 
 process extract_fasta {
-    cache 'lenient'
 
     input:
     tuple val(meta), path(gfa)
@@ -133,7 +132,6 @@ process extract_fasta {
 }
 
 process mix_fasta {
-    cache 'lenient'
 
     input:
     tuple val(meta), path(fasta_a), path(fasta_b)
@@ -200,9 +198,11 @@ process gt {
 process make_pangenome {
     memory '16 GB'
     executor 'slurm'
+    array 60
     cpus 8 
-    time '12h'
-    cache 'lenient'
+    time { task.attempt > 1 ? 8.hour : 2.hour}
+    errorStrategy 'retry'
+    maxRetries 2
 
     input:
     tuple val(meta), path(mixed_fasta)
@@ -222,10 +222,14 @@ process make_pangenome {
     
     touch ${paramfile}
     echo -e '{\n\t"max_memory": "16.GB",\n\t"wfmash_segment_length": ${meta.thr},\n\t"seqwish_min_match_length": 0,\n\t"smoothxg_poa_params": "asm5",\n\t"wfmash_map_pct_id": ${meta.pctid},\n\t"max_cpus": ${task.cpus},\n\t"wfmash_merge_segments": true\n}' > ${paramfile}
+    
+    bgzip -k ${mixed_fasta}
+    mkdir -p ./work-tmp
+    nextflow run nf-core/pangenome -r ${release} -profile $profile -w ./work-tmp  --input ${mixed_fasta}.gz --n_haplotypes ${haplos} --outdir ${out_core} -params-file ${paramfile} --wfmash_segment_length ${meta.thr} --wfmash_map_pct_id ${meta.pctid}
+    cp ${out_core}/FINAL_GFA/${mixed_fasta}.gz.gfaffix.unchop.Ygs.view.gfa ${pangenome} 
+    rm -rf ${out_core}
+    rm -rf ./work-tmp
 
-    bgzip ${mixed_fasta}
-    nextflow run nf-core/pangenome -r ${release} -profile $profile -resume --input ${mixed_fasta}.gz --n_haplotypes ${haplos} --outdir ${out_core} -params-file ${paramfile} --wfmash_segment_length ${meta.thr} --wfmash_map_pct_id ${meta.pctid}
-    cp ${out_core}/FINAL_GFA/${mixed_fasta}.gz.gfaffix.unchop.Ygs.view.gfa ${pangenome}
     """
 
     stub:
@@ -236,12 +240,13 @@ process make_pangenome {
 }
 
 process make_panassembly {
-    executor 'slurm'
 
-    memory '16 GB'
-    cpus 1
-    time '15m'
-    cache 'lenient'
+      maxForks 8
+//     executor 'slurm'
+//     memory '8 GB'
+//     array 60
+//     cpus 1
+//     time '15m'
 
     input:
     tuple val(meta), path(pangenome), path(ske), path(uni)
@@ -256,8 +261,6 @@ process make_panassembly {
     """
     #!/usr/bin/env bash
 
-    # module restore pbf
-    # source $projectDir/.venv/bin/activate
     python $projectDir/bin/gfa_cleaner.py --input ${pangenome} --output ${pangenomecl}
     python $projectDir/bin/pangenome_enancher.py --input ${pangenomecl} --output ${panassembly} --assembly ${uni} ${ske}
     """
@@ -268,7 +271,6 @@ process make_panassembly {
     """
 }
 process compute_scores {
-    cache 'lenient'
     errorStrategy 'terminate'
 
     input:
@@ -348,10 +350,15 @@ touch ${gc_uni}
 }
 
 process model {
+    
     executor 'slurm'
-    cpus 8
-    memory '16 GB'    
-    cache 'lenient'
+    array 60
+    maxForks 120
+    cpus 16
+    time { task.attempt > 1 ? 4.hour * task.attempt : 6.hour}
+    memory { task.attempt > 1 ? (task.previousTrace.memory > (8.GB) ? (task.previousTrace.memory * 2) : (16.GB)) : (16.GB) }
+    errorStrategy 'retry'
+    maxRetries 3
 
     input:
     tuple val(meta), path(gfa), path(gc), path(plscore)
@@ -362,23 +369,18 @@ process model {
 
     script:
 
-    if (meta.t == "pan") {
-        assembler = "pangenome"
-        // asm = "pan"
-        if (meta.pty == 0) {
-            args = "--nopenalty"
-        }
-        else if (meta.pty == 1) {
-            args = ""
-        }
-        seed_len = params.pangenome_seedlen
-        seed_score = params.pangenome_seedscore
-        min_pls_len = params.pangenome_minplaslen
-    }
+    assembler = "pangenome"
+    args = ""
+    seed_len = params.pangenome_seedlen
+    seed_score = params.pangenome_seedscore
+    min_pls_len = params.pangenome_minplaslen
 
-    else if (meta.t == "asm") {
+    if (meta.pty == 0) {
+      args = "--nopenalty"
+    }
+    
+    if (meta.asm != null && meta.asm != "pan" && meta.asm != "p") { 
         assembler = meta.asm == "s" ? "skesa" : "unicycler"
-        // asm = meta.asm == "s" ? "ske" : "uni"
         args = "--nopenalty"
         seed_len = params.assembly_seedlen
         seed_score = params.assembly_seedscore
@@ -391,7 +393,10 @@ process model {
 
     """
     bgzip -k ${gfa}
-    python ${pflow} ${args} -alpha4 ${meta.pty} -ag ${gfa}.gz -gc ${gc} -out_dir . -out_file ${bins}  -score ${plscore} -assembler ${assembler} -seed_len ${seed_len}  -seed_score ${seed_score} -min_pls_len ${min_pls_len}
+    python ${pflow} ${args} -alpha4 ${meta.pty} -ag ${gfa}.gz -gc ${gc} -out_dir . -out_file ${bins}  -score ${plscore} -assembler ${assembler} -seed_len ${seed_len} -seed_score ${seed_score} -min_pls_len ${min_pls_len} -log_file loglog.log
+    
+    rm -rf loglog.log
+    rm -rf m.log
     """
 
     stub:
@@ -537,11 +542,12 @@ workflow { // single input workflow, for dataset input use pipeline.nf
 
 
     gfa_ch = asm_ch
-    | bgzip_d // decompress gfa.gz
-    | rename_gfa 
-    | combine(Channel.fromList(cutl)) // add cut parameter
-    | map {_m, _f, _c -> _m['cut'] = _c; [_m, _f]} // map to meta
+    | bgzip_d
+    | rename_gfa
+    | combine(Channel.fromList(cutl))
+    | map { meta, file, cutvalue -> meta += ["cut": cutvalue]; [meta, file] } 
     | remove_nodes
+
 
     fasta_ch = gfa_ch
     | extract_fasta
@@ -595,9 +601,13 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     pangebin_bin_ch = panassembly_ch
     | join(compute_scores.out.gc_pan)
     | join(compute_scores.out.gd_pan)
+    | combine(Channel.fromList(pty))
+    | map { meta, file, gc, pls, _pty -> meta += ['pty': _pty]; [meta, file, gc, pls]}
     | model
 
-    pangebin_pred_ch = pangebin_bin_ch
+return
+
+  pangebin_pred_ch = pangebin_bin_ch
     | join(panassembly_ch)
     | transform
 
@@ -615,7 +625,6 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     | concat(pangebin_ovl_pred_ch)
     // | combine()
 
-return
     pred_ch
     | labeling
 

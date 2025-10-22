@@ -18,9 +18,12 @@ def metaname(meta) {
     if (meta.containsKey('pty')) {
         name += "-p${meta.pty}"
     }
-    if (meta.containsKey('t')) {
-        name += "-${meta.t}"
-    }    
+    if (meta.containsKey('bintype')) {
+        name += "-${meta.bintype}"
+    }   
+    if (meta.containsKey('tool')) {
+        name += "-${meta.tool}"
+    }
     return name
 }
 
@@ -197,11 +200,17 @@ process gt {
 }
 //................//
 process make_pangenome {
-    memory '16 GB'
-    executor 'slurm'
-    array 60
-    cpus 8 
-    time { task.attempt > 1 ? 8.hour : 2.hour}
+    if (params.executor == 'slurm') {
+        executor 'slurm'
+        memory '16 GB'
+        array 60
+        cpus 8
+        time { task.attempt > 1 ? 8.hour : 2.hour}
+    } else {
+        executor 'local'
+        memory '16 GB'
+        cpus 8
+    }
     errorStrategy 'retry'
     maxRetries 2
 
@@ -351,13 +360,21 @@ touch ${gc_uni}
 }
 
 process model {
-    
-    executor 'slurm'
-    array 60
-    maxForks 120
-    cpus 16
-    time { task.attempt > 1 ? 4.hour * task.attempt : 6.hour}
-    memory { task.attempt > 1 ? (task.previousTrace.memory > (8.GB) ? (task.previousTrace.memory * 2) : (16.GB)) : (16.GB) }
+    if (params.executor == 'slurm') {   
+        executor 'slurm'
+        array 60
+        maxForks 120
+        cpus 16
+        time { task.attempt > 1 ? 4.hour * task.attempt : 6.hour}
+        memory { task.attempt > 1 ? (task.previousTrace.memory > (8.GB) ? (task.previousTrace.memory * 2) : (16.GB)) : (16.GB) }
+    }
+    else {
+        executor 'local'
+        maxForks 1
+        cpus 8
+        memory '16 GB'
+    }
+
     errorStrategy 'retry'
     maxRetries 3
 
@@ -420,7 +437,8 @@ process transform {
     
     script:
 
-    res = metaname(meta) + ".pred.tab"
+    meta += ['bintype': 'bins']
+    res = metaname(meta) + ".tab"
     
     """
     python $projectDir/bin/evaluation/transform_pbf_pred.py --input ${bins} --gfa ${gfa} --output ${res} 
@@ -437,7 +455,8 @@ process transform_nve {
     tuple val(meta), path(modded)
     
     script:
-        modded = metaname(meta) + ".nve.tab"
+    meta += ['bintype': 'nve']
+        modded = metaname(meta) + ".tab"
         """
         #!/usr/bin/env bash
         python $projectDir/bin/extend_bins.py --pred ${pred} --out ${modded} --naive --n 1
@@ -453,7 +472,8 @@ process transform_ovl {
     tuple val(meta), path(modded)
     
     script:
-        modded = metaname(meta) + ".ovl.tab"
+    meta += ['bintype': 'ovl']
+        modded = metaname(meta) + ".tab"
         """
         #!/usr/bin/env bash
         python $projectDir/bin/extend_bins.py --pred ${pred} --out ${modded} --super --graph ${graph}
@@ -464,23 +484,22 @@ process labeling {
     cache false
 
     input:
-    tuple val(meta), path(prediction), path(gt)
+    tuple val(meta), path(bins_tab), path(gt)
+    val(tool)
 
     output:
     tuple val(meta), path(stats)
 
     script:
 
-    output = prediction.getBaseName()
-    id = output.split("\\.")[0]
-    asm = output.split("\\.")[1]
-    thr = output.split("\\.")[2]
-    tool = output.split("\\.")[3]
-
-    reference = gt.getBaseName().split("\\.")[2]
+    output = metaname(meta)
+    id = meta.id 
+    asm = meta.asm
+    thr = meta.thr
+    meta += ['tool': tool]
 
     description = "sample ${id}, ${asm} graph (cut ${thr}, ref ${reference}) with ${tool}"
-    stats = "${output}.${reference}.lab.txt"
+    stats = metaname(meta) + ".txt"
 
     """
     python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${output} --output ${stats} --description '${description}'
@@ -498,9 +517,13 @@ process binning {
     // tuple val(meta), path(plots), emit: plots
 
     script:
-    output = prediction.getBaseName()
-    reference = gt.getBaseName().split("\\.")[2]
-    stats = "${output}.${reference}.bin.txt"
+    output = metaname(meta)
+    id = meta.id 
+    asm = meta.asm
+    thr = meta.thr
+    meta += ['tool': tool]
+
+    stats = metaname(meta) + ".txt"
     // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",3)}1' ${gt} 
     // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",4)}1' ${gt} 
     """
@@ -625,18 +648,12 @@ return
     | concat(pangebin_ovl_pred_ch)
     // | combine()
 
-    pred_ch
+    labeling_ch = pred_ch
     | labeling
 
-    pred_ch
+    binning_ch = pred_ch
     | binning
 
-
-    // blast_ch_s
-    // blast_ch_u
-
-
-// make pangenome
-
+    // results_ch = labeling_ch.combine(binning_ch)
 
 }

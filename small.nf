@@ -147,13 +147,14 @@ process mix_fasta {
 
 // GROUND TRUTH
 process refcheck{
+    storeDir null
     errorStrategy 'ignore'
     input:
 
     tuple val(meta), path(refin)
 
     output:
-    tuple val(meta), path(ref)
+    tuple val(meta), path(ref), optional: true
 
     script:
     ref = metaname(meta) + ".fna"
@@ -548,7 +549,6 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     | map { meta, file, cutvalue -> meta += ["cut": cutvalue]; [meta, file] } 
     | remove_nodes
 
-
     fasta_ch = gfa_ch
     | extract_fasta
 
@@ -583,7 +583,7 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     | mix_fasta
     | combine(Channel.fromList(pctid))
     | combine(Channel.fromList(thr))
-    | map {meta, f, _p, _t -> meta += [pctid: _p, thr: _t] ;[meta, f] } 
+    | map {meta, f, _p, _t -> meta += ['pctid': _p, 'thr': _t] ;[meta, f] }
     | make_pangenome
     
     panassembly_ch = pangenome_ch

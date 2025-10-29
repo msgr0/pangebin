@@ -204,6 +204,7 @@ process make_pangenome {
         executor 'slurm'
         memory '16 GB'
         array 60
+	maxForks 180
         cpus 8
         time { task.attempt > 1 ? 8.hour : 2.hour}
     } else {
@@ -365,8 +366,8 @@ process model {
         array 60
         maxForks 120
         cpus 16
-        time { task.attempt > 1 ? 4.hour * task.attempt : 6.hour}
-        memory { task.attempt > 1 ? (task.previousTrace.memory > (8.GB) ? (task.previousTrace.memory * 2) : (16.GB)) : (16.GB) }
+        time { task.attempt > 1 ? 8.hour * task.attempt : 12.hour}
+        memory { task.attempt > 1 ? (task.previousTrace.memory > (16.GB) ? (task.previousTrace.memory * 2) : (32.GB)) : (32.GB) }
     }
     else {
         executor 'local'
@@ -375,7 +376,7 @@ process model {
         memory '16 GB'
     }
 
-    errorStrategy 'retry'
+    errorStrategy {task.attempt < 3 ? 'retry' : 'ignore'}
     maxRetries 3
 
     input:
@@ -627,7 +628,6 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     | combine(Channel.fromList(pty))
     | map { meta, file, gc, pls, _pty -> meta += ['pty': _pty]; [meta, file, gc, pls]}
     | model
-
 return
 
   pangebin_pred_ch = pangebin_bin_ch
@@ -643,16 +643,16 @@ return
     | transform_ovl
 
 
-    pred_ch = pangebin_pred_ch
-    | concat(pangebin_naive_pred_ch)
-    | concat(pangebin_ovl_pred_ch)
-    // | combine()
-
-    labeling_ch = pred_ch
-    | labeling
-
-    binning_ch = pred_ch
-    | binning
+//   pred_ch = pangebin_pred_ch
+//   | concat(pangebin_naive_pred_ch)
+//   | concat(pangebin_ovl_pred_ch)
+//   // | combine()
+//
+//   labeling_ch = pred_ch
+//   | labeling
+//
+//   binning_ch = pred_ch
+//   | binning
 
     // results_ch = labeling_ch.combine(binning_ch)
 

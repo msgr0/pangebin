@@ -622,12 +622,29 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     | compute_scores
 
 
-    pangebin_bin_ch = panassembly_ch
+    panassembly_model_ch = panassembly_ch
     | join(compute_scores.out.gc_pan)
     | join(compute_scores.out.gd_pan)
     | combine(Channel.fromList(pty))
     | map { meta, file, gc, pls, _pty -> meta += ['pty': _pty]; [meta, file, gc, pls]}
+    
+    skesa_model_ch = gfa_ch 
+    | filter {meta, f -> meta['asm'] == 's' }
+    | join( (compute_scores.out.gc_ske).map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = meta['asm']; m['cut'] = meta['cut']; [m, f]})
+    | join( (compute_scores.out.gd_ske).map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = meta['asm']; m['cut'] = meta['cut']; [m, f]})
+
+
+    uni_model_ch = gfa_ch
+    | filter {meta, f -> meta['asm'] == 'u' }
+    | join( (compute_scores.out.gc_uni).map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = meta['asm']; m['cut'] = meta['cut']; [m, f]})
+    | join( (compute_scores.out.gd_uni).map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = meta['asm']; m['cut'] = meta['cut']; [m, f]})
+    
+    bin_ch = panassembly_model_ch
+    | combine (skesa_model_ch)
+    | combine (uni_model_ch)
     | model
+
+
 return
 
   pangebin_pred_ch = pangebin_bin_ch

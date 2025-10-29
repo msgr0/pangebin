@@ -410,12 +410,19 @@ process model {
     bins = "${base}.pbf.bins.tsv"
     pflow = "$projectDir/PlasBin-flow-pangenome/code/plasbin_flow.py"
 
+    if (task.attempt > 3) {
+    """
+    touch ${bins}
+    """
+    }
+
     """
     bgzip -k ${gfa}
     python ${pflow} ${args} -alpha4 ${meta.pty} -ag ${gfa}.gz -gc ${gc} -out_dir . -out_file ${bins}  -score ${plscore} -assembler ${assembler} -seed_len ${seed_len} -seed_score ${seed_score} -min_pls_len ${min_pls_len} -log_file loglog.log
     
     rm -rf loglog.log
     rm -rf m.log
+    
     """
 
     stub:

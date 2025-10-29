@@ -32,6 +32,7 @@ def species_map = ["efea": "Enterococcus faecium", "kpne": "Klebsiella pneumonia
 def pctid = [95, 92, 98]
 def thr = [250, 500, 1000, 2000, 5000]
 def pty = [0, 0.5, 1, 2]
+def bintypeL = ["bins", "nve", "ovl"]
 // Gfa to Panassembly
 process bgzip_d {
     input:
@@ -196,6 +197,76 @@ process gt {
     fi
 
     """
+
+}
+
+process blast {
+
+    errorStrategy 'terminate'
+    cache false
+
+    input:
+    tuple val(meta), path(graph), path(mix), path(ske), path(uni), path(reference)
+
+    output:
+    tuple val(meta), path(pan_mix_gt), path(mix_gt), emit: pangt
+    tuple val(meta), path(pan_ske_gt), path(ske_gt), emit: skegt
+    tuple val(meta), path(pan_uni_gt), path(uni_gt), emit: unigt
+
+
+    script:
+    name = metaname(meta)
+    outmix = name + ".mix" 
+    // mapping_file = output + ".mapping.tsv"
+    mix_gt = outmix + ".gt.tsv"
+    pan_mix_gt = outmix + ".pan.gt.tsv"
+
+    outuni = metaname(meta) + ".uni"
+    // mapping_file = output + ".mapping.tsv"
+    uni_gt = outuni + ".gt.tsv"
+    pan_uni_gt = outuni + ".pan.gt.tsv"
+
+    outske = metaname(meta) + ".ske"
+    // mapping_file = output + ".mapping.tsv"
+    ske_gt = outske + ".gt.tsv"
+    pan_ske_gt = outske + ".pan.gt.tsv"
+    
+    """
+    #!/usr/bin/env bash
+
+    python $projectDir/bin/evaluation/build_truth.py --pangenome ${graph} --assembly ${mix} --reference ${reference} --output ${outmix} --mix
+    
+    python $projectDir/bin/evaluation/build_truth.py --pangenome ${graph} --assembly ${uni} --reference ${reference} --output ${outuni}
+
+    python $projectDir/bin/evaluation/build_truth.py --pangenome ${graph} --assembly ${ske} --reference ${reference} --output ${outske}
+    """
+
+    stub:
+
+    name = metaname(meta)
+    outmix = name + ".mix" 
+    // mapping_file = output + ".mapping.tsv"
+    mix_gt = outmix + ".gt.tsv"
+    pan_mix_gt = outmix + ".pan.gt.tsv"
+
+    outuni = metaname(meta) + ".uni"
+    // mapping_file = output + ".mapping.tsv"
+    uni_gt = outuni + ".gt.tsv"
+    pan_uni_gt = outuni + ".pan.gt.tsv"
+
+    outske = metaname(meta) + ".ske"
+    // mapping_file = output + ".mapping.tsv"
+    ske_gt = outske + ".gt.tsv"
+    pan_ske_gt = outske + ".pan.gt.tsv"
+    """
+    touch ${pan_mix_gt}
+    touch ${mix_gt}
+    touch ${pan_ske_gt}
+    touch ${ske_gt}
+    touch ${pan_uni_gt}
+    touch ${uni_gt}
+    """
+
 
 }
 //................//
@@ -451,6 +522,13 @@ process transform {
     """
     python $projectDir/bin/evaluation/transform_pbf_pred.py --input ${bins} --gfa ${gfa} --output ${res} 
     """
+
+    stub:
+    meta += ['bintype': 'bins']
+    res = metaname(meta) + ".tab"
+    """
+    touch ${res}
+    """
 } 
 
 process transform_nve {
@@ -469,6 +547,15 @@ process transform_nve {
         #!/usr/bin/env bash
         python $projectDir/bin/extend_bins.py --pred ${pred} --out ${modded} --naive --n 1
         """
+
+    stub:
+    meta += ['bintype': 'nve']
+        modded = metaname(meta) + ".tab"
+        """
+        touch ${modded}
+        """
+
+
 }
 process transform_ovl {
     cache false
@@ -486,6 +573,13 @@ process transform_ovl {
         #!/usr/bin/env bash
         python $projectDir/bin/extend_bins.py --pred ${pred} --out ${modded} --super --graph ${graph}
         """
+        stub:
+    meta += ['bintype': 'ovl']
+        modded = metaname(meta) + ".tab"
+        """
+       touch ${modded}
+       """
+
 }
 
 process labeling {
@@ -493,24 +587,25 @@ process labeling {
 
     input:
     tuple val(meta), path(bins_tab), path(gt)
-    val(tool)
 
     output:
     tuple val(meta), path(stats)
 
     script:
 
-    output = metaname(meta)
-    id = meta.id 
-    asm = meta.asm
-    thr = meta.thr
-    meta += ['tool': tool]
+    name = metaname(meta)
 
-    description = "sample ${id}, ${asm} graph (cut ${thr}, ref ${reference}) with ${tool}"
+    description = "sample ${name}"
     stats = metaname(meta) + ".txt"
 
     """
-    python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${output} --output ${stats} --description '${description}'
+    python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${name} --output ${stats} --description '${description}'
+    """
+    stub:
+    
+    stats = metaname(meta) + ".txt"
+    """
+    touch ${stats}
     """
 }
 
@@ -522,14 +617,9 @@ process binning {
 
     output:
     tuple val(meta), path(stats)
-    // tuple val(meta), path(plots), emit: plots
 
     script:
-    output = metaname(meta)
-    id = meta.id 
-    asm = meta.asm
-    thr = meta.thr
-    meta += ['tool': tool]
+    name = metaname(meta)
 
     stats = metaname(meta) + ".txt"
     // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",3)}1' ${gt} 
@@ -539,8 +629,38 @@ process binning {
     echo 'plasmid\tcontig\tnan\tnan\tcontig_len' | cat - ${gt} > temp && mv temp ${gt}
     python $projectDir/PlasEval/src/plaseval.py eval --pred ${prediction} --gt ${gt} --out ${stats} 
     """
+    stub:
+    stats = metaname(meta) + ".txt"
+
+"""
+touch ${stats}
+"""
+}
+
+process compute_results {
+
+  maxForks 1
+
+  input:
+  tuple val(meta), path(lab), path(bins)
+  path(res_lab)
+  path(res_bins)
+
+  output:
+  tuple val(meta), path(res_lab), path(res_bins)
+
+  script:
+  """
+  #!/usr/bin/env python
+
+  
+
+
+
+  """
 
 }
+
 workflow { // single input workflow, for dataset input use pipeline.nf
 
     // params input is the dataset folder
@@ -556,7 +676,11 @@ workflow { // single input workflow, for dataset input use pipeline.nf
 
     meta_ch = input_ch.map { meta, _files -> meta }
     ref_ch = Channel.empty()
-    meta_filt_ch = meta_ch | gt | refcheck.tap{ref_ch} | map {meta, fna -> [meta]}
+
+    ref_ch = meta_ch | gt | refcheck
+      
+    meta_filt_ch = ref_ch
+    | map {meta, fna -> [meta]}
 
     input_filt_ch = meta_filt_ch.join(input_ch)
 
@@ -597,6 +721,9 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     gfa_ch_s = gfa_ch
     | filter {meta, f -> meta['asm'] == 's' }
     | map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['cut'] = meta['cut']; [m, f]}
+
+
+    gfa_ch_s_pan = gfa_ch_s 
     | combine(Channel.fromList(pctid))
     | combine(Channel.fromList(thr))
     | map {meta, f, _p, _t -> meta += ['pctid': _p, 'thr': _t] ;[meta, f] }
@@ -604,28 +731,30 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     gfa_ch_u = gfa_ch
     | filter {meta, f -> meta['asm'] == 'u' }
     | map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['cut'] = meta['cut']; [m, f]}
+
+    gfa_ch_u_pan = gfa_ch_u
     | combine(Channel.fromList(pctid))
     | combine(Channel.fromList(thr))
     | map {meta, f, _p, _t -> meta += ['pctid': _p, 'thr': _t] ;[meta, f] }
     
     fastamix_ch = fasta_ch_s.join(fasta_ch_u)
+    | mix_fasta
 
     pangenome_ch = fastamix_ch
-    | mix_fasta
     | combine(Channel.fromList(pctid))
     | combine(Channel.fromList(thr))
     | map {meta, f, _p, _t -> meta += ['pctid': _p, 'thr': _t] ;[meta, f] }
     | make_pangenome
     
     panassembly_ch = pangenome_ch
-    | join(gfa_ch_s)
-    | join(gfa_ch_u)
+    | join(gfa_ch_s_pan)
+    | join(gfa_ch_u_pan)
     | make_panassembly
 
 
     scores_ch = panassembly_ch 
-    | join(gfa_ch_s)
-    | join(gfa_ch_u)
+    | join(gfa_ch_s_pan)
+    | join(gfa_ch_u_pan)
     | compute_scores
 
 
@@ -635,49 +764,130 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     | combine(Channel.fromList(pty))
     | map { meta, file, gc, pls, _pty -> meta += ['pty': _pty]; [meta, file, gc, pls]}
     
-    skesa_model_ch = gfa_ch 
-    | filter {meta, f -> meta['asm'] == 's' }
-    | join( (compute_scores.out.gc_ske).map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = meta['asm']; m['cut'] = meta['cut']; [m, f]})
-    | join( (compute_scores.out.gd_ske).map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = meta['asm']; m['cut'] = meta['cut']; [m, f]})
 
+    skesa_model_ch = gfa_ch 
+    | filter {meta, f -> meta['asm'] == 's'}
+    | join( (compute_scores.out.gc_ske).filter{meta, f -> meta['thr'] == thr[0] && meta['pctid'] == pctid[0]}.map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = 's'; m['cut'] = meta['cut']; [m, f]})
+    | join( (compute_scores.out.gd_ske).filter{meta, f -> meta['thr'] == thr[0] && meta['pctid'] == pctid[0]}.map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = 's'; m['cut'] = meta['cut']; [m, f]})
 
     uni_model_ch = gfa_ch
     | filter {meta, f -> meta['asm'] == 'u' }
-    | join( (compute_scores.out.gc_uni).map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = meta['asm']; m['cut'] = meta['cut']; [m, f]})
-    | join( (compute_scores.out.gd_uni).map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = meta['asm']; m['cut'] = meta['cut']; [m, f]})
-    
+    |  join( (compute_scores.out.gc_uni).filter{meta, f -> meta['thr'] == thr[0] && meta['pctid'] == pctid[0]}.map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = 'u'; m['cut'] = meta['cut']; [m, f]})
+    | join( (compute_scores.out.gd_uni).filter{meta, f -> meta['thr'] == thr[0] && meta['pctid'] == pctid[0]}.map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = 'u'; m['cut'] = meta['cut']; [m, f]})
+
+
+
     bin_ch = panassembly_model_ch
-    | combine (skesa_model_ch)
-    | combine (uni_model_ch)
+    | mix (skesa_model_ch)
+    | mix (uni_model_ch)
+    
+
+    model_ch = bin_ch
     | model
 
+    panassembly_end_ch = panassembly_ch
+    | combine(Channel.fromList(pty))
+    | map { meta, file,  _pty -> meta += ['pty': _pty]; [meta, file]}
 
-return
+    pange_transform_ch = model_ch
+    | join( panassembly_end_ch)
 
-  pangebin_pred_ch = pangebin_bin_ch
-    | join(panassembly_ch)
+    assembly_transform_ch = model_ch
+    | join(gfa_ch)
+  
+
+    transform_ch = pange_transform_ch
+    | mix (assembly_transform_ch)
     | transform
 
-    pangebin_naive_pred_ch = pangebin_pred_ch
-    | join(panassembly_ch)
+    transform_nve_ch = pange_transform_ch
     | transform_nve
-    
-    pangebin_ovl_pred_ch = pangebin_pred_ch
-    | join(panassembly_ch)
+
+    transform_ovl_ch = pange_transform_ch
     | transform_ovl
 
 
-//   pred_ch = pangebin_pred_ch
-//   | concat(pangebin_naive_pred_ch)
-//   | concat(pangebin_ovl_pred_ch)
-//   // | combine()
-//
-//   labeling_ch = pred_ch
-//   | labeling
-//
-//   binning_ch = pred_ch
-//   | binning
+    prediction_ch = transform_ch
+    | mix(transform_ovl_ch)
+    | mix(transform_nve_ch)
 
-    // results_ch = labeling_ch.combine(binning_ch)
+
+
+    
+    panassembly_ch.map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['cut'] = meta['cut']; [m, f]}
+    | join (fastamix_ch)
+    | join(fasta_ch_s)
+    | join(fasta_ch_u)
+    | combine (ref_ch.map{meta, f -> f})
+    | blast
+  
+
+    prediction_pan_ch = prediction_ch.filter { meta, pred -> meta['pty'] != null } 
+    prediction_asm_ch = prediction_ch.filter { meta, pred -> meta['pty'] == null }
+
+    prediction_ske_ch = prediction_asm_ch
+    | filter {meta, pred-> meta['asm'] == 's'}
+    | map{meta, pred -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['cut'] = meta['cut']; [m, pred]}
+    | combine((blast.out.skegt).map{ meta, fragments, contigs -> [meta, contigs]}, by: 0)
+    | map { meta, pred, gt -> meta += ['asm': "s"]; [meta, pred, gt] }
+
+    prediction_uni_ch = prediction_asm_ch
+    | filter {meta, pred-> meta['asm'] == 'u'}
+    | map{meta, pred -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['cut'] = meta['cut']; [m, pred]}
+    | combine((blast.out.unigt).map{ meta, fragments, contigs -> [meta, contigs]}, by: 0)
+    | map { meta, pred, gt -> meta += ['asm': "u"]; [meta, pred, gt] }
+
+    blast_pan_uni_gt_ch = blast.out.unigt
+    | combine ( Channel.fromList(pctid))
+    | combine ( Channel.fromList(thr))
+    | combine ( Channel.fromList(pty))
+    | combine ( Channel.fromList(bintypeL))
+    | map { meta, f, c, _pctid, _thr, _pty, _b -> meta += ['pctid' : _pctid, 'thr': _thr, 'pty': _pty, 'bintype': _b]; [meta, f]}
+    
+    prediction_pan_uni_ch = prediction_pan_ch
+    | combine( blast_pan_uni_gt_ch, by: 0)
+    | map { meta, pred, gt -> meta += ['asm': "panu"]; [meta, pred, gt]} 
+
+
+    blast_pan_ske_gt_ch = blast.out.skegt
+    | combine ( Channel.fromList(pctid))
+    | combine ( Channel.fromList(thr))
+    | combine ( Channel.fromList(pty))
+    | combine ( Channel.fromList(bintypeL))
+    | map { meta, f, c, _pctid, _thr, _pty, _b -> meta += ['pctid' : _pctid, 'thr': _thr, 'pty': _pty, 'bintype': _b]; [meta, f]}
+
+    prediction_pan_ske_ch = prediction_pan_ch
+    | combine( blast_pan_ske_gt_ch, by: 0)
+    | map { meta, pred, gt -> meta += ['asm': "pans"]; [meta, pred, gt] }
+
+    prediction_pan_ch = prediction_pan_uni_ch.mix(prediction_pan_ske_ch)
+
+    
+    prediction_ch = 
+    prediction_pan_ch
+    | mix (prediction_uni_ch)
+    | mix (prediction_ske_ch)
+
+       
+    labeling_ch = prediction_ch
+    | labeling
+
+    binning_ch = prediction_ch
+    | binning
+
+    result_ch = labeling_ch
+    | join( binning_ch)
+    
+    compute_results(result_ch, Channel.fromPath("${params.result}.lab.csv", Channel.fromPath("${params.result}.bin.csv")
+
+
+
+    
+    
+
+
+
+
+
 
 }

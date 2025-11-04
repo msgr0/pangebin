@@ -1,3 +1,4 @@
+nextflow.preview.output=true
 def metaname(meta) {
     def name = meta.id
     if (meta.containsKey('spc')) {

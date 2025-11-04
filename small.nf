@@ -590,7 +590,7 @@ process labeling {
     cache false
 
     input:
-    tuple val(meta), path(bins_tab), path(gt)
+    tuple val(meta), path(prediction), path(gt)
 
     output:
     tuple val(meta), path(stats)
@@ -644,47 +644,71 @@ touch ${stats}
 }
 
 process extract_results {
+    storeDir null
   cache false
 
   input:
   tuple val(meta), path(res)
 
   output:
-  tuple val(meta), val(perf)
+  tuple val(meta),  env(prec), env(rec), env(f1)//   val(prec), val(rec), val(f1)
 
 
   script:
-  def perf = [:]
+  def prec = 0
+  def rec = 0
+  def f1 = 0
 
   if (meta.t == 'l') {
-  """
-  #!/usr/bin/env python
-  import os
-  import pandas as pd
- 
-  prec, rec, f1 = 0
-  with open(${res}) as file:
-    lines = file.readlines()
-    prec, rec, f1 = float(lines[-4].split("\t")[-1].strip()), float(lines[-3].split("\t")[-1].strip()), float(lines[-2].split("\t")[-1].strip())
-  """
+
+    """
+if [ \$(wc -l < ${res}) -gt 1 ]; then
+    tail -n 4 "${res}" | head -n 3 | awk 'NR==1{prec=\$NF} NR==2{rec=\$NF} NR==3{f1=\$NF} END{print prec, rec, f1}'
+    export prec
+    export rec
+    export f1
+else
+    echo "File has one line or less"
+    export prec=0
+    export rec=0
+    export f1=0
+fi
+
+    """
 }
 else if (meta.t == 'b') {
-      """
-  #!/usr/bin/env python
-  import os
-  import pandas as pd
 
-  prec, rec, f1 = 0
-  with open(${res}) as file:
-    lines = file.readlines()
-    bprec, brec, bf1 = float(lines[-3].split("\t")[-1].strip()), float(lines[-2].split("\t")[-1].strip()), float(lines[-1].split("\t")[-1].strip())
-        
   """
+if [ \$(wc -l < ${res}) -gt 1 ]; then
+    tail -n 4 "${res}" | head -n 3 | awk 'NR==1{prec=\$NF} NR==2{rec=\$NF} NR==3{f1=\$NF} END{print prec, rec, f1}'
+    export prec
+    export rec
+    export f1
+else
+    echo "File has one line or less"
+    export prec=0
+    export rec=0
+    export f1=0
+fi
+    """
 }
-  perf += ['prec': prec, 'rec': rec, 'f1': f1]
+else {
+    """
+        echo "Unknown type"
+        export prec=0
+        export rec=0
+        export f1=0
+    """
+
+}
+
 
   stub:
-  perf = ['prec': 0.9, 'rec': 0.6, 'f1': 0.45]
+  """
+  export prec = 0.9
+    export rec = 0.4
+    export f1 = 0.4
+  """
 
 }
 
@@ -906,9 +930,9 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     results_ch = labeling_ch
     | mix ( binning_ch)
 
-    results_ch = results_ch
+    results_ch = results_ch | view
     | extract_results
-    | map { meta, perf ->     def outmeta = [:];
+    | map { meta, prec, rec, f1 ->     def outmeta = [:];
     outmeta += meta["id"] != null ? ['id': meta["id"]] : ["id": "NA"];
     outmeta += meta["spc"] != null ? ['spc': meta["spc"]] : ["spc": "NA"];
     outmeta += meta["cut"] != null ? ['cut': meta["cut"]] : ["cut": "NA"];
@@ -918,9 +942,9 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     outmeta += meta["pty"] != null ? ['pty': meta["pty"]] : ["pty": "NA"];
     outmeta += meta["bintype"] != null ? ['bintype': meta["bintype"]] : ["bintype": "NA"];
     outmeta += meta["t"] != null ? ['type': meta["t"]] : ["type": "NA"];
-    outmeta += perf['prec'] != null ? ['precision': perf['prec']] : ['precision': 'NA'];
-    outmeta += perf['rec'] != null ? ['recall': perf['rec']] : ['recall': 'NA'];
-    outmeta += perf['f1'] != null ? ['f1score': perf['f1']] : ['f1score': 'NA'];
+    outmeta += prec != 0 ? ['precision': prec] : ['precision': 'NA'];
+    outmeta += rec != 0 ? ['recall': rec] : ['recall': 'NA'];
+    outmeta += f1 != 0 ? ['f1score': f1] : ['f1score': 'NA'];
     outmeta
     }    
     publish:

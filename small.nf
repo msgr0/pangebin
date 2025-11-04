@@ -21,17 +21,21 @@ def metaname(meta) {
     if (meta.containsKey('bintype')) {
         name += "-${meta.bintype}"
     }   
-    if (meta.containsKey('tool')) {
-        name += "-${meta.tool}"
+    if (meta.containsKey('t')) {
+        name += "-${meta.t}"
     }
     return name
 }
 
 def cutl = [0, 1, 50, 100]
 def species_map = ["efea": "Enterococcus faecium", "kpne": "Klebsiella pneumoniae", "abau": "Acinetobacter baumannii", "ecol": "Escherichia coli", "oth": "other"]
-def pctid = [95, 92, 98]
-def thr = [250, 500, 1000, 2000, 5000]
-def pty = [0, 0.5, 1, 2]
+//def pctid = [95, 92, 98]
+def pctid = [95]
+def thr = [250]
+def pty = [0.5]
+//def thr = [250, 500, 1000, 2000, 5000]
+//def pty = [0, 0.5, 1, 2]
+
 def bintypeL = ["bins", "nve", "ovl"]
 // Gfa to Panassembly
 process bgzip_d {
@@ -593,6 +597,7 @@ process labeling {
 
     script:
 
+    meta += ['t': 'l']
     name = metaname(meta)
 
     description = "sample ${name}"
@@ -602,7 +607,7 @@ process labeling {
     python $projectDir/bin/evaluate_bins.py --bin ${prediction} --csv ${gt} --sample ${name} --output ${stats} --description '${description}'
     """
     stub:
-    
+    meta += ['t': 'l']
     stats = metaname(meta) + ".txt"
     """
     touch ${stats}
@@ -619,7 +624,7 @@ process binning {
     tuple val(meta), path(stats)
 
     script:
-    name = metaname(meta)
+    meta += ['t': 'b']
 
     stats = metaname(meta) + ".txt"
     // awk -i inplace '{\$0=gensub(/\s*\S+/,\\"\\",3)}1' ${gt} 
@@ -630,6 +635,7 @@ process binning {
     python $projectDir/PlasEval/src/plaseval.py eval --pred ${prediction} --gt ${gt} --out ${stats} 
     """
     stub:
+    meta += ['t': 'b']
     stats = metaname(meta) + ".txt"
 
 """
@@ -637,32 +643,55 @@ touch ${stats}
 """
 }
 
-process compute_results {
-
-  maxForks 1
+process extract_results {
+  cache false
 
   input:
-  tuple val(meta), path(lab), path(bins)
-  path(res_lab)
-  path(res_bins)
+  tuple val(meta), path(res)
 
   output:
-  tuple val(meta), path(res_lab), path(res_bins)
+  tuple val(meta), val(perf)
+
 
   script:
+  def perf = [:]
+
+  if (meta.t == 'l') {
   """
   #!/usr/bin/env python
-
-  
-
-
-
+  import os
+  import pandas as pd
+ 
+  prec, rec, f1 = 0
+  with open(${res}) as file:
+    lines = file.readlines()
+    prec, rec, f1 = float(lines[-4].split("\t")[-1].strip()), float(lines[-3].split("\t")[-1].strip()), float(lines[-2].split("\t")[-1].strip())
   """
+}
+else if (meta.t == 'b') {
+      """
+  #!/usr/bin/env python
+  import os
+  import pandas as pd
+
+  prec, rec, f1 = 0
+  with open(${res}) as file:
+    lines = file.readlines()
+    bprec, brec, bf1 = float(lines[-3].split("\t")[-1].strip()), float(lines[-2].split("\t")[-1].strip()), float(lines[-1].split("\t")[-1].strip())
+        
+  """
+}
+  perf += ['prec': prec, 'rec': rec, 'f1': f1]
+
+  stub:
+  perf = ['prec': 0.9, 'rec': 0.6, 'f1': 0.45]
 
 }
 
-workflow { // single input workflow, for dataset input use pipeline.nf
 
+
+workflow { // single input workflow, for dataset input use pipeline.nf
+    main:
     // params input is the dataset folder
     input_ch = Channel.fromFilePairs("${params.dataset}/*-S*-{s,u}.gfa.gz", type: 'file', checkIfExists: true)
 
@@ -867,27 +896,44 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     prediction_pan_ch
     | mix (prediction_uni_ch)
     | mix (prediction_ske_ch)
-
-       
+      
     labeling_ch = prediction_ch
     | labeling
 
     binning_ch = prediction_ch
     | binning
 
-    result_ch = labeling_ch
-    | join( binning_ch)
-    
-    compute_results(result_ch, Channel.fromPath("${params.result}.lab.csv", Channel.fromPath("${params.result}.bin.csv")
+    results_ch = labeling_ch
+    | mix ( binning_ch)
+
+    results_ch = results_ch
+    | extract_results
+    | map { meta, perf ->     def outmeta = [:];
+    outmeta += meta["id"] != null ? ['id': meta["id"]] : ["id": "NA"];
+    outmeta += meta["spc"] != null ? ['spc': meta["spc"]] : ["spc": "NA"];
+    outmeta += meta["cut"] != null ? ['cut': meta["cut"]] : ["cut": "NA"];
+    outmeta += meta["asm"] != null ? ['asm': meta["asm"]] : ["asm": "NA"];
+    outmeta += meta["pctid"] != null ? ['pctid': meta["pctid"]] : ["pctid": "NA"];
+    outmeta += meta["thr"] != null ? ['thr': meta["thr"]] : ["thr": "NA"];
+    outmeta += meta["pty"] != null ? ['pty': meta["pty"]] : ["pty": "NA"];
+    outmeta += meta["bintype"] != null ? ['bintype': meta["bintype"]] : ["bintype": "NA"];
+    outmeta += meta["t"] != null ? ['type': meta["t"]] : ["type": "NA"];
+    outmeta += perf['prec'] != null ? ['precision': perf['prec']] : ['precision': 'NA'];
+    outmeta += perf['rec'] != null ? ['recall': perf['rec']] : ['recall': 'NA'];
+    outmeta += perf['f1'] != null ? ['f1score': perf['f1']] : ['f1score': 'NA'];
+    outmeta
+    }    
+    publish:
+    result = results_ch
+}
 
 
-
-    
-    
-
-
-
-
-
-
+output {
+    result {
+        index {
+            path "results.csv"
+            header true
+            sep '\t'
+        }
+    }
 }

@@ -543,7 +543,7 @@ process transform_nve {
     tuple val(meta), path(pred), path(graph)
 
     output:
-    tuple val(meta), path(modded) optional: true
+    tuple val(meta), path(modded), optional: true
     
     script:
     meta += ['bintype': 'nve']
@@ -569,7 +569,7 @@ process transform_ovl {
     tuple val(meta), path(pred), path(graph)
 
     output:
-    tuple val(meta), path(modded) optional: true
+    tuple val(meta), path(modded), optional: true
     
     script:
     meta += ['bintype': 'ovl']

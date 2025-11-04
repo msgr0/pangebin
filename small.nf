@@ -517,7 +517,7 @@ process transform {
     tuple val(meta), path(bins), path(gfa)
 
     output:
-    tuple val(meta), path(res)
+    tuple val(meta), path(res), optional: true
     
     script:
 
@@ -543,7 +543,7 @@ process transform_nve {
     tuple val(meta), path(pred), path(graph)
 
     output:
-    tuple val(meta), path(modded)
+    tuple val(meta), path(modded) optional: true
     
     script:
     meta += ['bintype': 'nve']
@@ -569,7 +569,7 @@ process transform_ovl {
     tuple val(meta), path(pred), path(graph)
 
     output:
-    tuple val(meta), path(modded)
+    tuple val(meta), path(modded) optional: true
     
     script:
     meta += ['bintype': 'ovl']
@@ -594,7 +594,7 @@ process labeling {
     tuple val(meta), path(prediction), path(gt)
 
     output:
-    tuple val(meta), path(stats)
+    tuple val(meta), path(stats), optional: true
 
     script:
 
@@ -622,7 +622,7 @@ process binning {
     tuple val(meta), path(prediction), path(gt)
 
     output:
-    tuple val(meta), path(stats)
+    tuple val(meta), path(stats), optional: true
 
     script:
     meta += ['t': 'b']

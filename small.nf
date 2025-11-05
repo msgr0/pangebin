@@ -476,7 +476,7 @@ process model {
     }
     
     if (meta.asm != null && meta.asm != "pan" && meta.asm != "p") { 
-        assembler = meta.asm == "s" ? "skesa" : "unicycler"
+        assembler = "unicycler"
         args = "--nopenalty"
         pty_local = 0
         seed_len = params.assembly_seedlen

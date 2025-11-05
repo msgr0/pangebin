@@ -469,14 +469,16 @@ process model {
     seed_len = params.pangenome_seedlen
     seed_score = params.pangenome_seedscore
     min_pls_len = params.pangenome_minplaslen
+    pty_local = meta.pty
 
-    if (meta.pty == 0) {
+    if (pty_local == 0) {
       args = "--nopenalty"
     }
     
     if (meta.asm != null && meta.asm != "pan" && meta.asm != "p") { 
         assembler = meta.asm == "s" ? "skesa" : "unicycler"
         args = "--nopenalty"
+        pty_local = 0
         seed_len = params.assembly_seedlen
         seed_score = params.assembly_seedscore
         min_pls_len = params.assembly_minplaslen
@@ -494,7 +496,7 @@ process model {
 
     """
     bgzip -k ${gfa}
-    python ${pflow} ${args} -alpha4 ${meta.pty} -ag ${gfa}.gz -gc ${gc} -out_dir . -out_file ${bins}  -score ${plscore} -assembler ${assembler} -seed_len ${seed_len} -seed_score ${seed_score} -min_pls_len ${min_pls_len} -log_file loglog.log
+    python ${pflow} ${args} -alpha4 ${pty_local} -ag ${gfa}.gz -gc ${gc} -out_dir . -out_file ${bins}  -score ${plscore} -assembler ${assembler} -seed_len ${seed_len} -seed_score ${seed_score} -min_pls_len ${min_pls_len} -log_file loglog.log
     
     rm -rf loglog.log
     rm -rf m.log

@@ -59,7 +59,7 @@ DEFAULT_ALPHA4 = 1
 DEFAULT_RMITER_MAX = 50
 DEFAULT_MIN_PLS_LEN = 1500
 DEFAULT_GUROBI_MIP_GAP = 0.05
-DEFAULT_GUROBI_TIME_LIMIT = 240
+DEFAULT_GUROBI_TIME_LIMIT = 1200
 
 def parse_arguments():
     description = 'PlasBin-flow: A flow-based MILP algorithm for plasmid contigs binning'

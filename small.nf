@@ -30,12 +30,9 @@ def metaname(meta) {
 
 def cutl = [0, 1, 50, 100]
 def species_map = ["efea": "Enterococcus faecium", "kpne": "Klebsiella pneumoniae", "abau": "Acinetobacter baumannii", "ecol": "Escherichia coli", "oth": "other"]
-//def pctid = [95, 92, 98]
-def pctid = [95]
-def thr = [250]
-def pty = [0.5]
-//def thr = [250, 500, 1000, 2000, 5000]
-//def pty = [0, 0.5, 1, 2]
+def pctid = [95, 92, 98]
+def thr = [250, 500, 1000, 2000, 5000]
+def pty = [0, 0.5, 1, 2]
 
 def bintypeL = ["bins", "nve", "ovl"]
 // Gfa to Panassembly
@@ -442,7 +439,7 @@ process model {
         array 60
         maxForks 120
         cpus 16
-        time { task.attempt > 1 ? 8.hour * task.attempt : 12.hour}
+        time { task.attempt > 1 ? 4.hour * task.attempt : 4.hour}
         memory { task.attempt > 1 ? (task.previousTrace.memory > (16.GB) ? (task.previousTrace.memory * 2) : (32.GB)) : (32.GB) }
     }
     else {
@@ -452,8 +449,7 @@ process model {
         memory '16 GB'
     }
 
-    errorStrategy {task.attempt < 3 ? 'retry' : 'ignore'}
-    maxRetries 3
+    errorStrategy 'ignore'
 
     input:
     tuple val(meta), path(gfa), path(gc), path(plscore)
@@ -841,6 +837,7 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     model_ch = bin_ch
     | model
 
+   return
     panassembly_end_ch = panassembly_ch
     | combine(Channel.fromList(pty))
     | map { meta, file,  _pty -> meta += ['pty': _pty]; [meta, file]}
@@ -950,17 +947,5 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     outmeta += f1 != 0 ? ['f1score': f1] : ['f1score': 'NA'];
     outmeta
     }    
-    publish:
-    result = results_ch
 }
 
-
-output {
-    result {
-        index {
-            path "results.csv"
-            header true
-            sep '\t'
-        }
-    }
-}

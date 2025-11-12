@@ -509,6 +509,30 @@ process model {
     
 }
 
+process check_model {
+
+    input:
+    tuple val(meta), path(bins)
+
+    output:
+    tuple val(meta), path(bins2), optional: true
+
+    script:
+    bins2 = metaname(meta) + ".pbf.x.tsv"
+    """
+    #!/usr/bin/env bash
+
+    if [[ $(wc -l <file.txt) -ge 2 ]]
+    then
+        cp ${bins} ${bins2}
+    else
+        echo "No bins predicted, outputting no file"
+    fi
+
+    """
+
+}
+
 process transform {
     cache false
     input:
@@ -815,6 +839,9 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     | join(compute_scores.out.gd_pan)
     | combine(Channel.fromList(pty))
     | map { meta, file, gc, pls, _pty -> meta += ['pty': _pty]; [meta, file, gc, pls]}
+
+    panassembly_ch = panassembly_model_ch 
+    | map { meta, file, gc, pls -> [meta, file]}
     
 
     skesa_model_ch = gfa_ch 
@@ -824,7 +851,7 @@ workflow { // single input workflow, for dataset input use pipeline.nf
 
     uni_model_ch = gfa_ch
     | filter {meta, f -> meta['asm'] == 'u' }
-    |  join( (compute_scores.out.gc_uni).filter{meta, f -> meta['thr'] == thr[0] && meta['pctid'] == pctid[0]}.map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = 'u'; m['cut'] = meta['cut']; [m, f]})
+    | join( (compute_scores.out.gc_uni).filter{meta, f -> meta['thr'] == thr[0] && meta['pctid'] == pctid[0]}.map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = 'u'; m['cut'] = meta['cut']; [m, f]})
     | join( (compute_scores.out.gd_uni).filter{meta, f -> meta['thr'] == thr[0] && meta['pctid'] == pctid[0]}.map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['asm'] = 'u'; m['cut'] = meta['cut']; [m, f]})
 
 
@@ -837,17 +864,18 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     model_ch = bin_ch
     | model
 
-   return
-    panassembly_end_ch = panassembly_ch
-    | combine(Channel.fromList(pty))
-    | map { meta, file,  _pty -> meta += ['pty': _pty]; [meta, file]}
+    // check for empty predictions and remove them
+    model_ok_ch = model_ch
+    | check_model
 
-    pange_transform_ch = model_ch
-    | join( panassembly_end_ch)
+    model_pan_ch = model_ok_ch 
+    | join (panassembly_ch)
 
-    assembly_transform_ch = model_ch
-    | join(gfa_ch)
-  
+    model_asm_ch = model_ok_ch
+    | join (gfa_ch)
+return
+
+
 
     transform_ch = pange_transform_ch
     | mix (assembly_transform_ch)

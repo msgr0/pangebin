@@ -1,4 +1,3 @@
-nextflow.preview.output=true
 def metaname(meta) {
     def name = meta.id
     if (meta.containsKey('spc')) {
@@ -522,7 +521,7 @@ process check_model {
     """
     #!/usr/bin/env bash
 
-    if [[ $(wc -l <file.txt) -ge 2 ]]
+    if [[ \$(wc -l <${bins}) -ge 2 ]]
     then
         cp ${bins} ${bins2}
     else
@@ -867,26 +866,26 @@ workflow { // single input workflow, for dataset input use pipeline.nf
     // check for empty predictions and remove them
     model_ok_ch = model_ch
     | check_model
+    | view
 
     model_pan_ch = model_ok_ch 
-    | join (panassembly_ch)
+    | join (panassembly_model_ch)
+    | view
 
     model_asm_ch = model_ok_ch
     | join (gfa_ch)
-return
+    | view
 
-
-
-    transform_ch = pange_transform_ch
-    | mix (assembly_transform_ch)
+    // transform predictions to required format
+    transform_ch = model_pan_ch
+    | mix (model_asm_ch)
     | transform
 
-    transform_nve_ch = pange_transform_ch
+    transform_nve_ch = model_pan_ch
     | transform_nve
 
-    transform_ovl_ch = pange_transform_ch
+    transform_ovl_ch = model_pan_ch
     | transform_ovl
-
 
     prediction_ch = transform_ch
     | mix(transform_ovl_ch)
@@ -894,7 +893,6 @@ return
 
 
 
-    
     panassembly_ch.map {meta, f -> def m = [:]; m['id'] = meta['id']; m['spc'] = meta['spc']; m['cut'] = meta['cut']; [m, f]}
     | join (fastamix_ch)
     | join(fasta_ch_s)

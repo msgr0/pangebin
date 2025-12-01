@@ -9,6 +9,11 @@ import gfapy as gfa
 def main(args):
 
     df_header = ["#Pls_ID", "Flow", "GC_bin", "Contigs"]
+    # if file at path args.input is empty, exit the program
+    if not os.path.exists(args.input) or os.path.getsize(args.input) == 0:
+        with open(args.output, "w") as fout:
+            fout.write("\t".join(["plasmid", "contig", "contig_len"]) + "\n")
+        return 0
     df = pd.read_csv(args.input, sep="\t")
 
     header = ["plasmid", "contig", "contig_len"]
@@ -36,7 +41,7 @@ def main(args):
                         raise Exception("seq(contig).length == 0")
                     elif contig_len > 0:
                         print("warning: ", e1)
-                except e2:
+                except Exception as e2:
                     print(
                         "Halted cause of length error:", e1, e2, "check your gfa file."
                     )

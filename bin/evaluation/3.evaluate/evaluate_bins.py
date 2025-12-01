@@ -137,7 +137,7 @@ def main():
     # gtruth_header = {0: label, 1: contig, 3:pl_lenght, 4:contig_len}
     for _, row in ground_truth.iterrows():
         if (
-            row[0] != "chromosome"
+            "chromosome" not in row[0]
         ):  ## here we can find TRUE POSITIVE and FALSE NEGATIVES plasmids
             if row[1] in bin_file["contig"].values:
                 t_pos.append(row[1])
@@ -147,7 +147,7 @@ def main():
                 f_neg_len += row[4]
 
         elif (
-            row[0] == "chromosome"
+            "chromosome" in row[0]
         ):  ## here we can find FALSE PLASMIDS (FALSE POSITIVES)
             if row[1] in bin_file["contig"].values:
                 f_pos.append(row[1])
@@ -177,19 +177,19 @@ def main():
         }
     )
 
-    chart = (
-        alt.Chart(data)
-        .mark_bar()
-        .encode(
-            x="type",
-            y=alt.Y("score", scale=alt.Scale(domain=(0, 1))),
-            color=alt.Color("type").scale(range=["#e7ba52", "#c7c7c7", "#5f9ea0"]),
-            order=alt.Order("type", sort="ascending"),
-            column="sample",
-        )
-        .properties(title=f"[PRED_LABEL] (Plasmid SCORE")
-    )
-    chart.save(f"{args.output}.pred.scores.plasmids.pdf")
+    # chart = (
+    #     alt.Chart(data)
+    #     .mark_bar()
+    #     .encode(
+    #         x="type",
+    #         y=alt.Y("score", scale=alt.Scale(domain=(0, 1))),
+    #         color=alt.Color("type").scale(range=["#e7ba52", "#c7c7c7", "#5f9ea0"]),
+    #         order=alt.Order("type", sort="ascending"),
+    #         column="sample",
+    #     )
+    #     .properties(title=f"[PRED_LABEL] (Plasmid SCORE")
+    # )
+    # chart.save(f"{args.output}.pred.scores.plasmids.pdf")
 
     if args.output:
         with open(f"{args.output}.stats.txt", "w", encoding="utf8") as f:

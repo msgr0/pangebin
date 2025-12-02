@@ -115,7 +115,7 @@ def main():
     # bin_file.drop_duplicates(subset="contig", keep="first", inplace=True)
 
     # pred_plasmids_len = bin_file.groupby("").sum()["length"]["plasmid"]
-    gt_plasmid = ground_truth[ground_truth[0] != "chromosome"]
+    gt_plasmid = ground_truth["chromosome" not in ground_truth[0]]
     gt_plasmid_length = gt_plasmid.groupby(by=0).max()[3]
     pred_plasmid_len = bin_file.groupby(by="plasmid").sum()["contig_len"]
 
